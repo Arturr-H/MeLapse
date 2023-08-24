@@ -12,25 +12,15 @@ export class AlignHelper extends React.PureComponent<Props, State> {
 		super(props);
 
 		/* State */
-		this.state = {
-		};
-
-		/* Refs */
-
-		/* Bindings */
-	}
-
-	/* Lifetime */
-	async componentDidMount(): Promise<void> {
+		this.state = {};
 	}
 
 	render() {
 		return (
-			<View style={Styles.alignHelperContainer}>
-				<Image
-					source={require("../../assets/images/align/face.png")}
-				/>
-			</View>
+			<Image
+				style={Styles.alignFace}
+				source={require("../../assets/images/align/face.png")}
+			/>
 		);
 	}
 }
