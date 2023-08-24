@@ -16,7 +16,7 @@ const HEIGHT = Dimensions.get("window").height;
 /* Interfaces */
 export interface Props {
     source: ImageSourcePropType,
-    date: number | string,
+    date?: number,
 
     skipPan?: boolean,
     skipIntro?: boolean,

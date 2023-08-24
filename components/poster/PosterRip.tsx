@@ -13,7 +13,7 @@ interface RipProps {
 
     /// Original props
     source: ImageSourcePropType,
-    date: number | string,
+    date?: number,
 
     delete?: () => void,
 }
