@@ -59,6 +59,16 @@ export interface ExtraFaceData {
 export type FaceData = ExtraFaceData & FaceDetectionResult;
 export function getFaceFeatures(obj: any): FaceData {
     let res = obj as FaceDetectionResult;
+
+    let midEye = {
+        x: (res.leftEyePosition.x + res.rightEyePosition.x) / 2,
+        y: (res.leftEyePosition.y + res.rightEyePosition.y) / 2
+    };
+    let midMouth = {
+        x: (res.leftMouthPosition.x + res.rightMouthPosition.x) / 2,
+        y: (res.leftMouthPosition.y + res.rightMouthPosition.y) / 2,
+    };
+
     let data = {
         deltaEye: {
             x: res.rightEyePosition.x - res.leftEyePosition.x,
@@ -68,14 +78,9 @@ export function getFaceFeatures(obj: any): FaceData {
             x: res.rightMouthPosition.x - res.leftMouthPosition.x,
             y: Math.abs(res.rightMouthPosition.y - res.leftMouthPosition.y),
         },
-        midEye: {
-            x: (res.leftEyePosition.x + res.rightEyePosition.x) / 2,
-            y: (res.leftEyePosition.y + res.rightEyePosition.y) / 2,
-        },
-        midMouth: {
-            x: (res.leftMouthPosition.x + res.rightMouthPosition.x) / 2,
-            y: (res.leftMouthPosition.y + res.rightMouthPosition.y) / 2,
-        },
+        midEye,
+        midMouth,
+        middle: c_div(c_add(midEye, midMouth), { x: 2, y: 2 })
     };
 
     let extra: ExtraFaceData = {
