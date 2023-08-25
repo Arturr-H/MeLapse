@@ -51,8 +51,6 @@ export default StyleSheet.create({
 		aspectRatio: 1,
 
 		resizeMode: "cover",
-
-		transform: [{ scaleX: -1 }]
 	},
 	imageMask: {
 		width: "100%",
