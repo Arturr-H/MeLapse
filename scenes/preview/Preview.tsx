@@ -81,17 +81,19 @@ class Camera extends React.PureComponent<Props, State> {
             this.props.navigation.navigate("Camera");
         });
     }
-    onSave(): void {
-        Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
+    async onSave(): Promise<void> {
 
+        /* Save the image to fs */
+        await this.props.lsimage.saveAsync();
+
+        /* Animations */
+        Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
         this.background.current?.fadeOut(500).start();
         Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200, delay: 150 }).start();
 
         this.poster.current?.save(() => {
-			saveImage(this.props.lsimage.path).then(() => {
-                this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
-            });
+            this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
         });
     }
 
@@ -101,11 +103,7 @@ class Camera extends React.PureComponent<Props, State> {
                 <View style={Styles.posterContainer}>
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
-                        <Floater loosness={3}><Poster
-                            ref={this.poster}
-                            date={new Date().getTime()}
-                            source={{ uri: this.props.lsimage.path }}
-                        /></Floater>
+                        <Floater loosness={3}><Poster ref={this.poster} /></Floater>
                     </View>
                 </View>
 
