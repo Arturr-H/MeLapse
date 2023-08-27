@@ -7,6 +7,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import * as Haptics from "expo-haptics";
 import PosterRip from "./PosterRip";
 import { PosterInner } from "./PosterInner";
+import { LSImage } from "../../functional/Image";
 
 /* Constants */
 const CENTER_POSTER = -(254*2 - 12) / 4;
@@ -15,8 +16,7 @@ const HEIGHT = Dimensions.get("window").height;
 
 /* Interfaces */
 export interface Props {
-    source: ImageSourcePropType,
-    date?: number,
+    lsimage?: LSImage,
 
     skipPan?: boolean,
     skipIntro?: boolean,
@@ -244,8 +244,8 @@ export default class Poster extends React.PureComponent<Props, State> {
                         ?
                             <PosterInner {...this.props} />
                         : <>
-                            <PosterRip pos="left" {...this.props} opacity={this.state.ripOpacity} rotate={lrrotate} x={this.state.leftRip.x}  />
-                            <PosterRip pos="right" {...this.props} opacity={this.state.ripOpacity} rotate={rrrotate} x={this.state.rightRip.x}  />
+                            <PosterRip pos="left" lsimage={this.props.lsimage} opacity={this.state.ripOpacity} rotate={lrrotate} x={this.state.leftRip.x}  />
+                            <PosterRip pos="right" lsimage={this.props.lsimage} opacity={this.state.ripOpacity} rotate={rrrotate} x={this.state.rightRip.x}  />
                         </>
                     }
                 </Animated.View>
