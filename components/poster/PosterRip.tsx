@@ -3,6 +3,7 @@ import { Animated, Image, ImageSourcePropType } from "react-native";
 import Styles from "./Styles";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { PosterInner } from "./PosterInner";
+import { LSImage } from "../../functional/Image";
 
 
 interface RipProps {
@@ -11,9 +12,7 @@ interface RipProps {
     opacity: Animated.Value,
     pos: "left" | "right",
 
-    /// Original props
-    source: ImageSourcePropType,
-    date?: number,
+    lsimage?: LSImage,
 
     delete?: () => void,
 }
@@ -44,7 +43,7 @@ export default class PosterRip extends React.PureComponent<RipProps> {
                     }
                     style={this.props.pos === "right" && { right: 0.6 }}
                 >
-                    <PosterInner {...this.props} />
+                    <PosterInner lsimage={this.props.lsimage} />
                 </MaskedView>
             </Animated.View>
 		);
