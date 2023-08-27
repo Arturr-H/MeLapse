@@ -2,8 +2,6 @@ import { Image, Text, View } from "react-native";
 import React from "react";
 import Styles from "./Styles";
 import { Props } from "./Poster";
-import { formatDate } from "../../functional/Date";
-
 
 export class PosterInner extends React.PureComponent<Props> {
     constructor(props: Props) {
@@ -24,10 +22,10 @@ export class PosterInner extends React.PureComponent<Props> {
 
                 <View style={Styles.poster}>
                     {/* The actual image */}
-                    <Image style={Styles.image} source={this.props.source} />
+                    <Image style={Styles.image} source={{ uri: this.props.lsimage?.getPath() }} />
 
                     {/* Date? (yes / no) */}
-                    <Text style={Styles.posterDate}>{formatDate(this.props.date)}</Text>
+                    <Text style={Styles.posterDate}>{this.props.lsimage?.getDateFormatted()}</Text>
                 </View>
             </React.Fragment>
         );
