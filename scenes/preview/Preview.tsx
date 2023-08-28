@@ -10,15 +10,15 @@ import { Animated } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptic from "expo-haptics";
 import Floater from "../../components/floater/Floater";
-import { LSImage, saveImage } from "../../functional/Image";
+import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Result: { lsimage: LSImage }, Camera: undefined }, "Camera", "Result">,
+    navigation: StackNavigationProp<{ Result: { lsimage: LSImageProp }, Camera: undefined }, "Camera", "Result">,
 
     /* Navigation props */
-    lsimage: LSImage
+    lsimage: LSImageProp
 }
 interface State {
     confirmButtonY: Animated.Value,
@@ -32,7 +32,7 @@ const BUTTON_SHOW_CONFIG = { easing: Easing.out(Easing.exp), duration: 500, useN
 const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
 
-class Camera extends React.PureComponent<Props, State> {
+class Preview extends React.PureComponent<Props, State> {
     poster: RefObject<Poster>;
     background: RefObject<Animator>;
 
@@ -84,7 +84,7 @@ class Camera extends React.PureComponent<Props, State> {
     async onSave(): Promise<void> {
 
         /* Save the image to fs */
-        await this.props.lsimage.saveAsync();
+        await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
 
         /* Animations */
         Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
@@ -103,7 +103,7 @@ class Camera extends React.PureComponent<Props, State> {
                 <View style={Styles.posterContainer}>
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
-                        <Floater loosness={3}><Poster ref={this.poster} /></Floater>
+                        <Floater loosness={3}><Poster lsimage={this.props.lsimage} ref={this.poster} /></Floater>
                     </View>
                 </View>
 
@@ -181,5 +181,5 @@ class Camera extends React.PureComponent<Props, State> {
 export default function(props: any) {
 	const navigation = useNavigation();
   
-	return <Camera {...props} lsimage={props.route.params.lsimage} navigation={navigation} />;
+	return <Preview {...props} lsimage={props.route.params.lsimage} navigation={navigation} />;
 }
