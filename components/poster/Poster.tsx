@@ -1,13 +1,11 @@
 
 /* Imports */
-import { Animated, PanResponder, Dimensions, Easing, GestureResponderEvent, ImageSourcePropType, PanResponderInstance } from "react-native";
+import { Animated, Dimensions, Easing } from "react-native";
 import React from "react";
 import Styles from "./Styles";
-import MaskedView from "@react-native-masked-view/masked-view";
-import * as Haptics from "expo-haptics";
 import PosterRip from "./PosterRip";
 import { PosterInner } from "./PosterInner";
-import { LSImage } from "../../functional/Image";
+import { LSImageProp } from "../../functional/Image";
 
 /* Constants */
 const CENTER_POSTER = -(254*2 - 12) / 4;
@@ -16,7 +14,7 @@ const HEIGHT = Dimensions.get("window").height;
 
 /* Interfaces */
 export interface Props {
-    lsimage?: LSImage,
+    lsimage?: LSImageProp,
 
     skipPan?: boolean,
     skipIntro?: boolean,
