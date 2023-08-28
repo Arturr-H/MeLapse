@@ -8,12 +8,21 @@ import * as Haptics from "expo-haptics";
 interface Props {
     text: string,
     onPress: () => void,
-    active: boolean
+    active: boolean,
+
+    color?: "red" | "blue" | "green",
+    flex?: boolean
 }
 interface State {
 }
 
 export class Button extends React.PureComponent<Props, State> {
+    colors: {
+        "blue": string[],
+        "red": string[],
+        "green": string[]
+    };
+
 	constructor(props: Props) {
 		super(props);
 
@@ -25,6 +34,11 @@ export class Button extends React.PureComponent<Props, State> {
         };
 
         /* Static */
+        this.colors = {
+            "blue": ["rgb(90, 200, 245)", "rgb(80, 190, 245)"],
+            "red": ["rgb(255, 45, 85)", "rgb(235, 25, 75)"],
+            "green": ["rgb(59, 199, 89)", "rgb(49, 189, 79)"]
+        }
 	}
 
     /* Lifetime */
@@ -34,8 +48,11 @@ export class Button extends React.PureComponent<Props, State> {
 	render() {
 		return (
             <TouchableHighlight
-                underlayColor={"rgb(80, 190, 245)"}
-                style={Styles.button}
+                underlayColor={this.colors[this.props.color ?? "blue"][1]}
+                style={[Styles.button, {
+                    backgroundColor: this.colors[this.props.color ?? "blue"][0],
+                    borderColor: this.colors[this.props.color ?? "blue"][1]
+                }, this.props.flex && { flex: 1 }]}
                 onPress={() => {
                     this.props.active && this.props.onPress();
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

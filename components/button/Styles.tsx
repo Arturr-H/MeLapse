@@ -6,9 +6,9 @@ const HEIGHT = Dimensions.get("window").height;
 
 export default StyleSheet.create({
     button: {
-        width: "100%",
         height: 50,
-        
+        minHeight: 50,
+
         borderColor: "rgb(80, 190, 245)",
         borderWidth: 2,
         borderRadius: 15,
