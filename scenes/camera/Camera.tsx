@@ -8,12 +8,11 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
-import { LSImage } from "../../functional/Image";
+import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { AlignHelper } from "./AlignHelper";
-import { FaceData, getCalibratedDifferences, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
+import { FaceData, getAlignTransforms, getCalibratedDifferences, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { Debug } from "../../functional/Debug";
-import { spring } from "../../functional/AnimUtils";
 import { PictureManipulator } from "./PictureManipulator";
 import { Animator } from "../../components/animator/Animator";
 import { ProgressView } from "../../components/progressView/ProgressView";
@@ -24,10 +23,17 @@ const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.7
 
 /* Interfaces */
 interface Props {
-	navigation: StackNavigationProp<
-		{ Preview: { lsimage: LSImage } }, "Preview">,
-
+	navigation: StackNavigationProp<{ Preview: { lsimage: LSImageProp }, Preferences: undefined }, "Preview", "Preferences">,
 	isFocused: boolean,
+
+	/**
+	 * Is used to determine which intro animation to play
+	 * in the `Camera` scene. If we're going back from preferences
+	 * the `MenuButton` needs to scale down, and if we're
+	 * coming back from any other scene it has to be the 
+	 * camera button.
+	*/
+	comesFrom: "preferences" | "other"
 }
 interface State {
 	/// User needs to allow app to use camera
@@ -44,15 +50,17 @@ interface State {
 	rollAngle: Animated.Value,
 
 	transform: any[],
-	cameraImage: CameraCapturedPicture | null,
 	loadingImage: boolean,
+	detectedFaces: FaceDetectionResult,
 }
 
 class Camera extends React.PureComponent<Props, State> {
-	pictureManipulator: RefObject<PictureManipulator>;
-	camera: RefObject<ExpoCamera>;
-	alignHelper: RefObject<Animator>;
-	debug: RefObject<Debug>;
+	pictureManipulator : RefObject<PictureManipulator>;
+	camera             : RefObject<ExpoCamera>;
+	alignHelperAnimator: RefObject<Animator>;
+	alignHelper        : RefObject<AlignHelper>;
+	debug              : RefObject<Debug>;
+	menuButton         : RefObject<MenuButton>;
 
 	constructor(props: Props) {
 		super(props);
@@ -61,23 +69,27 @@ class Camera extends React.PureComponent<Props, State> {
 		this.state = {
 			cameraAllowed: false,
 			cameraButtonScale: new Animated.Value(24),
-			cameraButtonPadding: 4,
+			cameraButtonPadding: 0,
 
 			yawAngle: new Animated.Value(0),
 			rollAngle: new Animated.Value(0),
 			transform: [],
-			cameraImage: null,
 			loadingImage: false,
+
+			detectedFaces: { faces: [] }
 		};
 
 		/* Refs */
 		this.pictureManipulator = React.createRef();
+		this.alignHelperAnimator = React.createRef();
 		this.alignHelper = React.createRef();
+		this.menuButton = React.createRef();
 		this.camera = React.createRef();
 		this.debug = React.createRef();
 
 		/* Bindings */
-		this.handleFacesDetected = this.handleFacesDetected.bind(this);
+		this.onFacesDetected = this.onFacesDetected.bind(this);
+		this.gainedFocus = this.gainedFocus.bind(this);
 		this.takePic = this.takePic.bind(this);
 	}
 
@@ -87,63 +99,35 @@ class Camera extends React.PureComponent<Props, State> {
 		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
 		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
 
-		Animated.timing(this.state.cameraButtonScale, {
-			toValue: 1,
-			duration: 1250,
-			easing: Easing.inOut(Easing.exp),
-			useNativeDriver: true,
-		}).start();
+		this.animateIntro();
 	}
 
 	/* Called via the export default function (navigation handler) */
 	gainedFocus(): void {
-		/* Animate transition */
-		Animated.timing(this.state.cameraButtonScale, {
-			toValue: 1,
-			duration: 1250,
-			easing: Easing.inOut(Easing.exp),
-			useNativeDriver: true,
-		}).start(() => {
-			this.setState({ cameraButtonPadding: 4 });
-		});
+		this.animateIntro();
 
-		this.alignHelper.current?.wait(1500).fadeIn().start();
+		this.alignHelperAnimator.current?.wait(1500).fadeIn().start();
 	}
 
-	/* Handle face detection */
-	handleFacesDetected(faces: FaceDetectionResult): void {
-		const face_ = faces.faces[0];
+	/** Animates the right intro depending on which scene we previously left */
+	animateIntro(): void {
+		/* Menu button */
+		if (this.props.comesFrom === "preferences") {
+			this.setState({ cameraButtonScale: new Animated.Value(1), cameraButtonPadding: 4 });
 
-		/* (change later to multiple faces) */
-		if (face_) {
-			const face = getFaceFeatures(face_);
-			// console.log("\n\n", "\n\n", "\n\n", face, "\n\n", this.temp);
-			const diff = getCalibratedDifferences(face, temp);
+			this.menuButton.current?.animateBack();
+		}
 
-			spring(this.state.yawAngle, face.yawAngle);
-			spring(this.state.rollAngle, face.rollAngle);
+		/* Camera button */
+		else {
+			this.menuButton.current?.instanSetBack();
 
-			this.setState({ transform: getTransforms(face, temp) })
-
-			this.debug && this.debug.current?.setBalls([
-				// face.leftEarPosition, 
-				// face.rightEarPosition,
-				// face.leftEyePosition, 
-				// face.rightEyePosition,
-				// face.leftMouthPosition, 
-				// face.rightMouthPosition,
-				
-				// face.bottomMouthPosition,
-				// face.midEye,
-				// face.midMouth,
-				// face.noseBasePosition,
-
-				// temp.leftEyePosition, 
-				// temp.rightEyePosition,
-				// temp.leftMouthPosition, 
-				// temp.rightMouthPosition,
-				// face.middle
-			]);
+			Animated.timing(this.state.cameraButtonScale, {
+				toValue: 1,
+				duration: 1250,
+				easing: Easing.inOut(Easing.exp),
+				useNativeDriver: true,
+			}).start(() => this.setState({ cameraButtonPadding: 4 }));
 		}
 	}
 
@@ -151,57 +135,110 @@ class Camera extends React.PureComponent<Props, State> {
 	async takePic(): Promise<void> {
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
-		this.alignHelper.current?.fadeOut().start();
+		this.alignHelperAnimator.current?.fadeOut().start();
 		this.setState({ loadingImage: true });
 
 		/* Take camera picture */
 		const image = await this.camera.current?.takePictureAsync();
+
+		/* Camera button transition */
+		let transition = Animated.timing(this.state.cameraButtonScale, {
+			toValue: 24,
+			duration: 1250,
+			easing: Easing.inOut(Easing.exp),
+			useNativeDriver: true,
+		});
+
+		/* Try detect face */
 		if (image) {
-			this.setState({ cameraImage: image });
-
-			/* !! Image is not saved here it's saved in preview/Preview.tsx !! */
-			/* Flip image */
-			const flipped = await manipulateAsync(
+			/// TODO: Probably smthn with more than one face
+			// let face = this.state.detectedFaces.faces[0];
+			// const _face = getFaceFeatures(face);
+			let flipped = await manipulateAsync(
 				image.uri,
-				[{ flip: FlipType.Horizontal }],
-				{ compress: 1, format: SaveFormat.JPEG }
-			);
-			let lsimage: LSImage = {
-				path: image.uri,
-				filename: "unknown",
-				date: new Date().getTime()
-			};
+				[{ flip: FlipType.Horizontal }]
+			).then(e => e)
+			.catch(_ => null);
 
-			/* Animate transition */
-			Animated.timing(this.state.cameraButtonScale, {
-				toValue: 24,
-				duration: 1250,
-				easing: Easing.inOut(Easing.exp),
-				useNativeDriver: true,
-			}).start(() => {
-				this.setState({ loadingImage: false });
-				this.props.navigation.navigate("Preview", { lsimage })
-			});
-			this.setState({ cameraButtonPadding: 0 });
+			if (flipped) {
+
+				/* Use pic manipulator to (try) take transformed pic */
+				let path = await this.pictureManipulator.current?.takePictureAsync(
+					flipped.uri,
+					this.state.transform
+				) ?? image.uri;
+				
+				/* !! Image is not saved here it's saved in preview/Preview.tsx !! */
+				let lsimage = new LSImage(path).toLSImageProp();
+				
+				/* Transition */
+				transition.start(() => {
+					this.setState({ loadingImage: false });
+					this.props.navigation.navigate("Preview", { lsimage })
+				});
+				this.setState({ cameraButtonPadding: 0 });
+			}
+
+			/* Take picture but without transform */
+			else {
+				/* Take pic */
+				let path = await this.pictureManipulator.current?.takePictureAsync(
+					image.uri,
+					[]
+				) ?? image.uri;
+
+				/* Transition */
+				transition.start(() => {
+					this.setState({ loadingImage: false });
+					this.props.navigation.navigate("Preview", { lsimage: new LSImage(path).toLSImageProp() });
+					this.setState({ cameraButtonPadding: 0 });
+				});
+			}
+		}
+
+		/* Could not take pic */
+		else {
+			alert("Camera is not able to take pic");
+		}
+	}
+
+	/* On detect faces (expo-face-detector) */
+	onFacesDetected(e: FaceDetectionResult): void {
+		if (e.faces[0]) {
+			let ffeatures = getFaceFeatures(e.faces[0]);
+			let transform = getTransforms(ffeatures, temp);
+			let aligntrfm = getAlignTransforms(ffeatures, temp);
+
+			this.alignHelper
+				&& this.alignHelper.current?.animateNext(aligntrfm);
+
+			/* Set transforms? */
+			this.setState({ transform });
+
+			this.debug.current?.setBalls([
+				temp.leftEyePosition,
+				temp.rightEyePosition,
+				temp.rightMouthPosition,
+				temp.leftMouthPosition,
+			])
 		}
 	}
 	
+	/* Render */
 	render() {
 		let scale = this.state.cameraButtonScale;
 
 		return (
 			<View style={Styles.container}>
 				<Debug ref={this.debug} />
-				{/* <PictureManipulator
-					transform={this.state.transform}
-					image={this.state.cameraImage}
-					ref={this.pictureManipulator} 
-				/> */}
+
+				{/* Transforms image and saves it */}
+				<PictureManipulator ref={this.pictureManipulator} />
 
 				{/* Camera */}
 				{(this.state.cameraAllowed && this.props.isFocused) && <ExpoCamera
 					ref={this.camera}
-					style={[Styles.container, { transform: [] }]}
+					style={Styles.container}
 					type={CameraType.front}
 					faceDetectorSettings={{
 						mode: FaceDetector.FaceDetectorMode.accurate,
@@ -210,22 +247,21 @@ class Camera extends React.PureComponent<Props, State> {
 						minDetectionInterval: 5,
 						tracking: true,
 					}}
-					onFacesDetected={this.handleFacesDetected}
+					onFacesDetected={this.onFacesDetected}
 				/>}
-
-				{/* Face in the middle of the screen */}
-				<Animator ref={this.alignHelper} style={{ position: "absolute" }}>
-					<AlignHelper />
-				</Animator>
 
 				{/* Loading indicator */}
 				{this.state.loadingImage && <ProgressView />}
 
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
-
-					{/* Camera button */}
 					<Floater loosness={5} style={Styles.cameraButtonWrapper}>
+						{/* Face to indicate roughly where user needs to position their head */}
+						<Animator ref={this.alignHelperAnimator} >
+							<AlignHelper ref={this.alignHelper} />
+						</Animator>
+
+						{/* Camera Button */}
 						<Animated.View
 							style={[Styles.cameraButton, {
 								transform: [{ scale }],
@@ -240,9 +276,8 @@ class Camera extends React.PureComponent<Props, State> {
 						</Animated.View>
 					</Floater>
 
-					<View style={{ width: "100%", paddingHorizontal: "12%", }}>
-						<MenuButton />
-					</View>
+					{/* Button to open preferences */}
+					<MenuButton ref={this.menuButton} navigation={this.props.navigation} />
 				</SafeAreaView>
 
 
@@ -267,5 +302,11 @@ export default function(props: any) {
 		return unsubscribe;
 	}, [navigation]);
   
-	return <Camera isFocused={isFocused} ref={CameraRef} {...props} navigation={navigation} />;
+	return <Camera
+		comesFrom={props.route.params.comesFrom}
+		isFocused={isFocused}
+		ref={CameraRef}
+		{...props}
+		navigation={navigation}
+	/>;
 }

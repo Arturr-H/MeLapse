@@ -25,19 +25,22 @@ export default StyleSheet.create({
             alignItems: "center",
         flexDirection: "column",
     },
-    instructionText: {
+
+    alignFaceContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: 120,
+        width: 90
+    },
+    alignFace: {
+        // opacity: 0.1,
+        width: "100%",
         position: "absolute",
-        alignSelf: "center",
-
-        bottom: 80,
-
-        fontSize: 20,
-        fontWeight: "700",
-        fontStyle: "italic",
-
-        opacity: 0.4
+        objectFit: "contain"
     },
 
+    /* Camera button */
     cameraButtonWrapper: {
         position: "absolute",
         bottom: 50,
@@ -48,7 +51,8 @@ export default StyleSheet.create({
         flexDirection: "column",
         gap: 20,
 
-        zIndex: 2
+        /// needs to be > 3
+        zIndex: 4
     },
     cameraButton: {
         width: 98,
@@ -66,52 +70,9 @@ export default StyleSheet.create({
         height: "100%",
 
         backgroundColor: "#fff",
-        borderRadius: 49
+        borderRadius: 49,
+
     },
-
-    /* Align helper */
-
-    alignHelperContainer: {
-        // width: 82,
-        // height: 82,
-        // backgroundColor: "blue",
-        display: "flex",
-        justifyContent: "center",
-            alignItems: "center",
-    },
-    alignHelperXbg: {
-        width: "100%",
-        height: 10,
-        // backgroundColor: "#eeeeee",
-        borderRadius: 5,
-
-        position: "absolute",
-        overflow: "hidden",
-
-        display: "flex",
-        justifyContent: "center",
-            alignItems: "center",
-    },
-    alignHelperYbg: {
-        width: 10,
-        height: "100%",
-        // backgroundColor: "#eeeeee",
-        borderRadius: 5,
-
-        position: "absolute",
-        overflow: "hidden",
-
-        display: "flex",
-        justifyContent: "center",
-            alignItems: "center",
-    },
-    alignHelper: {
-        // backgroundColor: "#121215",
-        backgroundColor: "#fff",
-        borderRadius: 5,
-    },
-    x: { width: "80%", height: "100%" },
-    y: { width: "100%", height: "80%" },
 
     viewShot: {
 		width: "100%",
@@ -119,13 +80,15 @@ export default StyleSheet.create({
 		position: "absolute",
 		justifyContent: "center",
 			alignItems: "center",
+        zIndex: 10,
 		// zIndex: 21,
 		// opacity: 0
 	},
 
+    /* Options / menu button */
     menuButton: {
-        width: 70,
-        height: 70,
+        width: 50,
+        height: 50,
         borderRadius: 40,
 
         backgroundColor: "rgb(255, 255, 255)",
@@ -141,11 +104,21 @@ export default StyleSheet.create({
         justifyContent: "center",
             alignItems: "center",
 
-        marginTop: 20
+        marginTop: 20,
+        alignSelf: "flex-start",
+        marginLeft: "8%"
+    },
+    innerMenuButton: {
+        backgroundColor: "rgb(255, 255, 255)",
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        borderRadius: 40
     },
     menuButtonIcon: {
+        pointerEvents: "none",
         color: "#fff",
-        fontSize: 40,
+        fontSize: 30,
         fontFamily: "inter-black",
     }
 })
