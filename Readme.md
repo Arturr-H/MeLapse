@@ -11,8 +11,8 @@ I've really not decided yet wether I'd want to publish this app or not, but this
 
 ## Screenshots 🌄
 
-<div style="display: flex; flex-direction: row; width: 100%">
-<image src="./.github/screenshots/camera.PNG">
-<image src="./.github/screenshots/preferences.PNG">
-<image src="./.github/screenshots/preview.PNG">
+<div style="display: flex; flex-direction: row; width: 200px; gap: 15px;">
+    <image src="./.github/screenshots/camera.PNG">
+    <image src="./.github/screenshots/preferences.PNG">
+    <image src="./.github/screenshots/preview.PNG">
 </div>
