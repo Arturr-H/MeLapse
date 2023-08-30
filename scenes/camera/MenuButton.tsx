@@ -2,6 +2,7 @@ import React, { RefObject } from "react";
 import { Animated, Dimensions, Easing, Image, Text, TouchableOpacity, View } from "react-native";
 import Styles from "./Styles";
 import { StackNavigationProp } from "@react-navigation/stack";
+import * as Haptics from "expo-haptics";
 
 /* Interfaces */
 interface Props {
@@ -44,6 +45,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 	async componentDidMount(): Promise<void> {
 		this.setState({ animating: false });
+		Animated.timing(this.state.opacity, { duration: 750, toValue: 1, useNativeDriver: false }).start();
 	}
 
 	/** Scale down if going back from preferences scene */
@@ -55,16 +57,19 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		Animated.parallel([
 			Animated.timing(this.state.size, { ...OPT, toValue: 1 }),
 			Animated.timing(this.state.opacity, { ...OPT, toValue: 1 })
-		]).start();
+		]).start(() => {
+			this.setState({ animating: false });
+		});
 	}
 
 	/** Instantly set back size without animation */
 	instanSetBack(): void {
-		this.setState({ size: new Animated.Value(1) });
+		this.setState({ size: new Animated.Value(1), animating: false });
 	}
 
 	/* On click */
 	onPress(): void {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 		this.setState({ animating: true });
 
 		/* Animate opacity and scale */
@@ -89,7 +94,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 	render() {
 		let transform = { transform: [{ scale: this.state.size }]};
-		let zIndex = this.state.animating ? 20 : 3;
+		let zIndex = this.state.animating ? 60 : 3;
 		let pointerEvents: "none" | "auto" = this.state.animating ? "none" : "auto";
 		let opacity = this.state.opacity;
 
