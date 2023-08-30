@@ -11,8 +11,5 @@ I've really not decided yet wether I'd want to publish this app or not, but this
 
 ## Screenshots 🌄
 
-<div style="display: flex; flex-direction: row; width: 200px; gap: 15px;">
-    <image src="./.github/screenshots/camera.PNG">
-    <image src="./.github/screenshots/preferences.PNG">
-    <image src="./.github/screenshots/preview.PNG">
-</div>
+![Screenshot 1](./.github/screenshots/preview.png) | ![Screenshot 2](./.github/screenshots/camera.png) | ![Screenshot 3](./.github/screenshots/preferences.png)
+:-------------------------:|:-------------------------:|:-------------------------:
