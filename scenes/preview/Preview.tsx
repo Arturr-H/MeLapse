@@ -1,7 +1,7 @@
 /* Imports */
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Dimensions, Easing, Image, ImageSourcePropType, SafeAreaView, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { ActivityIndicator, Dimensions, Easing, Image, ImageSourcePropType, SafeAreaView, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import Styles from "./Styles";
 import Poster from "../../components/poster/Poster";
 import { RouteProp, useNavigation } from "@react-navigation/native";
@@ -15,7 +15,7 @@ import { Animator } from "../../components/animator/Animator";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Result: { lsimage: LSImageProp }, Camera: undefined }, "Camera", "Result">,
+    navigation: StackNavigationProp<{ Result: { lsimage: LSImageProp }, Camera: { comesFrom: "other" } }, "Camera", "Result">,
 
     /* Navigation props */
     lsimage: LSImageProp
@@ -24,6 +24,8 @@ interface State {
     confirmButtonY: Animated.Value,
     scrapButtonX: Animated.Value,
     bgTranslateY: Animated.Value,
+
+    deactivateButtons: boolean,
 }
 
 /* Constants */
@@ -43,7 +45,9 @@ class Preview extends React.PureComponent<Props, State> {
         this.state = {
             confirmButtonY: new Animated.Value(200),
             scrapButtonX: new Animated.Value(-200),
-            bgTranslateY: new Animated.Value(-HEIGHT)
+            bgTranslateY: new Animated.Value(-HEIGHT),
+
+            deactivateButtons: false,
         };
 
         /* Bindings */
@@ -57,6 +61,7 @@ class Preview extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     componentDidMount(): void {
+        this.setState({ deactivateButtons: false });
         Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 150 }).start();
         this.background.current?.fadeIn(1000).start();
@@ -71,6 +76,7 @@ class Preview extends React.PureComponent<Props, State> {
 
     /* Delete / save image */
     onDelete(): void {
+        this.setState({ deactivateButtons: true });
         Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
 
         Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200, delay: 150 }).start();
@@ -78,10 +84,11 @@ class Preview extends React.PureComponent<Props, State> {
         this.background.current?.fadeOut(500).start();
 
         this.poster.current?.delete(() => {
-            this.props.navigation.navigate("Camera");
+            this.props.navigation.navigate("Camera", { comesFrom: "other" });
         });
     }
     async onSave(): Promise<void> {
+        this.setState({ deactivateButtons: true });
 
         /* Save the image to fs */
         await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
@@ -115,11 +122,12 @@ class Preview extends React.PureComponent<Props, State> {
                             style={[Styles.deleteButton, { transform: [{
                                 translateX: this.state.scrapButtonX
                             }] }]}
-                            onPress={this.onDelete}
+                            onPress={!this.state.deactivateButtons ? this.onDelete : () => {}}
                         >
-                            <Text style={Styles.deleteButtonText}>
-                                👎
-                            </Text>
+                            {this.state.deactivateButtons
+                                ? <ActivityIndicator color={"white"} />
+                                : <Text style={Styles.deleteButtonText}>👎</Text>
+                            }
                         </TouchableOpacity>
                     </Floater>
 
@@ -130,11 +138,12 @@ class Preview extends React.PureComponent<Props, State> {
                             style={[Styles.acceptButton, { transform: [{
                                 translateY: this.state.confirmButtonY
                             }] }]}
-                            onPress={this.onSave}
+                            onPress={!this.state.deactivateButtons ? this.onSave : () => {}}
                         >
-                            <Text style={Styles.acceptButtonText}>
-                                Yea 👍
-                            </Text>
+                            {this.state.deactivateButtons
+                                ? <ActivityIndicator color={"white"} />
+                                : <Text style={Styles.acceptButtonText}>Yea 👍</Text>
+                            }
                         </TouchableOpacity>
                     </Floater>
                 </View>
