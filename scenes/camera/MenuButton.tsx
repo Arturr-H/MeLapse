@@ -14,6 +14,7 @@ interface Props {
 interface State {
 	size: Animated.Value,
 	opacity: Animated.Value,
+	rotate: Animated.Value,
 	animating: boolean
 }
 
@@ -31,7 +32,8 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		this.state = {
 			size: new Animated.Value(BTN_FINAL_HEIGHT),
 			opacity: new Animated.Value(0),
-			animating: false
+			animating: false,
+			rotate: new Animated.Value(0),
 		};
 
 		/* Refs */
@@ -56,7 +58,8 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		};
 		Animated.parallel([
 			Animated.timing(this.state.size, { ...OPT, toValue: 1 }),
-			Animated.timing(this.state.opacity, { ...OPT, toValue: 1 })
+			Animated.timing(this.state.opacity, { ...OPT, toValue: 1 }),
+			Animated.timing(this.state.rotate, { ...OPT, toValue: 0 })
 		]).start(() => {
 			this.setState({ animating: false });
 		});
@@ -64,7 +67,11 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 	/** Instantly set back size without animation */
 	instanSetBack(): void {
-		this.setState({ size: new Animated.Value(1), animating: false });
+		this.setState({
+			size: new Animated.Value(1),
+			animating: false,
+			rotate: new Animated.Value(0)
+		});
 	}
 
 	/* On click */
@@ -83,7 +90,13 @@ export class MenuButton extends React.PureComponent<Props, State> {
 				toValue: 0,
 				duration: DURATION,
 				...DEFAULT_
-			})
+			}),
+			Animated.timing(this.state.rotate, {
+				toValue: 180,
+				duration: DURATION,
+				...DEFAULT_
+			}),
+			
 		]).start(this.openPreferencesScene);
 	}
 
@@ -97,6 +110,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		let zIndex = this.state.animating ? 60 : 3;
 		let pointerEvents: "none" | "auto" = this.state.animating ? "none" : "auto";
 		let opacity = this.state.opacity;
+		let rotate = this.state.rotate.interpolate({ inputRange: [0, 360], outputRange: ["0deg", "360deg"] });
 
 		return (
 			<Animated.View style={[Styles.menuButton, { zIndex }, { pointerEvents }]}>
@@ -106,7 +120,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 				/>
 				<Animated.Text
 					children={"⚙️"}
-					style={[Styles.menuButtonIcon, { opacity }]}
+					style={[Styles.menuButtonIcon, { opacity, transform: [{ rotate }] }]}
 				/>
 			</Animated.View>
 		);
