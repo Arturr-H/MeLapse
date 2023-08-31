@@ -7,7 +7,8 @@ import { BigText } from "./BigText";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LSImage } from "../../functional/Image";
+import { LSImage, LSImageProp } from "../../functional/Image";
+import * as Haptics from "expo-haptics";
 
 /* Constants */
 export const WIDTH = Dimensions.get("window").width;
@@ -19,10 +20,10 @@ type A = Animated.Value;
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<{ Camera: undefined }, "Camera">,
+    navigation: StackNavigationProp<{ Camera: { comesFrom: "other" } }, "Camera">,
 
     /* Navigation props */
-    lsimage: LSImage
+    lsimage: LSImageProp
 }
 export interface State {
     bigTextX: A,
@@ -33,9 +34,11 @@ export interface State {
 
     posterSliderX: A,
     dateSliderX: A,
+    
+    skipTransformX: A,
 
     number: number;
-    previous?: LSImage;
+    previous?: LSImageProp;
 }
 
 class Result extends React.PureComponent<Props, State> {
@@ -55,14 +58,16 @@ class Result extends React.PureComponent<Props, State> {
 
             posterSliderX: new AV(WIDTH),
             dateSliderX: new AV(WIDTH),
+            skipTransformX: new AV(0),
 
             number: -1,
         };
 
         /* Bindings */
-        this.anim = this.anim.bind(this);
+        this.skipAnimation = this.skipAnimation.bind(this);
         this.intro = this.intro.bind(this);
         this.outro = this.outro.bind(this);
+        this.anim = this.anim.bind(this);
 
         /* Refs */
         this.prevPoster = React.createRef();
@@ -110,7 +115,7 @@ class Result extends React.PureComponent<Props, State> {
         const FLOAT_DELAY = 200;
         this.anim(this.state.posterSliderX, -WIDTH*2, 1900, Easing.inOut(Easing.exp), 200, () => {
             /* SWITCH SCENE */
-            this.props.navigation.navigate("Camera");
+            this.props.navigation.navigate("Camera", { comesFrom: "other" });
         });
         this.anim(this.state.dateSliderX, -WIDTH*2, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 200 + FLOAT_DELAY);
     }
@@ -148,7 +153,7 @@ class Result extends React.PureComponent<Props, State> {
     }
 
     /* Get number of pics taken and previous pic */
-    async getStats(): Promise<{ length: number, previous?: LSImage } | null> {
+    async getStats(): Promise<{ length: number, previous?: LSImageProp } | null> {
         const pics = await AsyncStorage.getItem("imagePointers");
         if (pics) {
             const parsed = JSON.parse(pics);
@@ -162,66 +167,109 @@ class Result extends React.PureComponent<Props, State> {
         }
     }
 
+    /* Returns a string saying how long ago a
+        date (unix time) was, like "5 days ago" */
+    getTimeAgo(input: number | undefined): string {
+        if (input) {
+            const currentTime = Math.floor(Date.now() / 1000); // Convert to seconds
+            const elapsedTime = currentTime - input / 1000;
+        
+            const intervals = [
+                { label: "year", seconds: 31536000 },
+                { label: "month", seconds: 2592000 },
+                { label: "week", seconds: 604800 },
+                { label: "day", seconds: 86400 },
+                { label: "hour", seconds: 3600 },
+                { label: "minute", seconds: 60 },
+                { label: "second", seconds: 1 },
+            ];
+        
+            for (const interval of intervals) {
+                const count = Math.floor(elapsedTime / interval.seconds);
+                if (count >= 1) {
+                    return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
+                }
+            }
+        
+            return "just now";
+        }else {
+            return ""
+        }
+    }
+
+    /* Skips result animation */
+    skipAnimation(): void {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        this.anim(this.state.skipTransformX, WIDTH*2, 500, Easing.exp, 0, () => {
+            this.props.navigation.navigate("Camera", { comesFrom: "other" });
+        });
+    }
+
 	render() {
 		return (
-			<View style={Styles.container}>
-
-                {/* Title text */}
-                <Animated.View style={[Styles.numberContainer, this.getTransformY(this.state.textContainerY)]}>
-                    <BigText
-                        prev={this.state.number - 1}
-                        curr={this.state.number}
-                        fontSizeFactor={this.state.fontSizeFactor}
-                        translateX={this.state.bigTextX}
-                    />
-                    <Animated.Text style={[
-                        Styles.photoText,
-                        { transform: [
-                            { scale: this.state.fontSizeFactor },
-                            { translateX: this.state.photoTextX }
-                        ] }
-                    ]}>PHOTOS</Animated.Text>
-                </Animated.View>
-
-                {/* Previous and current photo */}
+            <View style={Styles.container}>
                 <Animated.View
-                    style={[
-                        Styles.slideContainer,
-                        { transform: [
-                            { translateX: this.state.posterSliderX }
-                        ] }
-                    ]}
+                    style={[Styles.container, {
+                        transform: [{ translateX: this.state.skipTransformX }]
+                    }]}
+                    onTouchStart={this.skipAnimation}
                 >
-                    <Poster
-                        ref={this.prevPoster}
-                        date={this.state.previous?.date ?? "-"}
-                        source={{ uri: this.state.previous?.path }}
-                        skipIntro={true}
-                        skipPan={true}
-                    />
-                    <Poster
-                        ref={this.currentPoster}
-                        date={this.props.lsimage.date}
-                        source={{ uri: this.props.lsimage.path }}
-                        skipIntro={true}
-                        skipPan={true}
-                    />
-                </Animated.View>
 
-                {/* "3d" effect for last photo and current photo */}
-                <Animated.View
-                    style={[
-                        Styles.slideContainer,
-                        Styles.dateSliderContainer,
-                        { transform: [
-                            { translateX: this.state.dateSliderX }
-                        ] }
-                    ]}
-                >
-                    <Text style={Styles.dateText}>Yesterday</Text>
-                    <Text style={Styles.dateText}>Just now</Text>
+                    {/* Title text */}
+                    <Animated.View style={[Styles.numberContainer, this.getTransformY(this.state.textContainerY)]}>
+                        <BigText
+                            prev={this.state.number - 1}
+                            curr={this.state.number}
+                            fontSizeFactor={this.state.fontSizeFactor}
+                            translateX={this.state.bigTextX}
+                        />
+                        <Animated.Text style={[
+                            Styles.photoText,
+                            { transform: [
+                                { scale: this.state.fontSizeFactor },
+                                { translateX: this.state.photoTextX }
+                            ] }
+                        ]}>PHOTOS</Animated.Text>
+                    </Animated.View>
+
+                    {/* Previous and current photo */}
+                    <Animated.View
+                        style={[
+                            Styles.slideContainer,
+                            { transform: [
+                                { translateX: this.state.posterSliderX }
+                            ] }
+                        ]}
+                    >
+                        <Poster
+                            ref={this.prevPoster}
+                            lsimage={this.state.previous}
+                            skipIntro={true}
+                            skipPan={true}
+                        />
+                        <Poster
+                            ref={this.currentPoster}
+                            lsimage={this.props.lsimage}
+                            skipIntro={true}
+                            skipPan={true}
+                        />
+                    </Animated.View>
+
+                    {/* "3d" effect for last photo and current photo */}
+                    <Animated.View
+                        style={[
+                            Styles.slideContainer,
+                            Styles.dateSliderContainer,
+                            { transform: [
+                                { translateX: this.state.dateSliderX }
+                            ] }
+                        ]}
+                    >
+                        <Text style={Styles.dateText}>{this.getTimeAgo(this.state.previous?.date)}</Text>
+                        <Text style={Styles.dateText}>Just now</Text>
+                    </Animated.View>
                 </Animated.View>
-			</View>
+            </View>
 		);
 	}
 }
