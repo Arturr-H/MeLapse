@@ -10,16 +10,17 @@ import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
-import { AlignHelper } from "./AlignHelper";
+import { AlignHelper } from "../calibration/AlignHelper";
 import { FaceData, getAlignTransforms, getCalibratedDifferences, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { Debug } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
 import { Animator } from "../../components/animator/Animator";
 import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
+import AppConfig from "../preferences/Config";
 
 /* Constants */
-const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 241.21041831374168, "y": 386.5458326935768}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
+const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 241.21041831374168, "y": 383.5854159295559}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
 
 /* Interfaces */
 interface Props {
@@ -52,6 +53,8 @@ interface State {
 	transform: any[],
 	loadingImage: boolean,
 	detectedFaces: FaceDetectionResult,
+	debugTransformCamera: any[],
+	transformCamera: boolean
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -60,6 +63,7 @@ class Camera extends React.PureComponent<Props, State> {
 	alignHelperAnimator: RefObject<Animator>;
 	alignHelper        : RefObject<AlignHelper>;
 	debug              : RefObject<Debug>;
+	debugOutside       : RefObject<Debug>;
 	menuButton         : RefObject<MenuButton>;
 
 	constructor(props: Props) {
@@ -75,6 +79,8 @@ class Camera extends React.PureComponent<Props, State> {
 			rollAngle: new Animated.Value(0),
 			transform: [],
 			loadingImage: false,
+			debugTransformCamera: [],
+			transformCamera: false,
 
 			detectedFaces: { faces: [] }
 		};
@@ -82,6 +88,7 @@ class Camera extends React.PureComponent<Props, State> {
 		/* Refs */
 		this.pictureManipulator = React.createRef();
 		this.alignHelperAnimator = React.createRef();
+		this.debugOutside = React.createRef();
 		this.alignHelper = React.createRef();
 		this.menuButton = React.createRef();
 		this.camera = React.createRef();
@@ -95,40 +102,44 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
+		this.animateIntro();
+		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
+
 		/* Get camera permission */
 		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
 		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
-
-		this.animateIntro();
 	}
 
 	/* Called via the export default function (navigation handler) */
 	gainedFocus(): void {
 		this.animateIntro();
+		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 
 		this.alignHelperAnimator.current?.wait(1500).fadeIn().start();
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
 	animateIntro(): void {
-		/* Menu button */
-		if (this.props.comesFrom === "preferences") {
+		const backMenuButton = () => {
 			this.setState({ cameraButtonScale: new Animated.Value(1), cameraButtonPadding: 4 });
-
 			this.menuButton.current?.animateBack();
 		}
-
-		/* Camera button */
-		else {
+		const backCameraButton = () => {
 			this.menuButton.current?.instanSetBack();
 
 			Animated.timing(this.state.cameraButtonScale, {
 				toValue: 1,
-				duration: 1250,
+				duration: 900,
 				easing: Easing.inOut(Easing.exp),
 				useNativeDriver: true,
 			}).start(() => this.setState({ cameraButtonPadding: 4 }));
 		}
+
+		/* Menu button */
+		if (this.props.comesFrom === "preferences") backMenuButton()
+
+		/* Camera button */
+		else backCameraButton();
 	}
 
 	/* Take pic */
@@ -144,16 +155,13 @@ class Camera extends React.PureComponent<Props, State> {
 		/* Camera button transition */
 		let transition = Animated.timing(this.state.cameraButtonScale, {
 			toValue: 24,
-			duration: 1250,
+			duration: 900,
 			easing: Easing.inOut(Easing.exp),
 			useNativeDriver: true,
 		});
 
 		/* Try detect face */
 		if (image) {
-			/// TODO: Probably smthn with more than one face
-			// let face = this.state.detectedFaces.faces[0];
-			// const _face = getFaceFeatures(face);
 			let flipped = await manipulateAsync(
 				image.uri,
 				[{ flip: FlipType.Horizontal }]
@@ -213,14 +221,21 @@ class Camera extends React.PureComponent<Props, State> {
 				&& this.alignHelper.current?.animateNext(aligntrfm);
 
 			/* Set transforms? */
-			this.setState({ transform });
+			this.setState({ transform, debugTransformCamera: this.state.transformCamera ? transform : [] });
 
-			this.debug.current?.setBalls([
+			// this.debug.current?.setBalls([
+			// 	ffeatures.leftEyePosition,
+			// 	ffeatures.rightEyePosition,
+			// 	ffeatures.rightMouthPosition,
+			// 	ffeatures.leftMouthPosition,
+			// ]);
+			
+			this.debugOutside.current?.setBalls([
 				temp.leftEyePosition,
 				temp.rightEyePosition,
 				temp.rightMouthPosition,
 				temp.leftMouthPosition,
-			])
+			], "yellow")
 		}
 	}
 	
@@ -230,15 +245,14 @@ class Camera extends React.PureComponent<Props, State> {
 
 		return (
 			<View style={Styles.container}>
-				<Debug ref={this.debug} />
-
+				<Debug ref={this.debugOutside} />
 				{/* Transforms image and saves it */}
 				<PictureManipulator ref={this.pictureManipulator} />
 
 				{/* Camera */}
 				{(this.state.cameraAllowed && this.props.isFocused) && <ExpoCamera
 					ref={this.camera}
-					style={Styles.container}
+					style={[Styles.container, { transform: this.state.debugTransformCamera }]}
 					type={CameraType.front}
 					faceDetectorSettings={{
 						mode: FaceDetector.FaceDetectorMode.accurate,
@@ -248,7 +262,7 @@ class Camera extends React.PureComponent<Props, State> {
 						tracking: true,
 					}}
 					onFacesDetected={this.onFacesDetected}
-				/>}
+				><Debug ref={this.debug} /></ExpoCamera>}
 
 				{/* Loading indicator */}
 				{this.state.loadingImage && <ProgressView />}
@@ -258,7 +272,7 @@ class Camera extends React.PureComponent<Props, State> {
 					<Floater loosness={5} style={Styles.cameraButtonWrapper}>
 						{/* Face to indicate roughly where user needs to position their head */}
 						<Animator ref={this.alignHelperAnimator} >
-							<AlignHelper ref={this.alignHelper} />
+							{/* <AlignHelper ref={this.alignHelper} /> */}
 						</Animator>
 
 						{/* Camera Button */}
@@ -282,7 +296,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 
 				{/* Time, battery & more */}
-				<StatusBar style="dark" />
+				<StatusBar style="light" />
 			</View>
 		);
 	}
