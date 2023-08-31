@@ -11,5 +11,5 @@ I've really not decided yet wether I'd want to publish this app or not, but this
 
 ## Screenshots 🌄
 
-![Screenshot 1](./.github/screenshots/preview.png) | ![Screenshot 2](./.github/screenshots/camera.png) | ![Screenshot 3](./.github/screenshots/preferences.png)
+![Screenshot 1](./.github/screenshots/preview.PNG) | ![Screenshot 2](./.github/screenshots/camera.PNG) | ![Screenshot 3](./.github/screenshots/preferences.PNG)
 :-------------------------:|:-------------------------:|:-------------------------:
