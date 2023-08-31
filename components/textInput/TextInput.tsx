@@ -10,7 +10,12 @@ interface Props {
 
     minChars?: number,
     maxChars?: number,
-    active: boolean
+    active: boolean,
+
+    initial?: string,
+
+    spellCheck?: boolean,
+    autoCorrect?: boolean,
 }
 interface State {
     focus: boolean,
@@ -44,6 +49,12 @@ export class TextInput extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     componentDidMount(): void {
+        this.setState({ value: this.props.initial ?? "" });
+    }
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+        if (prevProps.initial !== this.props.initial) {
+            this.setState({ value: this.props.initial ?? "" });
+        }
     }
 
     /* On change the character length */
@@ -84,6 +95,8 @@ export class TextInput extends React.PureComponent<Props, State> {
                 ]}
             >
                 <RNTextInput
+                    spellCheck={this.props.spellCheck ?? false}
+                    autoCorrect={this.props.autoCorrect ?? false}
                     style={Styles.textInput}
                     placeholder={this.props.placeholder}
                     onChangeText={(e) => {
@@ -91,6 +104,7 @@ export class TextInput extends React.PureComponent<Props, State> {
                         this.onCharLenChange(e.length);
                         this.setState({ value: e });
                     }}
+                    value={this.state.value}
                     editable={this.props.active}
 
                     onFocus={() => this.setState({ focus: true })}
