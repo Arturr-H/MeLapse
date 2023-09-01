@@ -285,15 +285,14 @@ class Camera extends React.PureComponent<Props, State> {
 							<TouchableOpacity
 								style={Styles.cameraButtonInner}
 								activeOpacity={1}
-								onPress={this.takePic}
+								onPress={this.state.loadingImage ? () => {} : this.takePic}
 							/>
 						</Animated.View>
 					</Floater>
 
 					{/* Button to open preferences */}
-					<MenuButton ref={this.menuButton} navigation={this.props.navigation} />
+					<MenuButton active={!this.state.loadingImage} ref={this.menuButton} navigation={this.props.navigation} />
 				</SafeAreaView>
-
 
 				{/* Time, battery & more */}
 				<StatusBar style="light" />
