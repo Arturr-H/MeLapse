@@ -42,6 +42,7 @@ interface State {
 
 	/// Needed for scaling into transition
 	cameraButtonScale: Animated.Value,
+	cameraButtonInnerScale: Animated.Value,
 
 	/// Needed when scaling button, because we don't want it to scale with the rim
 	cameraButtonPadding: number,
@@ -73,6 +74,7 @@ class Camera extends React.PureComponent<Props, State> {
 		this.state = {
 			cameraAllowed: false,
 			cameraButtonScale: new Animated.Value(24),
+			cameraButtonInnerScale: new Animated.Value(1),
 			cameraButtonPadding: 0,
 
 			yawAngle: new Animated.Value(0),
@@ -144,6 +146,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Take pic */
 	async takePic(): Promise<void> {
+
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
 		this.alignHelperAnimator.current?.fadeOut().start();
@@ -281,9 +284,15 @@ class Camera extends React.PureComponent<Props, State> {
 								transform: [{ scale }],
 								padding: this.state.cameraButtonPadding,
 							}]}
+
+							/* Animations */
+							onTouchStart={() => Animated.timing(this.state.cameraButtonInnerScale, { toValue: 0.9, duration: 100, useNativeDriver: true }).start()}
+							onTouchEnd={() => Animated.timing(this.state.cameraButtonInnerScale, { toValue: 1, duration: 100, useNativeDriver: true }).start()}
 						>
 							<TouchableOpacity
-								style={Styles.cameraButtonInner}
+								style={[Styles.cameraButtonInner, {
+									transform: [{ scale: this.state.cameraButtonInnerScale }]
+								}]}
 								activeOpacity={1}
 								onPress={this.state.loadingImage ? () => {} : this.takePic}
 							/>
