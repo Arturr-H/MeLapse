@@ -10,6 +10,7 @@ interface Props {
 		Preview: { lsimage: any },
 		Preferences: undefined
 	}, "Preview", "Preferences">,
+	active: boolean,
 }
 interface State {
 	size: Animated.Value,
@@ -76,28 +77,30 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 	/* On click */
 	onPress(): void {
-		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-		this.setState({ animating: true });
-
-		/* Animate opacity and scale */
-		Animated.parallel([
-			Animated.timing(this.state.size, {
-				toValue: BTN_FINAL_HEIGHT,
-				duration: DURATION,
-				...DEFAULT_
-			}),
-			Animated.timing(this.state.opacity, {
-				toValue: 0,
-				duration: DURATION,
-				...DEFAULT_
-			}),
-			Animated.timing(this.state.rotate, {
-				toValue: 180,
-				duration: DURATION,
-				...DEFAULT_
-			}),
+		if(this.props.active) {
+			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+			this.setState({ animating: true });
 			
-		]).start(this.openPreferencesScene);
+			/* Animate opacity and scale */
+			Animated.parallel([
+				Animated.timing(this.state.size, {
+					toValue: BTN_FINAL_HEIGHT,
+					duration: DURATION,
+					...DEFAULT_
+				}),
+				Animated.timing(this.state.opacity, {
+					toValue: 0,
+					duration: DURATION,
+					...DEFAULT_
+				}),
+				Animated.timing(this.state.rotate, {
+					toValue: 180,
+					duration: DURATION,
+					...DEFAULT_
+				}),
+				
+			]).start(this.openPreferencesScene);
+		}
 	}
 
 	/* Switch scene after anim */
