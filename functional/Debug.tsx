@@ -3,23 +3,20 @@
 import React, { RefObject } from "react";
 import { Animated, Easing, Text, View } from "react-native";
 
-type Ball = { x: number, y: number };
+type Ball = { ball: { x: number, y: number }, color?: "blue" | "red" | "yellow" | "orange" | "pink" | "green" | "brown" };
 interface State {
-    balls: Ball[]
+    balls: Ball[],
 }
 interface Props {
 }
 
-/// This class displays a big number (ex 5) and
-/// makes a smooth transition into 6 (next number)
-/// to show that another photo has been "secured".
 export class Debug extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
         /* State */
         this.state = {
-            balls: []
+            balls: [],
         };
 
         this.setBalls = this.setBalls.bind(this);
@@ -29,7 +26,20 @@ export class Debug extends React.PureComponent<Props, State> {
     componentDidUpdate(): void {
     }
 
-    setBalls(balls: Ball[]): void {
+    setBalls(bls: {
+        balls: { x: number, y: number }[],
+        color?: "blue" | "red" | "yellow" | "orange" | "pink" | "green" | "brown"
+    }[]): void {
+        let balls: Ball[] = [];
+
+        bls.forEach(e => {
+            for (let i = 0; i < e.balls.length; i++) {
+                const ball = e.balls[i];
+                
+                balls.push({ ball, color: e.color });
+            }
+        })
+
         this.setState({ balls });
     }
 
@@ -48,10 +58,10 @@ export class Debug extends React.PureComponent<Props, State> {
                         height: 5,
 
                         transform: [
-                            { translateX: e.x - 2.5 },
-                            { translateY: e.y - 2.5 },
+                            { translateX: e.ball.x - 2.5 },
+                            { translateY: e.ball.y - 2.5 },
                         ],
-                        backgroundColor: "yellow",
+                        backgroundColor: e.color,
                         borderRadius: 5,
                         zIndex: 2,
 
