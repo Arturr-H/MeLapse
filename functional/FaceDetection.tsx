@@ -123,42 +123,20 @@ function c_div(c1: Coordinate, c2: Coordinate): Coordinate {
 /// Taken from my first facelapse prototype
 export function getTransforms(faceData: FaceData, calibrated: FaceData) {
     let scale = (
-        (
-            hypotenuse(calibrated.rightEyePosition, calibrated.rightMouthPosition) /
-            antiZero(hypotenuse(faceData.rightEyePosition, faceData.rightMouthPosition))
-        ) + (
-            hypotenuse(calibrated.leftEyePosition, calibrated.leftMouthPosition) /
-            antiZero(hypotenuse(faceData.leftEyePosition, faceData.leftMouthPosition))
-        )
-    ) / 2;
+        hypotenuse(calibrated.midMouth, calibrated.midEye)
+        / hypotenuse(faceData.midMouth, faceData.midEye)
+    );
 
     let translateX = (
-        (((calibrated.leftEyePosition.x + calibrated.rightEyePosition.x) / 2) // mid y ttm
-        - ((faceData.leftEyePosition.x + faceData.rightEyePosition.x) / 2)  // mid y stt
-        +
-        ((calibrated.leftMouthPosition.x + calibrated.rightMouthPosition.x) / 2) 
-        - ((faceData.leftMouthPosition.x + faceData.rightMouthPosition.x) / 2))
-        / 2
+        ((calibrated.leftEyePosition.x - faceData.leftEyePosition.x) + (calibrated.rightEyePosition.x - faceData.rightEyePosition.x)) / 2
     );
     let translateY = (
-        (((calibrated.leftEyePosition.y + calibrated.rightEyePosition.y) / 2) // mid y ttm
-        - ((faceData.leftEyePosition.y + faceData.rightEyePosition.y) / 2)  // mid y stt
-        +
-        ((calibrated.leftMouthPosition.y + calibrated.rightMouthPosition.y) / 2) 
-        - ((faceData.leftMouthPosition.y + faceData.rightMouthPosition.y) / 2))
-        / 2
+        ((calibrated.leftEyePosition.y - faceData.leftEyePosition.y) + (calibrated.rightEyePosition.y - faceData.rightEyePosition.y)) / 2
     );
 
     let rot = -faceData.rollAngle * (Math.PI / 180);
-        // Math.atan2(calibrated.rightEyePosition.y - calibrated.leftEyePosition.y, calibrated.rightEyePosition.x - calibrated.leftEyePosition.x) -
-        // Math.atan2(faceData.rightEyePosition.y - faceData.leftEyePosition.y, faceData.rightEyePosition.x - faceData.leftEyePosition.x);
-
-    let centerY = 
-        (((faceData.leftEyePosition.y + faceData.rightEyePosition.y) / 2) +
-        ((faceData.leftMouthPosition.y + faceData.rightMouthPosition.y) / 2)) / 2;
-    let centerX = 
-        (((faceData.rightEyePosition.x + faceData.rightMouthPosition.x) / 2) +
-        ((faceData.leftEyePosition.x + faceData.leftMouthPosition.x) / 2)) / 2;
+    let centerY = (faceData.midEye.y + faceData.midMouth.y) / 2;
+    let centerX = (faceData.midEye.x + faceData.midMouth.x) / 2;
     let rotation = withAnchorPoint(
         { transform: [{ rotate: rot + "rad" }]},
         { 
@@ -171,8 +149,23 @@ export function getTransforms(faceData: FaceData, calibrated: FaceData) {
         }
     );
 
-    //@ts-ignore
-    return [...rotation.transform, { translateX }, { translateY }, { scale }]
+    /* Modify translate Y */
+    const deltaMouthY =
+        (((calibrated.midMouth.y - calibrated.midEye.y) -
+        (faceData.midMouth.y - faceData.midEye.y)) / 4);
+    translateY = (translateY + deltaMouthY);
+
+    /* Modify translate X */
+    translateX = translateX - (rot*45);
+
+    return [
+        { scale },
+        { translateX },
+        { translateY },
+        
+        //@ts-ignore
+        ...rotation.transform,
+    ]
 }
 
 /* Remove div by 0 */
@@ -185,4 +178,27 @@ function hypotenuse(p1: { x: number, y: number }, p2: { x: number, y: number }):
     let dx = p1.x - p2.x;
     let dy = p1.y - p2.y;
     return Math.hypot(dy, dx)
+}
+
+
+/// Get transforms for the aligning face
+export interface AlignTransforms {
+    translate: Coordinate,
+    scale: number,
+    rotation: number,
+};
+export function getAlignTransforms(faceData: FaceData, calibrated: FaceData): AlignTransforms {
+    let scale = 
+        (faceData.deltaEye.x / calibrated.deltaEye.x +
+        faceData.deltaMouth.x / calibrated.deltaMouth.x) / 2;
+
+    let rotation = faceData.rollAngle;
+
+    let translate = {
+        x: -(faceData.midEye.x - calibrated.midEye.x) / 5,
+        y: -(faceData.midEye.y - calibrated.midEye.y) / 5
+    };
+
+    return { scale, rotation, translate };
+
 }
