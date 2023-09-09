@@ -102,7 +102,7 @@ export async function saveImage(lsimage: LSImage, callback?: () => void): Promis
 
 	/* Push & create filename */
 	const filename = generateFileName();
-	const path = `${RNFS.DocumentDirectoryPath}/${filename}.${EXT}`;
+	const path = `${RNFS.PicturesDirectoryPath}/${filename}.${EXT}`;
 	let imagePointers = await AsyncStorage.getItem("imagePointers");
 
 	/* Push image to pointers */
