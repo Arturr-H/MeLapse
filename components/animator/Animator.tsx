@@ -10,7 +10,8 @@ interface Props {
     startX?: number,
     startY?: number,
 
-    style?: ViewStyle
+    style?: ViewStyle,
+    pointerEvents?: Animated.Value | "box-none" | "none" | "box-only" | "auto" | Animated.AnimatedInterpolation<string | number> | undefined
 }
 interface State {
     translateX: Animated.Value,
@@ -109,9 +110,9 @@ export class Animator extends React.PureComponent<Props, State> {
 
 
     /* Start animation */
-    start(): void {
+    start(callback?: () => void): void {
         this.animation = Animated.sequence(this.animations);
-        this.animation.start();
+        this.animation.start(callback);
         this.animations = [];
     }
 
@@ -121,7 +122,7 @@ export class Animator extends React.PureComponent<Props, State> {
         let rotate = this.state.rotation.interpolate({ inputRange: [-360, 360], outputRange: ["-360deg", "360deg"] });
 		return (
 			<Animated.View
-                // pointerEvents={"none"}
+                pointerEvents={this.props.pointerEvents}
                 style={{
                     opacity: this.state.opacity,
                     transform: [
