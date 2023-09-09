@@ -9,6 +9,7 @@ import { Button } from "../../components/button/Button";
 import { Animator } from "../../components/animator/Animator";
 import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
+import MultiAnimator from "../../components/animator/MultiAnimator";
 
 /* Interfaces */
 export interface Props {
@@ -24,7 +25,7 @@ export interface State {
 
 class Preferences extends React.Component<Props, State> {
     nameInput: RefObject<TextInput>;
-    animatorComponent: RefObject<Animator>;
+    animatorComponent: RefObject<MultiAnimator>;
     bottomNavAnimator: RefObject<Animator>;
 
     constructor(props: Props) {
@@ -50,7 +51,7 @@ class Preferences extends React.Component<Props, State> {
 
     async componentDidMount(): Promise<void> {
         const fadeIn = () => {
-            this.animatorComponent.current?.fadeOut(0).fadeIn(750).start();
+            this.animatorComponent.current?.fadeIn(300, 50);
             this.bottomNavAnimator.current?.fadeOut(0).fadeIn(750).start();
         };
 
@@ -67,7 +68,7 @@ class Preferences extends React.Component<Props, State> {
     /* Lifetime */
     cameraScene(): void {
         this.bottomNavAnimator.current?.fadeOut(750).start();
-        this.animatorComponent.current?.fadeOut(750).start(() => {
+        this.animatorComponent.current?.fadeOut(300, 50, () => {
             this.props.navigation.navigate("Camera", { comesFrom: "preferences" });
         });
     }
@@ -90,63 +91,69 @@ class Preferences extends React.Component<Props, State> {
 			<SafeAreaView style={Styles.container}>
                 <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
                     <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                        <Animator style={Styles.containerInner} ref={this.animatorComponent} startOpacity={0}>
+                        <MultiAnimator
+                            // style={Styles.containerInner}
+                            ref={this.animatorComponent}
+                            // startOpacity={0}
+                        >
                             <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
 
                             {/* Username input */}
                             <View>
-                            <View><Text style={Styles.paragraph}>Username</Text></View>
-                            <TextInput
-                                ref={this.nameInput}
-                                placeholder="Username..."
-                                active={!this.state.switching}
-                                initial={this.state.username}
-                                onChangeText={AppConfig.setUsername}
-                                minChars={1}
-                                maxChars={16}
-                            />
+                                <View><Text style={Styles.paragraph}>Username</Text></View>
+                                <TextInput
+                                    ref={this.nameInput}
+                                    placeholder="Username..."
+                                    active={!this.state.switching}
+                                    initial={this.state.username}
+                                    onChangeText={AppConfig.setUsername}
+                                    minChars={1}
+                                    maxChars={16}
+                                />
                             </View>
 
                             {/* "How often" input */}
                             <View>
-                            <View><Text style={Styles.paragraph}>How often</Text></View>
-                            <SelectInput
-                                buttons={["1", "2", "3", "🤷‍♂️"]}
-                                initial={this.state.timesPerDay}
-                                onChange={AppConfig.setTargetTimesPerDay}
-                            />
+                                <View><Text style={Styles.paragraph}>How often</Text></View>
+                                <SelectInput
+                                    buttons={["1", "2", "3", "🤷‍♂️"]}
+                                    initial={this.state.timesPerDay}
+                                    onChange={AppConfig.setTargetTimesPerDay}
+                                />
                             </View>
 
-                            {/* Transform camera */}
                             <View>
-                            <View><Text style={Styles.paragraph}>Transform camera in camera view</Text></View>
-                            <SelectInput
-                                buttons={["YES", "NO"]}
-                                initial={this.state.transformCamera ? 0 : 1}
-                                onChange={(idx) => {
-                                    this.setState({ transformCamera: idx == 0 ? true : false });
-                                    AppConfig.setTransformCamera(idx == 0 ? true : false);
-                                }}
-                            />
+                                {/* Transform camera */}
+                                <View><Text style={Styles.paragraph}>Transform camera in camera view</Text></View>
+                                <SelectInput
+                                    buttons={["YES", "NO"]}
+                                    initial={this.state.transformCamera ? 0 : 1}
+                                    onChange={(idx) => {
+                                        this.setState({ transformCamera: idx == 0 ? true : false });
+                                        AppConfig.setTransformCamera(idx == 0 ? true : false);
+                                    }}
+                                />
                             </View>
 
-                            {/* Redo face calibration */}
                             <View>
-                            <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
-                            <Button color="blue" active={!this.state.switching} onPress={this.onConfirm} text="New face calib  📸" />
+                                {/* Redo face calibration */}
+                                <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
+                                <Button color="blue" active={!this.state.switching} onPress={this.onConfirm} text="New face calib  📸" />
                             </View>
 
-                            {/* Reset settings */}
                             <View>
-                            <View><Text style={Styles.paragraph}>Reset settings to default</Text></View>
-                            <Button color="red" active={!this.state.switching} onPress={this.onConfirm} text="Reset settings  🗑️" />
+                                <Text style={Styles.paragraph}>Reset settings to default</Text>
                             </View>
-                        </Animator>
+
+                            <View>
+                                <Button color="red" active={!this.state.switching} onPress={this.onConfirm} text="Reset settings  🗑️" />
+                            </View>
+                        </MultiAnimator>
                     </ScrollView>
 
                     {/* Confirm */}
                     <Animator startOpacity={0} ref={this.bottomNavAnimator}>
-                        <Button color="green" active={!this.state.switching} onPress={this.cameraScene} text="Done" />
+                        <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="Done" />
                     </Animator>
                 </KeyboardAvoidingView>
 			</SafeAreaView>

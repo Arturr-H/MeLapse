@@ -11,7 +11,7 @@ export default StyleSheet.create({
     },
     paragraph: {
         fontSize: 16,
-        color: "#9c9c9c",
+        color: "#d0d0d0",
         marginBottom: 5,
         fontWeight: "300",
     },
