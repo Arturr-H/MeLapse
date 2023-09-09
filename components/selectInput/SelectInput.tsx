@@ -18,7 +18,10 @@ interface Props {
      * 
      * buttons={["1", "2", "3"]}
      */
-    buttons: string[]
+    buttons: string[],
+
+    /** Index of which button is initially activated */
+    initial?: number
 }
 interface State {
     active: number
@@ -30,7 +33,13 @@ class SelectInput extends React.PureComponent<Props, State> {
         super(props);
 
         this.state = {
-            active: 0
+            active: this.props.initial ?? 0
+        }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+        if (prevProps.initial !== this.props.initial) {
+            this.setState({ active: this.props.initial ?? 0 });
         }
     }
 
