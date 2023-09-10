@@ -3,6 +3,7 @@ import { Image, View } from "react-native";
 import Styles from "./Styles";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import { CameraCapturedPicture } from "expo-camera";
+import { FlipType, SaveFormat, SaveOptions, manipulateAsync } from "expo-image-manipulator";
 
 /* Interfaces */
 interface Props {
@@ -49,7 +50,6 @@ export class PictureManipulator extends React.PureComponent<Props, State> {
                 /* Wait for image to actually render */
                 this.state.imageLoadedPromise.then(async () => {
                     let resolve_and_clear = (value: string) => {
-                        console.log(transform);
                         this.setState({
                             image: undefined,
                             transform: [],
@@ -60,10 +60,13 @@ export class PictureManipulator extends React.PureComponent<Props, State> {
                         
                         resolve(value);
                     }
+
+                    const save: SaveOptions = { compress: 0, format: SaveFormat.JPEG };
+                    const flip = async (uri: string) => await manipulateAsync(uri, [], save);
                     
                     /* Try run capture ref */
                     if (cap) await cap()
-                        .then(uri => resolve_and_clear(uri))
+                        .then(async viewshot_uri => resolve_and_clear((await flip(viewshot_uri)).uri))
                         .catch(_ => resolve_and_clear(fallback))
                 
                     /* Return image which is not manipulated
