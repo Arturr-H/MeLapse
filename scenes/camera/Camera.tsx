@@ -1,8 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Easing, SafeAreaView, TouchableOpacity, View } from "react-native";
+import { Animated, Easing, Image, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
-import { CameraCapturedPicture, CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
+import { CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
@@ -11,13 +11,15 @@ import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { AlignHelper } from "../calibration/AlignHelper";
-import { FaceData, getAlignTransforms, getCalibratedDifferences, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
-import { Debug } from "../../functional/Debug";
+import { FaceData, getAlignTransforms, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
+import { DebugDots } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
 import { Animator } from "../../components/animator/Animator";
 import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
 import AppConfig from "../preferences/Config";
+import { ShutterButton } from "./ShutterButton";
+import { AlignView } from "./AlignView";
 
 /* Constants */
 const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 241.21041831374168, "y": 383.5854159295559}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
@@ -37,25 +39,33 @@ interface Props {
 	comesFrom: "preferences" | "other"
 }
 interface State {
-	/// User needs to allow app to use camera
+	/** User needs to allow app to use camera */
 	cameraAllowed: boolean,
 
-	/// Needed for scaling into transition
+	/** Needed for scaling into transition */
 	cameraButtonScale: Animated.Value,
 	cameraButtonInnerScale: Animated.Value,
 
-	/// Needed when scaling button, because we don't want it to scale with the rim
+	/** Needed when scaling button, because we don't want it to scale with the rim */
 	cameraButtonPadding: number,
 
-	/// Animated values
+	/* Animated values */
 	yawAngle: Animated.Value,
 	rollAngle: Animated.Value,
 
 	transform: any[],
+
+	/** If there are any faces visible on screen */
+	anyFaceVisible: boolean,
+
+	/** This value represents how close the users head is to
+	 /* where it needs to be (calibrated). 1 means that it's
+	 /* on spot, < 1 means they need to move head further away
+	 /* > 1 means they need to move closer. */
+	transformScale: number,
 	loadingImage: boolean,
-	detectedFaces: FaceDetectionResult,
 	debugTransformCamera: any[],
-	transformCamera: boolean
+	transformCamera: boolean,
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -63,8 +73,8 @@ class Camera extends React.PureComponent<Props, State> {
 	camera             : RefObject<ExpoCamera>;
 	alignHelperAnimator: RefObject<Animator>;
 	alignHelper        : RefObject<AlignHelper>;
-	debug              : RefObject<Debug>;
-	debugOutside       : RefObject<Debug>;
+	debug              : RefObject<DebugDots>;
+	debugOutside       : RefObject<DebugDots>;
 	menuButton         : RefObject<MenuButton>;
 
 	constructor(props: Props) {
@@ -79,12 +89,14 @@ class Camera extends React.PureComponent<Props, State> {
 
 			yawAngle: new Animated.Value(0),
 			rollAngle: new Animated.Value(0),
+
 			transform: [],
+			transformScale: 1,
+
 			loadingImage: false,
 			debugTransformCamera: [],
 			transformCamera: false,
-
-			detectedFaces: { faces: [] }
+			anyFaceVisible: false
 		};
 
 		/* Refs */
@@ -116,6 +128,7 @@ class Camera extends React.PureComponent<Props, State> {
 	gainedFocus(): void {
 		this.animateIntro();
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
+		this.setState({ anyFaceVisible: true });
 
 		this.alignHelperAnimator.current?.wait(1500).fadeIn().start();
 	}
@@ -163,21 +176,20 @@ class Camera extends React.PureComponent<Props, State> {
 			useNativeDriver: true,
 		});
 
-		/* Try detect face */
 		if (image) {
 			let flipped = await manipulateAsync(
 				image.uri,
-				[{ flip: FlipType.Horizontal }]
+				[{ flip: FlipType.Horizontal }],
 			).then(e => e)
 			.catch(_ => null);
 
 			if (flipped) {
-
 				/* Use pic manipulator to (try) take transformed pic */
 				let path = await this.pictureManipulator.current?.takePictureAsync(
 					flipped.uri,
 					this.state.transform
 				) ?? image.uri;
+				console.log("TAKEN", path);
 				
 				/* !! Image is not saved here it's saved in preview/Preview.tsx !! */
 				let lsimage = new LSImage(path).toLSImageProp();
@@ -188,22 +200,8 @@ class Camera extends React.PureComponent<Props, State> {
 					this.props.navigation.navigate("Preview", { lsimage })
 				});
 				this.setState({ cameraButtonPadding: 0 });
-			}
-
-			/* Take picture but without transform */
-			else {
-				/* Take pic */
-				let path = await this.pictureManipulator.current?.takePictureAsync(
-					image.uri,
-					[]
-				) ?? image.uri;
-
-				/* Transition */
-				transition.start(() => {
-					this.setState({ loadingImage: false });
-					this.props.navigation.navigate("Preview", { lsimage: new LSImage(path).toLSImageProp() });
-					this.setState({ cameraButtonPadding: 0 });
-				});
+			}else {
+				alert("Can't flip image");
 			}
 		}
 
@@ -216,6 +214,9 @@ class Camera extends React.PureComponent<Props, State> {
 	/* On detect faces (expo-face-detector) */
 	onFacesDetected(e: FaceDetectionResult): void {
 		if (e.faces[0]) {
+			/* Some face was detected */
+			if (!this.state.anyFaceVisible) this.setState({ anyFaceVisible: true });
+
 			let ffeatures = getFaceFeatures(e.faces[0]);
 			let transform = getTransforms(ffeatures, temp);
 			let aligntrfm = getAlignTransforms(ffeatures, temp);
@@ -224,31 +225,53 @@ class Camera extends React.PureComponent<Props, State> {
 				&& this.alignHelper.current?.animateNext(aligntrfm);
 
 			/* Set transforms? */
-			this.setState({ transform, debugTransformCamera: this.state.transformCamera ? transform : [] });
+			let transformScale = transform.find(e => typeof e.scale == "number").scale ?? 1;
+			this.setState({ transform, transformScale, debugTransformCamera: this.state.transformCamera ? transform : [] });
 
-			// this.debug.current?.setBalls([
-			// 	ffeatures.leftEyePosition,
-			// 	ffeatures.rightEyePosition,
-			// 	ffeatures.rightMouthPosition,
-			// 	ffeatures.leftMouthPosition,
-			// ]);
+			this.debug.current?.setBalls([
+				{ balls: [
+					ffeatures.leftEyePosition,
+					ffeatures.rightEyePosition,
+					ffeatures.rightMouthPosition,
+					ffeatures.leftMouthPosition,
+				], color: "blue" },
+
+				{ balls: [
+					ffeatures.midEye,
+					ffeatures.midMouth,
+				], color: "orange" },
+
+				{ balls: [
+					ffeatures.middle,
+				], color: "pink" },
+
+				{ balls: [
+					ffeatures.leftCheekPosition,
+					ffeatures.rightCheekPosition,
+				], color: "pink" },
+			]);
 			
 			this.debugOutside.current?.setBalls([
-				temp.leftEyePosition,
-				temp.rightEyePosition,
-				temp.rightMouthPosition,
-				temp.leftMouthPosition,
-			], "yellow")
+				{ balls: [
+					temp.leftEyePosition,
+					temp.rightEyePosition,
+					temp.rightMouthPosition,
+					temp.leftMouthPosition,
+				], color: "yellow" },
+			]);
+
+		}else {
+			/* No face visible */
+			this.setState({ anyFaceVisible: false });
 		}
 	}
 	
 	/* Render */
 	render() {
-		let scale = this.state.cameraButtonScale;
-
 		return (
 			<View style={Styles.container}>
-				<Debug ref={this.debugOutside} />
+				<DebugDots ref={this.debugOutside} />
+				
 				{/* Transforms image and saves it */}
 				<PictureManipulator ref={this.pictureManipulator} />
 
@@ -265,42 +288,40 @@ class Camera extends React.PureComponent<Props, State> {
 						tracking: true,
 					}}
 					onFacesDetected={this.onFacesDetected}
-				><Debug ref={this.debug} /></ExpoCamera>}
+				><DebugDots ref={this.debug} /></ExpoCamera>}
 
 				{/* Loading indicator */}
 				{this.state.loadingImage && <ProgressView />}
 
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
-					<Floater loosness={5} style={Styles.cameraButtonWrapper}>
-						{/* Face to indicate roughly where user needs to position their head */}
-						<Animator ref={this.alignHelperAnimator} >
-							{/* <AlignHelper ref={this.alignHelper} /> */}
-						</Animator>
-
-						{/* Camera Button */}
-						<Animated.View
-							style={[Styles.cameraButton, {
-								transform: [{ scale }],
-								padding: this.state.cameraButtonPadding,
-							}]}
-
-							/* Animations */
-							onTouchStart={() => Animated.timing(this.state.cameraButtonInnerScale, { toValue: 0.9, duration: 100, useNativeDriver: true }).start()}
-							onTouchEnd={() => Animated.timing(this.state.cameraButtonInnerScale, { toValue: 1, duration: 100, useNativeDriver: true }).start()}
-						>
-							<TouchableOpacity
-								style={[Styles.cameraButtonInner, {
-									transform: [{ scale: this.state.cameraButtonInnerScale }]
-								}]}
-								activeOpacity={1}
-								onPress={this.state.loadingImage ? () => {} : this.takePic}
-							/>
-						</Animated.View>
-					</Floater>
-
 					{/* Button to open preferences */}
 					<MenuButton active={!this.state.loadingImage} ref={this.menuButton} navigation={this.props.navigation} />
+
+					{/* Bottom UI components */}
+					<Floater loosness={3} style={Styles.bottomBar}>
+						{/* Left */}
+						<View style={Styles.bottomBarTile}>
+							<AlignView
+								/* Only visible when there are any faces on screen */
+								visible={this.state.anyFaceVisible}
+								scale={this.state.transformScale}
+							/>
+						</View>
+
+						{/* Middle - Shutter Button */}
+						<View style={Styles.bottomBarTile}>
+							<ShutterButton
+								cameraButtonPadding={this.state.cameraButtonPadding}
+								scale={this.state.cameraButtonScale}
+								loadingImage={this.state.loadingImage}
+								takePic={this.takePic}
+							/>
+						</View>
+
+						{/* Right */}
+						<View style={Styles.bottomBarTile}></View>
+					</Floater>
 				</SafeAreaView>
 
 				{/* Time, battery & more */}
@@ -309,6 +330,7 @@ class Camera extends React.PureComponent<Props, State> {
 		);
 	}
 }
+
 export default function(props: any) {
 	const navigation = useNavigation();
 	const isFocused = useIsFocused();
