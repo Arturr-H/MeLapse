@@ -10,7 +10,30 @@ interface State {
 interface Props {
 }
 
-export class Debug extends React.PureComponent<Props, State> {
+/** Displays a debug overlay, with dots to mark
+ * coordinates.
+ * 
+ * ## Examples
+ * ```
+ * 
+ * // Text overlay
+ * 
+ * 
+ * // Coordinates
+ * this.debugRef.current.setBalls([
+ *      { balls: [
+ *          { x: 150, y: 200 },
+ *          { x: 100, y: 230 },
+ *      ], "yellow" }
+ * 
+ *      { balls: [
+ *          { x: 40, y: 32 },
+ *      ], "blue" }
+ * ])
+ * ```
+*/
+export class DebugDots extends React.PureComponent<Props, State> {
+    text: any = { _pad: "", __pad: "", ___pad: "" };
     constructor(props: Props) {
         super(props);
 
@@ -26,6 +49,7 @@ export class Debug extends React.PureComponent<Props, State> {
     componentDidUpdate(): void {
     }
 
+    /** Mark coordinates */
     setBalls(bls: {
         balls: { x: number, y: number }[],
         color?: "blue" | "red" | "yellow" | "orange" | "pink" | "green" | "brown"
