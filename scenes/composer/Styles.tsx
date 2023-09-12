@@ -26,7 +26,7 @@ export default StyleSheet.create({
     paragraph: {
         fontSize: 16,
         color: "#d0d0d0",
-        marginBottom: 5,
+        marginBottom: 10,
         fontWeight: "300",
     },
     paragraphWhite: {
@@ -122,11 +122,12 @@ export default StyleSheet.create({
 
     framerateViewDotWrapper: {
         width: "100%",
+        height: 10,
         flex: 1,
 
         display: "flex",
         justifyContent: "center",
-            alignItems: "center",
+            alignItems: "flex-start",
         flexDirection: "row",
         gap: 5
     },

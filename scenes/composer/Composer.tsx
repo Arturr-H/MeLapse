@@ -1,23 +1,21 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { Animated, Easing, Image, KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Animated, KeyboardAvoidingView, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import { Animator } from "../../components/animator/Animator";
 import SelectInput from "../../components/selectInput/SelectInput";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 import { LSImage } from "../../functional/Image";
-import { stitchImages } from "../../functional/VideoCreator";
 import FramerateScroller from "./FramerateScroller";
-import { TouchableHighlight } from "react-native-gesture-handler";
 import ComposerConfig from "./Config";
+import { LoadingScreenRouteParams } from "../compileFootage/LoadingScreen";
+import { ScrollView } from "react-native-gesture-handler";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Preferences: undefined }, "Preferences">,
+    navigation: StackNavigationProp<{ Preferences: undefined, LoadingScreen: LoadingScreenRouteParams }, "Preferences" | "LoadingScreen">,
 }
 interface State {
     config: {
@@ -41,6 +39,7 @@ class Composer extends React.Component<Props, State> {
     /* Other */
     framerates: number[] = [24, 30, 60];
     rotationsAnimation: Animated.CompositeAnimation | null = null;
+    qualities: ("okay" | "mid" | "high")[] = ["okay", "mid", "high"];
 
     constructor(props: Props) {
         super(props);
@@ -58,6 +57,8 @@ class Composer extends React.Component<Props, State> {
 
         /* Bindings */
         this.onChangeFramerate = this.onChangeFramerate.bind(this);
+        this.loadingScreen = this.loadingScreen.bind(this);
+        this.fadeIn = this.fadeIn.bind(this);
         this.goBack = this.goBack.bind(this);
     };
     
@@ -71,8 +72,18 @@ class Composer extends React.Component<Props, State> {
             quality: await ComposerConfig.getQuality(),
             framerate: await ComposerConfig.getFramerate()
         } });
+
+        this.props.navigation.addListener("focus", this.fadeIn);
+    }
+    componentWillUnmount(): void {
+        this.props.navigation.removeListener("focus", this.fadeIn);
     }
 
+    /** Fades in scene (duh) */
+    fadeIn(): void {
+        this.animator.current?.fadeIn(300, 50);
+    }
+    
     /** Goes back to preferences scene */
     goBack(): void {
         this.animator.current?.fadeOut(300, 50, () => {
@@ -101,10 +112,22 @@ class Composer extends React.Component<Props, State> {
         })
     }
 
+    /** Generate the timmelapse footage */
+    async loadingScreen(): Promise<void> {
+        this.animator.current?.fadeOut(300, 50, async () => {
+            this.props.navigation.navigate("LoadingScreen", {
+                fps: this.framerates[await ComposerConfig.getFramerate()],
+                quality: this.qualities[await ComposerConfig.getQuality()],
+                outputFormat: "gif", // TODO: Change this yk
+            });
+        });
+    }
+
 	render() {
 		return (
 			<SafeAreaView style={Styles.container}>
-                <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
+                <ScrollView>
+                <View style={Styles.keyboardAvoidingView}>
                     <MultiAnimator ref={this.animator}>
                     <Text style={Styles.header}>Composer 🎨</Text>
 
@@ -157,16 +180,17 @@ class Composer extends React.Component<Props, State> {
 
                     {/* Generate video */}
                     <View>
-                        <Text style={Styles.paragraph}>Generates the video</Text>
+                        <Text style={Styles.paragraph}>Generates the video and saves it to your media library</Text>
                         <Button
-                            onPress={() => {}}
+                            onPress={this.loadingScreen}
                             active={true}
                             color="green"
                             text="Generate  🎥"
                         />
                     </View>
                     </MultiAnimator>
-                </KeyboardAvoidingView>
+                </View>
+                </ScrollView>
 			</SafeAreaView>
 		);
 	}
