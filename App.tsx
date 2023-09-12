@@ -13,6 +13,10 @@ import Result from "./scenes/result/Result";
 import { enableScreens } from "react-native-screens";
 import Setup from "./scenes/setup/Name";
 import HowOften from "./scenes/setup/HowOften";
+import Preferences from "./scenes/preferences/Preferences";
+import Calibration from "./scenes/calibration/Calibration";
+import Composer from "./scenes/composer/Composer";
+import LoadingScreen from "./scenes/compileFootage/LoadingScreen";
 enableScreens();
 
 /* Scenes */
@@ -33,11 +37,15 @@ const App = () => {
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>
-				<Stack.Screen options={commonConfig} name="Setup" component={Setup} />
-				<Stack.Screen options={commonConfig} name="HowOften" component={HowOften} />
-				<Stack.Screen options={commonConfig} name="Camera" component={Camera} />
-				<Stack.Screen options={commonConfig} name="Preview" component={Preview} initialParams={{}} />
-				<Stack.Screen options={commonConfig} name="Result" component={Result} />
+				<Stack.Screen options={commonConfig} name="Camera"		  component={Camera} initialParams={{ comesFrom: "other" }} />
+				<Stack.Screen options={commonConfig} name="LoadingScreen" component={LoadingScreen} />
+				<Stack.Screen options={commonConfig} name="Composer"	  component={Composer} />
+				<Stack.Screen options={commonConfig} name="Setup" 		  component={Setup} />
+				<Stack.Screen options={commonConfig} name="Result" 		  component={Result} />
+				<Stack.Screen options={commonConfig} name="Calibration"   component={Calibration} />
+				<Stack.Screen options={commonConfig} name="Preferences"   component={Preferences} />
+				<Stack.Screen options={commonConfig} name="HowOften" 	  component={HowOften} />
+				<Stack.Screen options={commonConfig} name="Preview" 	  component={Preview} initialParams={{}} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
