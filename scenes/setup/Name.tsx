@@ -7,6 +7,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
 import { Animator } from "../../components/animator/Animator";
+import AppConfig from "../preferences/Config";
+import MultiAnimator from "../../components/animator/MultiAnimator";
 
 /* Interfaces */
 export interface Props {
@@ -17,11 +19,10 @@ export interface State {
 }
 
 class Name extends React.PureComponent<Props, State> {
-    nameInput: RefObject<TextInput>;
 
-    s1: RefObject<Animator>;
-    s2: RefObject<Animator>;
-    s3: RefObject<Animator>;
+    /* Refs */
+    animator: RefObject<MultiAnimator> = React.createRef();
+    nameInput: RefObject<TextInput> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -35,43 +36,27 @@ class Name extends React.PureComponent<Props, State> {
         this.onConfirm = this.onConfirm.bind(this);
         this.fadeOut = this.fadeOut.bind(this);
         this.fadeIn = this.fadeIn.bind(this);
-        
-        /* Refs */
-        this.nameInput = React.createRef();
-        this.s1 = React.createRef();
-        this.s2 = React.createRef();
-        this.s3 = React.createRef();
+
     };
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
         this.fadeIn();
     };
-    fadeIn(): void {
-        [this.s1, this.s2, this.s3].forEach((e, index) => {
-            e.current?.wait(index*200).fadeIn(400).start()
-        });
-    }
-    fadeOut(): void {
-        [this.s1, this.s2, this.s3].forEach((e, index) => {
-            e.current?.wait(index*200).fadeOut(400).start()
-        });
-    }
+    fadeIn(callback?: () => void): void { this.animator.current?.fadeIn(300, 100, callback); }
+    fadeOut(callback?: () => void): void { this.animator.current?.fadeOut(300, 100, callback); }
 
     /* Try confirm */
     onConfirm(): void {
         let name = this.nameInput.current?.tryGetValue();
 
         if (name != null) {
-            this.setState({ switching: true });
-            this.fadeOut();
+            AppConfig.setUsername(name);
 
-            setTimeout(() => {
+            this.setState({ switching: true });
+            this.fadeOut(() => {
                 this.props.navigation.navigate("HowOften");
-            }, 800);
-            
-        }else {
-            console.log("NO NAME");
+            });
         }
     }
 
@@ -79,23 +64,19 @@ class Name extends React.PureComponent<Props, State> {
 		return (
 			<View style={Styles.container}>
                 <KeyboardAvoidingView style={Styles.containerInner} behavior="padding">
-                    <Animator startOpacity={0} ref={this.s1}>
+                    <MultiAnimator ref={this.animator}>
                         <Text style={Styles.header}>Welcome! 🎉</Text>
                         <Text style={Styles.paragraph}>Let's begin by entering your username.</Text>
-                    </Animator>
 
-                    <Animator startOpacity={0} ref={this.s2}>
                         <TextInput
                             ref={this.nameInput}
                             placeholder="Name..."
                             active={!this.state.switching}
                         />
-                    </Animator>
 
-                    {/* Confirm */}
-                    <Animator startOpacity={0} ref={this.s3}>
+                        {/* Confirm */}
                         <Button active={!this.state.switching} onPress={this.onConfirm} text="Confirm" />
-                    </Animator>
+                    </MultiAnimator>
                 </KeyboardAvoidingView>
 			</View>
 		);
