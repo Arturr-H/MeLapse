@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Easing, Image, SafeAreaView, View } from "react-native";
+import { Animated, Easing, Image, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -11,7 +11,7 @@ import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { AlignHelper } from "../calibration/AlignHelper";
-import { FaceData, getAlignTransforms, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
+import { FaceData, getAlignTransforms, getError, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { DebugDots } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
 import { Animator } from "../../components/animator/Animator";
@@ -19,7 +19,7 @@ import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
 import AppConfig from "../preferences/Config";
 import { ShutterButton } from "./ShutterButton";
-import { AlignView } from "./AlignView";
+import FlashLightButton from "./FlashLightButton";
 
 /* Constants */
 const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 239.21041831374168, "y": 386.5854159295559}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
@@ -66,6 +66,8 @@ interface State {
 	loadingImage: boolean,
 	debugTransformCamera: any[],
 	transformCamera: boolean,
+
+	flashlightOpacity: Animated.Value
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -89,6 +91,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 			yawAngle: new Animated.Value(0),
 			rollAngle: new Animated.Value(0),
+			flashlightOpacity: new Animated.Value(0),
 
 			transform: [],
 			transformScale: 1,
@@ -96,7 +99,7 @@ class Camera extends React.PureComponent<Props, State> {
 			loadingImage: false,
 			debugTransformCamera: [],
 			transformCamera: false,
-			anyFaceVisible: false
+			anyFaceVisible: false,
 		};
 
 		/* Refs */
@@ -109,6 +112,7 @@ class Camera extends React.PureComponent<Props, State> {
 		this.debug = React.createRef();
 
 		/* Bindings */
+		this.setFlashlightBrightness = this.setFlashlightBrightness.bind(this);
 		this.onFacesDetected = this.onFacesDetected.bind(this);
 		this.gainedFocus = this.gainedFocus.bind(this);
 		this.takePic = this.takePic.bind(this);
@@ -232,7 +236,7 @@ class Camera extends React.PureComponent<Props, State> {
 			let ffeatures = getFaceFeatures(e.faces[0]);
 			let transform = getTransforms(ffeatures, temp);
 			let aligntrfm = getAlignTransforms(ffeatures, temp);
-
+			
 			this.alignHelper
 				&& this.alignHelper.current?.animateNext(aligntrfm);
 
@@ -240,29 +244,6 @@ class Camera extends React.PureComponent<Props, State> {
 			let transformScale = transform.find(e => typeof e.scale == "number").scale ?? 1;
 			this.setState({ transform, transformScale, debugTransformCamera: this.state.transformCamera ? transform : [] });
 
-			this.debug.current?.setBalls([
-				{ balls: [
-					ffeatures.leftEyePosition,
-					ffeatures.rightEyePosition,
-					ffeatures.rightMouthPosition,
-					ffeatures.leftMouthPosition,
-				], color: "blue" },
-
-				{ balls: [
-					ffeatures.midEye,
-					ffeatures.midMouth,
-				], color: "orange" },
-
-				{ balls: [
-					ffeatures.middle,
-				], color: "pink" },
-
-				{ balls: [
-					ffeatures.leftCheekPosition,
-					ffeatures.rightCheekPosition,
-				], color: "pink" },
-			]);
-			
 			this.debugOutside.current?.setBalls([
 				{ balls: [
 					temp.leftEyePosition,
@@ -276,6 +257,15 @@ class Camera extends React.PureComponent<Props, State> {
 			/* No face visible */
 			this.setState({ anyFaceVisible: false });
 		}
+	}
+
+	/** Animate flashlight brigthess */
+	async setFlashlightBrightness(toValue: number): Promise<void> {
+		Animated.timing(this.state.flashlightOpacity, {
+			toValue,
+			useNativeDriver: true,
+			duration: 0
+		}).start();
 	}
 	
 	/* Render */
@@ -305,6 +295,14 @@ class Camera extends React.PureComponent<Props, State> {
 				{/* Loading indicator */}
 				{this.state.loadingImage && <ProgressView />}
 
+				{/* Flashlight */}
+				<View pointerEvents="none" style={Styles.flashRingLightContainer}>
+					<Animated.Image
+						style={[Styles.flashRingLight, { opacity: this.state.flashlightOpacity }]}
+						source={require("../../assets/images/flashlight-overlay.png")}
+					/>
+				</View>
+
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
 					{/* Button to open preferences */}
@@ -312,14 +310,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 					{/* Bottom UI components */}
 					<Floater loosness={3} style={Styles.bottomBar}>
-						{/* Left */}
-						<View style={Styles.bottomBarTile}>
-							<AlignView
-								/* Only visible when there are any faces on screen */
-								visible={this.state.anyFaceVisible}
-								scale={this.state.transformScale}
-							/>
-						</View>
+						<View style={Styles.bottomBarTile}></View>
 
 						{/* Middle - Shutter Button */}
 						<View style={Styles.bottomBarTile}>
@@ -332,7 +323,9 @@ class Camera extends React.PureComponent<Props, State> {
 						</View>
 
 						{/* Right */}
-						<View style={Styles.bottomBarTile}></View>
+						<View style={Styles.bottomBarTile}>
+							<FlashLightButton onChange={this.setFlashlightBrightness}/>
+						</View>
 					</Floater>
 				</SafeAreaView>
 
