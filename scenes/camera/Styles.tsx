@@ -7,7 +7,7 @@ const HEIGHT = Dimensions.get("window").height;
 export default StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#272727",
 
         display: "flex",
         justifyContent: "center",
@@ -26,33 +26,24 @@ export default StyleSheet.create({
         flexDirection: "column",
     },
 
-    alignFaceContainer: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: 120,
-        width: 90
-    },
-    alignFace: {
-        // opacity: 0.1,
-        width: "100%",
-        position: "absolute",
-        objectFit: "contain"
-    },
-
     /* Camera button */
-    cameraButtonWrapper: {
+    bottomBar: {
         position: "absolute",
         bottom: 50,
 
         display: "flex",
-        justifyContent: "center",
-            alignItems: "center",
-        flexDirection: "column",
+        flexDirection: "row",
         gap: 20,
 
         /// needs to be > 3
         zIndex: 4
+    },
+    bottomBarTile: {
+        flex: 1,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
     },
     cameraButton: {
         width: 98,
@@ -71,7 +62,36 @@ export default StyleSheet.create({
 
         backgroundColor: "#fff",
         borderRadius: 49,
+    },
+    alignGrid: {
+        width: "100%",
+        height: "100%",
+        opacity: 0.5,
+        position: "absolute"
+    },
+    alignFace: {
+        // opacity: 0.1,
+        width: 70,
+        height: 70,
+        position: "absolute",
+        backgroundColor: "blue",
+        objectFit: "contain",
 
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    alignFaceMask: {
+        // opacity: 0.1,
+        width: "100%",
+        height: "100%",
+        objectFit: "contain"
+    },
+    alignFaceInner: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        backgroundColor: "red",
     },
 
     viewShot: {
@@ -116,6 +136,67 @@ export default StyleSheet.create({
         borderRadius: 40
     },
     menuButtonIcon: {
+        pointerEvents: "none",
+        color: "#fff",
+        fontSize: 30,
+        fontFamily: "inter-black",
+    },
+
+    flashRingLightContainer: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+    },
+    flashRingLight: {
+        width: "100%",
+        height: "100%",
+    },
+
+    flashlightButtonContainer: {
+        width: 50,
+        height: 50,
+        bottom: 0,
+
+        display: "flex",
+        justifyContent: "flex-end",
+            alignItems: "center",
+
+        borderRadius: 25,
+
+        paddingVertical: 10
+    },
+    flashlightButtonBgLine: {
+        width: 2,
+        height: 40,
+        backgroundColor: "rgb(235, 235, 235)",
+
+        borderRadius: 2,
+        position: "absolute",
+
+        bottom: 0,
+        transform: [{ translateY: -25 }],
+    },
+    flashlightButton: {
+        width: "100%",
+        height: 50,
+        backgroundColor: "#fff",
+        borderColor: "rgb(235, 235, 235)",
+        borderWidth: 2,
+
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 0 },
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+        position: "absolute",
+
+        borderRadius: 25
+    },
+    flashlightButtonIcon: {
         pointerEvents: "none",
         color: "#fff",
         fontSize: 30,
