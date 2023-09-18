@@ -11,7 +11,8 @@ interface Props {
     active: boolean,
 
     color?: "red" | "blue" | "green",
-    flex?: boolean
+    flex?: boolean,
+    small?: true
 }
 interface State {
 }
@@ -49,16 +50,28 @@ export class Button extends React.PureComponent<Props, State> {
 		return (
             <TouchableHighlight
                 underlayColor={this.colors[this.props.color ?? "blue"][1]}
-                style={[Styles.button, {
-                    backgroundColor: this.colors[this.props.color ?? "blue"][0],
-                    borderColor: this.colors[this.props.color ?? "blue"][1]
-                }, this.props.flex && { flex: 1 }]}
+                style={[
+                    Styles.button,
+                    {
+                        backgroundColor: this.colors[this.props.color ?? "blue"][0],
+                        borderColor: this.colors[this.props.color ?? "blue"][1],
+                    },
+                    this.props.flex && { flex: 1 },
+                    this.props.small && {
+                        borderRadius: 5,
+                        height: 40,
+                        minHeight: 40
+                    }
+                ]}
                 onPress={() => {
                     this.props.active && this.props.onPress();
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
             >
-                <Text style={Styles.buttonText}>{this.props.text}</Text>
+                <Text style={[
+                    Styles.buttonText,
+                    this.props.small && { fontSize: 16 }
+                ]}>{this.props.text}</Text>
             </TouchableHighlight>
         );
 	}
