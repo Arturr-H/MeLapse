@@ -16,6 +16,9 @@ interface Props {
 
     spellCheck?: boolean,
     autoCorrect?: boolean,
+
+    keyboardType?: "ascii-capable" | "numbers-and-punctuation" | "name-phone-pad" | "twitter" | "web-search" |
+                 "default" | "number-pad" | "decimal-pad" | "numeric" | "email-address" | "phone-pad" | "url";
 }
 interface State {
     focus: boolean,
@@ -39,8 +42,8 @@ export class TextInput extends React.PureComponent<Props, State> {
         };
 
         /* Static */
-        this.min = 1;
-        this.max = 16;
+        this.min = this.props.minChars ?? 1;
+        this.max = this.props.maxChars ?? 16;
 
         this.minMaxText = React.createRef();
 
@@ -106,6 +109,7 @@ export class TextInput extends React.PureComponent<Props, State> {
                     }}
                     value={this.state.value}
                     editable={this.props.active}
+                    keyboardType={this.props.keyboardType ?? "default"}
 
                     onFocus={() => this.setState({ focus: true })}
                     onBlur={() => this.setState({ focus: false })}
