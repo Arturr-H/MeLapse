@@ -1,5 +1,5 @@
 import React, { RefObject } from "react";
-import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight } from "react-native";
+import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, ActivityIndicator } from "react-native";
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
 import * as Haptics from "expo-haptics";
@@ -12,9 +12,12 @@ interface Props {
 
     color?: "red" | "blue" | "green",
     flex?: boolean,
-    small?: true
+    small?: true,
+
+    loading?: boolean
 }
 interface State {
+    loading?: boolean,
 }
 
 export class Button extends React.PureComponent<Props, State> {
@@ -29,9 +32,7 @@ export class Button extends React.PureComponent<Props, State> {
 
 		/* State */
 		this.state = {
-            focus: false,
-            value: "",
-            chars: 0,
+            loading: false,
         };
 
         /* Static */
@@ -44,6 +45,12 @@ export class Button extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     componentDidMount(): void {
+        this.setState({ loading: this.props.loading });
+    }
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+        if (this.props.loading !== prevProps.loading) {
+            this.setState({ loading: this.props.loading });
+        }
     }
 
 	render() {
@@ -68,10 +75,12 @@ export class Button extends React.PureComponent<Props, State> {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }}
             >
-                <Text style={[
-                    Styles.buttonText,
-                    this.props.small && { fontSize: 16 }
-                ]}>{this.props.text}</Text>
+                {this.state.loading === true ? <ActivityIndicator color={"white"} /> :
+                    <Text style={[
+                        Styles.buttonText,
+                        this.props.small && { fontSize: 16 }
+                    ]}>{this.props.text}</Text>
+                }
             </TouchableHighlight>
         );
 	}
