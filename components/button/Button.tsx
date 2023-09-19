@@ -1,5 +1,5 @@
 import React, { RefObject } from "react";
-import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, ActivityIndicator } from "react-native";
+import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, ActivityIndicator, Alert } from "react-native";
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
 import * as Haptics from "expo-haptics";
@@ -14,7 +14,10 @@ interface Props {
     flex?: boolean,
     small?: true,
 
-    loading?: boolean
+    loading?: boolean,
+
+    /** Display a popup message and OK or cancel */
+    confirm?: { message: string, title: string }
 }
 interface State {
     loading?: boolean,
@@ -71,8 +74,17 @@ export class Button extends React.PureComponent<Props, State> {
                     }
                 ]}
                 onPress={() => {
-                    this.props.active && this.props.onPress();
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (this.props.confirm) {
+                        Alert.alert(this.props.confirm.title, this.props.confirm.message, [
+                            { style: "destructive", onPress: () => {
+                                this.props.active && this.props.onPress();
+                            }, isPreferred: false, text: "Ok" },
+                            { style: "default", isPreferred: true, text: "Cancel" },
+                        ])
+                    }else {
+                        this.props.active && this.props.onPress();
+                    }
                 }}
             >
                 {this.state.loading === true ? <ActivityIndicator color={"white"} /> :
