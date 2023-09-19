@@ -1,5 +1,5 @@
 import React, { RefObject } from "react";
-import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text } from "react-native";
+import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight } from "react-native";
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
 
@@ -17,6 +17,8 @@ interface Props {
     spellCheck?: boolean,
     autoCorrect?: boolean,
 
+    flex?: boolean,
+
     keyboardType?: "ascii-capable" | "numbers-and-punctuation" | "name-phone-pad" | "twitter" | "web-search" |
                  "default" | "number-pad" | "decimal-pad" | "numeric" | "email-address" | "phone-pad" | "url";
 }
@@ -27,7 +29,8 @@ interface State {
 }
 
 export class TextInput extends React.PureComponent<Props, State> {
-    minMaxText: RefObject<Animator>;
+    minMaxText: RefObject<Animator> = React.createRef();
+    input: RefObject<RNTextInput> = React.createRef();
     min: number;
     max: number;
 
@@ -44,8 +47,6 @@ export class TextInput extends React.PureComponent<Props, State> {
         /* Static */
         this.min = this.props.minChars ?? 1;
         this.max = this.props.maxChars ?? 16;
-
-        this.minMaxText = React.createRef();
 
         this.tryGetValue = this.tryGetValue.bind(this);
 	}
@@ -91,12 +92,18 @@ export class TextInput extends React.PureComponent<Props, State> {
 
 	render() {
 		return (
-            <View
+            <TouchableHighlight
+                underlayColor={"transparent"}
                 style={[
                     Styles.textInputWrapper,
-                    this.state.focus && Styles.focused
+                    this.state.focus && Styles.focused,
+                    this.props.flex === true && { flex: 1 }
                 ]}
+                onPress={() => {
+                    this.input.current?.focus();
+                }}
             >
+                <React.Fragment>
                 <RNTextInput
                     spellCheck={this.props.spellCheck ?? false}
                     autoCorrect={this.props.autoCorrect ?? false}
@@ -110,6 +117,7 @@ export class TextInput extends React.PureComponent<Props, State> {
                     value={this.state.value}
                     editable={this.props.active}
                     keyboardType={this.props.keyboardType ?? "default"}
+                    ref={this.input}
 
                     onFocus={() => this.setState({ focus: true })}
                     onBlur={() => this.setState({ focus: false })}
@@ -120,7 +128,8 @@ export class TextInput extends React.PureComponent<Props, State> {
                         <Text style={Styles.charLenText}>{this.state.chars}/{this.max}</Text>
                     </Animator>
                 </View>
-            </View>
+                </React.Fragment>
+            </TouchableHighlight>
         );
 	}
 }
