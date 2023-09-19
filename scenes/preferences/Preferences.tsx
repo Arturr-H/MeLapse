@@ -12,6 +12,7 @@ import AppConfig, { TargetTimesPerDay } from "./Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 import { LSImage } from "../../functional/Image";
 import { stitchImages } from "../../functional/VideoCreator";
+import { StatusBar } from "expo-status-bar";
 
 /* Interfaces */
 export interface Props {
@@ -71,13 +72,13 @@ class Preferences extends React.Component<Props, State> {
     }
     fadeIn = () => {
         this.animatorComponent.current?.fadeOut(0, 0, () => {
-            this.animatorComponent.current?.fadeIn(300, 50);
+            this.animatorComponent.current?.fadeIn(200, 50);
         });
-        this.bottomNavAnimator.current?.fadeOut(0).fadeIn(750).start();
+        this.bottomNavAnimator.current?.fadeOut(0).fadeIn(400).start();
     }
     fadeOut = (callback?: () => void) => {
-        this.animatorComponent.current?.fadeOut(300, 50);
-        this.bottomNavAnimator.current?.fadeOut(750).start(callback);
+        this.animatorComponent.current?.fadeOut(200, 50);
+        this.bottomNavAnimator.current?.fadeOut(400).start(callback);
     }
 
     /* Scene switches */
@@ -207,6 +208,8 @@ class Preferences extends React.Component<Props, State> {
                         <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="Done" />
                     </Animator>
                 </KeyboardAvoidingView>
+
+                <StatusBar style="dark" />
 			</SafeAreaView>
 		);
 	}

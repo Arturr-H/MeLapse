@@ -8,33 +8,6 @@ const HEIGHT = Dimensions.get("window").height;
 export default StyleSheet.create({
     ...MenuBundle,
 
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-
-        width: "100%",
-        height: "100%",
-    },
-    keyboardAvoidingView: {
-        height: "100%",
-        width: "100%",
-
-        paddingHorizontal: 30,
-    },
-    containerInner: {
-        justifyContent: "center",
-        
-        display: "flex",
-        flexDirection: "column",
-        gap: 15,
-        width: "100%",
-
-        paddingTop: 20,
-
-        /// Check row style object transform comment
-        paddingBottom: 20 + 10
-    },
-
     buttonText: {
         color: "#000",
         fontSize: 20,
