@@ -3,11 +3,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as MediaLibrary from "expo-media-library";
 import RNFS from "react-native-fs";
 import { formatDate } from "./Date";
+import * as fs from "react-native-fs";
 
 /// We use .jpg because when we flip the image
 /// using `expo-image-manipulator` we save it
 /// as jpg in the end (it's good for space)
-const EXT = "JPG";
+const EXT = "jpg";
 
 /**
  * The `LSImage` class can't be passed as prop, it leads 
@@ -34,9 +35,9 @@ export class LSImage {
 	private filename: string;
 	date: number;
 
-	constructor(path: string) {
+	constructor(path: string, filename: string) {
 		this.path = path;
-		this.filename = generateFileName();
+		this.filename = filename;
 		this.date = new Date().getTime();
 
 		/* Bindings */
@@ -61,7 +62,7 @@ export class LSImage {
 
 	/** Convert `LSImageProp` into this class */
 	static fromLSImageProp(prop: LSImageProp): LSImage {
-		let lsimage = new LSImage(prop.path);
+		let lsimage = new LSImage(prop.path, prop.filename);
 		lsimage.filename = prop.filename;
 		lsimage.date = prop.date;
 
@@ -91,6 +92,42 @@ export class LSImage {
 			return null
 		}
 	}
+	
+	/** Removes file extension from only filename */
+	static removeFileExt(name: string): string {
+		return name.split(".")[0];
+	}
+
+	/** Delete image */
+	public static async deleteImageAsync(image: { path: string, filename: string }): Promise<void> {
+		/* Check if we've got a local image pointer array to delete from */
+		const imagePointers_str = await AsyncStorage.getItem("imagePointers");
+		if (imagePointers_str !== null) {
+			try {
+				let imagePointers: LSImageProp[] = JSON.parse(imagePointers_str) as LSImageProp[];
+				const filename = image.filename;
+				const filepath = image.path;
+				
+				/* Find removable element */
+				for (let i = 0; i < imagePointers.length; i++) {
+					const element = imagePointers[i];
+					const split = element.path.split("/");
+					const try_filename = split[split.length - 1];
+
+					if (try_filename === filename) {
+						const unlinkPath = fs.DocumentDirectoryPath + "/" + try_filename;
+						return fs.unlink(unlinkPath);
+					}
+				}
+
+				return alert("Image wasn't found sadly. Nothing was removed.");
+			}catch {
+				return alert("Couldn't parse images pointer...");
+			}
+		}else {
+			return alert("No images in pointer...");
+		}
+	}
 }
 
 /* Save image to users fs */
@@ -107,7 +144,8 @@ export async function saveImage(lsimage: LSImage, callback?: () => void): Promis
 
 	/* Push image to pointers */
 	if (imagePointers !== null) {
-		let push = new LSImage(path);
+		let push = new LSImage(path, filename);
+		console.log("pushing", push.toLSImageProp());
 		let array: LSImage[] = JSON.parse(imagePointers);
 
 		if (array) {
