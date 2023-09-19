@@ -1,26 +1,12 @@
 import { Dimensions, StyleSheet } from "react-native";
+import MenuBundle from "../../styleBundles/MenuBundle";
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
 
 export default StyleSheet.create({
-    header: {
-        fontFamily: "inter-extrabold",
-        fontSize: 42,
-    },
-    paragraph: {
-        fontSize: 16,
-        color: "#d0d0d0",
-        marginBottom: 5,
-        fontWeight: "300",
-    },
-    italic: {
-        fontStyle: "italic",
-        color: "#5c5c5c",
-        fontWeight: "200"
-    },
-
+    ...MenuBundle,
 
     container: {
         flex: 1,

@@ -10,14 +10,18 @@ import { Animator } from "../../components/animator/Animator";
 import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
+import { LSImage } from "../../functional/Image";
+import { stitchImages } from "../../functional/VideoCreator";
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<{ Camera: { comesFrom: "preferences" } }, "Camera">,
+    navigation: StackNavigationProp<{ Camera: { comesFrom: "preferences" }, Debug: undefined, Composer: undefined }, "Camera" | "Debug" | "Composer">,
 }
 export interface State {
     switching: boolean,
 
+    saveSelfiesToCameraRoll: boolean,
+    postProcessingTransform: boolean,
     transformCamera: boolean,
     timesPerDay: number,
     username: string,
@@ -35,12 +39,13 @@ class Preferences extends React.Component<Props, State> {
         this.state = {
             switching: false,
             timesPerDay: TargetTimesPerDay.Twice,
+            postProcessingTransform: true,
+            saveSelfiesToCameraRoll: false,
             username: "",
             transformCamera: false,
         };
 
         /* Bindings */
-        this.cameraScene = this.cameraScene.bind(this);
         this.onConfirm = this.onConfirm.bind(this);
         
         /* Refs */
@@ -50,28 +55,38 @@ class Preferences extends React.Component<Props, State> {
     };
 
     async componentDidMount(): Promise<void> {
-        const fadeIn = () => {
-            this.animatorComponent.current?.fadeIn(300, 50);
-            this.bottomNavAnimator.current?.fadeOut(0).fadeIn(750).start();
-        };
-
-        fadeIn();
-        this.props.navigation.addListener("focus", fadeIn);
+        this.fadeIn();
+        this.props.navigation.addListener("focus", this.fadeIn);
 
         this.setState({
             timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
             username: await AppConfig.getUsername(),
             transformCamera: await AppConfig.getTransformCamera(),
+            postProcessingTransform: await AppConfig.getPostProcessingTransform(),
+            saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
         });
+    }
+    componentWillUnmount(): void {
+        this.props.navigation.removeListener("focus", this.fadeIn);
+    }
+    fadeIn = () => {
+        this.animatorComponent.current?.fadeOut(0, 0, () => {
+            this.animatorComponent.current?.fadeIn(300, 50);
+        });
+        this.bottomNavAnimator.current?.fadeOut(0).fadeIn(750).start();
+    }
+    fadeOut = (callback?: () => void) => {
+        this.animatorComponent.current?.fadeOut(300, 50);
+        this.bottomNavAnimator.current?.fadeOut(750).start(callback);
     }
 
-    /* Lifetime */
-    cameraScene(): void {
-        this.bottomNavAnimator.current?.fadeOut(750).start();
-        this.animatorComponent.current?.fadeOut(300, 50, () => {
-            this.props.navigation.navigate("Camera", { comesFrom: "preferences" });
-        });
-    }
+    /* Scene switches */
+    cameraScene = () => this.fadeOut(() => 
+        this.props.navigation.navigate("Camera", { comesFrom: "preferences" })
+    )
+    composerScene = () => this.fadeOut(() => 
+        this.props.navigation.navigate("Composer")
+    )
 
     /* Try confirm */
     onConfirm(): void {
@@ -91,11 +106,7 @@ class Preferences extends React.Component<Props, State> {
 			<SafeAreaView style={Styles.container}>
                 <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
                     <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                        <MultiAnimator
-                            // style={Styles.containerInner}
-                            ref={this.animatorComponent}
-                            // startOpacity={0}
-                        >
+                        <MultiAnimator ref={this.animatorComponent}>
                             <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
 
                             {/* Username input */}
@@ -114,7 +125,7 @@ class Preferences extends React.Component<Props, State> {
 
                             {/* "How often" input */}
                             <View>
-                                <View><Text style={Styles.paragraph}>How often</Text></View>
+                                <View><Text style={Styles.paragraph}>Your target amount of selfies per day</Text></View>
                                 <SelectInput
                                     buttons={["1", "2", "3", "🤷‍♂️"]}
                                     initial={this.state.timesPerDay}
@@ -122,8 +133,8 @@ class Preferences extends React.Component<Props, State> {
                                 />
                             </View>
 
+                            {/* Transform camera */}
                             <View>
-                                {/* Transform camera */}
                                 <View><Text style={Styles.paragraph}>Transform camera in camera view</Text></View>
                                 <SelectInput
                                     buttons={["YES", "NO"]}
@@ -135,24 +146,64 @@ class Preferences extends React.Component<Props, State> {
                                 />
                             </View>
 
+                            {/* Goto composer scene */}
                             <View>
-                                {/* Redo face calibration */}
-                                <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
-                                <Button color="blue" active={!this.state.switching} onPress={this.onConfirm} text="New face calib  📸" />
+                                <Text style={Styles.paragraph}>Go to composer scene for creating your final timelapse-footage.</Text>
+                                <Button color="green" active={!this.state.switching} onPress={this.composerScene} text="Generate video  🎨" />
                             </View>
 
+                            <View style={Styles.hr} />
+
+                            {/* Post processing */}
+                            <View>
+                                <Text style={Styles.header2}>⭐️ Post processing</Text>
+                                <View><Text style={Styles.paragraph}>Automatically align your face to the calibrated position after taking photo (recommended)</Text></View>
+
+                                <SelectInput
+                                    buttons={["ALIGN", "STATIC"]}
+                                    initial={this.state.postProcessingTransform ? 0 : 1}
+                                    onChange={(idx) => {
+                                        this.setState({ postProcessingTransform: idx == 0 ? true : false });
+                                        AppConfig.setPostProcessingTransform(idx == 0 ? true : false);
+                                    }}
+                                />
+                            </View>
+
+                            {/* Save image media lib */}
+                            <View>
+                                <View><Text style={Styles.paragraph}>Automatically save each selfie to your camera roll (won't apply to previous selfies)</Text></View>
+
+                                <SelectInput
+                                    buttons={["YES", "NO"]}
+                                    initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
+                                    onChange={(idx) => {
+                                        this.setState({ saveSelfiesToCameraRoll: idx == 0 ? true : false });
+                                        AppConfig.setSaveSelfiesToCameraRoll(idx == 0 ? true : false);
+                                    }}
+                                />
+                            </View>
+
+                            <View style={Styles.hr} />
+
+                            {/* Redo face calibration */}
+                            <View>
+                                <Text style={Styles.header2}>🚨 Danger zone</Text>
+                                <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
+                                <Button color="red" active={!this.state.switching} onPress={this.onConfirm} text="New face calib  📸" />
+                            </View>
+
+                            {/* Reset config */}
                             <View>
                                 <Text style={Styles.paragraph}>Reset settings to default</Text>
-                            </View>
-
-                            <View>
                                 <Button color="red" active={!this.state.switching} onPress={this.onConfirm} text="Reset settings  🗑️" />
                             </View>
+
+                            <View style={Styles.hr} />
                         </MultiAnimator>
                     </ScrollView>
 
                     {/* Confirm */}
-                    <Animator startOpacity={0} ref={this.bottomNavAnimator}>
+                    <Animator startOpacity={0} ref={this.bottomNavAnimator} style={{ transform: [{ translateY: -12 }] }}>
                         <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="Done" />
                     </Animator>
                 </KeyboardAvoidingView>
