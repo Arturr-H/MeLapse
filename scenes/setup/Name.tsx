@@ -6,7 +6,6 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import { Animator } from "../../components/animator/Animator";
 import AppConfig from "../preferences/Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 

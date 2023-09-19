@@ -7,6 +7,7 @@ import SelectInput from "../../components/selectInput/SelectInput";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import AppConfig from "../preferences/Config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Interfaces */
 export interface Props {
@@ -63,8 +64,9 @@ export class HowOften extends React.PureComponent<Props, State> {
         this.setState({ active: nr });
     }
 
-    onConfirm(): void {
+    async onConfirm(): Promise<void> {
         this.fadeOut();
+        await AsyncStorage.setItem("setupComplete", "true");
         setTimeout(() => {
             this.props.navigation.navigate("Camera");
         }, 800);
