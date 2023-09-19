@@ -12,6 +12,7 @@ import * as Haptic from "expo-haptics";
 import Floater from "../../components/floater/Floater";
 import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Interfaces */
 interface Props {
@@ -26,6 +27,7 @@ interface State {
     bgTranslateY: Animated.Value,
 
     deactivateButtons: boolean,
+    lsimage?: LSImageProp
 }
 
 /* Constants */
@@ -52,6 +54,7 @@ class Preview extends React.PureComponent<Props, State> {
 
         /* Bindings */
         this.onDelete = this.onDelete.bind(this);
+        this.onFocus = this.onFocus.bind(this);
         this.onSave = this.onSave.bind(this);
 
         /* Refs */
@@ -61,6 +64,8 @@ class Preview extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     componentDidMount(): void {
+        this.props.navigation.addListener("focus", this.onFocus);
+        this.setState({ lsimage: this.props.lsimage });
         this.setState({ deactivateButtons: false });
         Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 150 }).start();
@@ -73,11 +78,23 @@ class Preview extends React.PureComponent<Props, State> {
             useNativeDriver: true
         })).start();
     }
+    componentWillUnmount(): void {
+        this.props.navigation.removeListener("focus", this.onFocus);
+    }
+    onFocus(): void {
+        this.setState({ lsimage: this.props.lsimage });
+    }
 
     /* Delete / save image */
-    onDelete(): void {
+    async onDelete(): Promise<void> {
         this.setState({ deactivateButtons: true });
         Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
+
+        /* Increase scrapping stats */
+        try {
+            const count: number = JSON.parse(await AsyncStorage.getItem("scrappedSelfies") ?? "0")
+            await AsyncStorage.setItem("scrappedSelfies", (count+1).toString());
+        }catch {}
 
         Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200, delay: 150 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200 }).start();
@@ -110,7 +127,7 @@ class Preview extends React.PureComponent<Props, State> {
                 <View style={Styles.posterContainer}>
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
-                        <Floater loosness={3}><Poster lsimage={this.props.lsimage} ref={this.poster} /></Floater>
+                        {this.state.lsimage && <Floater loosness={3}><Poster lsimage={this.state.lsimage} ref={this.poster} /></Floater>}
                     </View>
                 </View>
 
@@ -142,7 +159,7 @@ class Preview extends React.PureComponent<Props, State> {
                         >
                             {this.state.deactivateButtons
                                 ? <ActivityIndicator color={"white"} />
-                                : <Text style={Styles.acceptButtonText}>Yea 👍</Text>
+                                : <Text style={Styles.acceptButtonText}>YEA 👍</Text>
                             }
                         </TouchableOpacity>
                     </Floater>
