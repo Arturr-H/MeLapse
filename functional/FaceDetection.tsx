@@ -134,7 +134,10 @@ export function getTransforms(faceData: FaceData, calibrated: FaceData) {
         ((calibrated.leftEyePosition.y - faceData.leftEyePosition.y) + (calibrated.rightEyePosition.y - faceData.rightEyePosition.y)) / 2
     );
 
-    let rot = -faceData.rollAngle * (Math.PI / 180);
+    let rot = (
+        Math.atan2(calibrated.rightEyePosition.y - calibrated.leftEyePosition.y, calibrated.rightEyePosition.x - calibrated.leftEyePosition.x) -
+        Math.atan2(faceData.rightEyePosition.y - faceData.leftEyePosition.y, faceData.rightEyePosition.x - faceData.leftEyePosition.x)
+    );
     let centerY = (faceData.midEye.y + faceData.midMouth.y) / 2;
     let centerX = (faceData.midEye.x + faceData.midMouth.x) / 2;
     let rotation = withAnchorPoint(
@@ -156,7 +159,7 @@ export function getTransforms(faceData: FaceData, calibrated: FaceData) {
     translateY = (translateY + deltaMouthY);
 
     /* Modify translate X */
-    translateX = translateX - (rot*45);
+    translateX = translateX - (rot*20);
 
     return [
         { scale },
@@ -192,7 +195,10 @@ export function getAlignTransforms(faceData: FaceData, calibrated: FaceData): Al
         (faceData.deltaEye.x / calibrated.deltaEye.x +
         faceData.deltaMouth.x / calibrated.deltaMouth.x) / 2;
 
-    let rotation = faceData.rollAngle;
+    let rotation = (
+        Math.atan2(calibrated.rightEyePosition.y - calibrated.leftEyePosition.y, calibrated.rightEyePosition.x - calibrated.leftEyePosition.x) -
+        Math.atan2(faceData.rightEyePosition.y - faceData.leftEyePosition.y, faceData.rightEyePosition.x - faceData.leftEyePosition.x)
+    );
 
     let translate = {
         x: -(faceData.midEye.x - calibrated.midEye.x) / 5,
