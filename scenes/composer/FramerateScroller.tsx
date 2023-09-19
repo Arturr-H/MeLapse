@@ -88,7 +88,7 @@ export default class FramerateScroller extends React.Component<Props, State> {
         
         Animated.spring(this.state.pan, { speed: 100, toValue, useNativeDriver: false }).start();
 
-        doCallback && this.props.onSelect(index);
+        if (doCallback === true) this.props.onSelect(index);
         this.setState({ active: index });
     }
 

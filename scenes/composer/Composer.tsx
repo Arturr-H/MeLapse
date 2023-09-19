@@ -10,12 +10,13 @@ import MultiAnimator from "../../components/animator/MultiAnimator";
 import { LSImage } from "../../functional/Image";
 import FramerateScroller from "./FramerateScroller";
 import ComposerConfig from "./Config";
-import { LoadingScreenRouteParams } from "../compileFootage/LoadingScreen";
+import { StitchOptions } from "../compileFootage/LoadingScreen";
 import { ScrollView } from "react-native-gesture-handler";
+import { Animator } from "../../components/animator/Animator";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Preferences: undefined, LoadingScreen: LoadingScreenRouteParams }, "Preferences" | "LoadingScreen">,
+    navigation: StackNavigationProp<{ Preferences: undefined, LoadingScreen: StitchOptions, AdvancedComposer: undefined }, "Preferences" | "LoadingScreen" | "AdvancedComposer">,
 }
 interface State {
     config: {
@@ -38,6 +39,7 @@ class Composer extends React.Component<Props, State> {
 
     /* Other */
     framerates: number[] = [24, 30, 60];
+    formats: ("gif" | "mp4")[] = ["gif", "mp4"];
     rotationsAnimation: Animated.CompositeAnimation | null = null;
     qualities: ("okay" | "mid" | "high")[] = ["okay", "mid", "high"];
 
@@ -56,45 +58,64 @@ class Composer extends React.Component<Props, State> {
         };
 
         /* Bindings */
+        this.openAdvancedSettings = this.openAdvancedSettings.bind(this);
         this.onChangeFramerate = this.onChangeFramerate.bind(this);
         this.loadingScreen = this.loadingScreen.bind(this);
+        this.onFocus = this.onFocus.bind(this);
         this.fadeIn = this.fadeIn.bind(this);
         this.goBack = this.goBack.bind(this);
     };
     
     /* Lifetime */
     async componentDidMount(): Promise<void> {
-        await this.onChangeFramerate(0, true);
-        this.animator.current?.fadeIn(300, 50);
-        
-        this.setState({ config: {
-            format: await ComposerConfig.getFormat(),
-            quality: await ComposerConfig.getQuality(),
-            framerate: await ComposerConfig.getFramerate()
-        } });
+        this.animator.current?.fadeIn(200, 50);
+        await this.onFocus();
 
-        this.props.navigation.addListener("focus", this.fadeIn);
+        this.props.navigation.addListener("focus", this.onFocus);
     }
     componentWillUnmount(): void {
-        this.props.navigation.removeListener("focus", this.fadeIn);
+        this.props.navigation.removeListener("focus", this.onFocus);
+    }
+    async onFocus(): Promise<void> {
+        this.fadeIn();
+        const [format, quality, framerate] = [
+            await ComposerConfig.getFormat(),
+            await ComposerConfig.getQuality(),
+            await ComposerConfig.getFramerate()
+        ];
+
+        await this.onChangeFramerate(framerate);
+
+        this.setState({ config: {
+            format,
+            quality,
+            framerate
+        } });
     }
 
     /** Fades in scene (duh) */
     fadeIn(): void {
-        this.animator.current?.fadeIn(300, 50);
+        this.animator.current?.fadeIn(200, 50);
     }
     
     /** Goes back to preferences scene */
     goBack(): void {
-        this.animator.current?.fadeOut(300, 50, () => {
+        this.animator.current?.fadeOut(200, 50, () => {
             this.props.navigation.navigate("Preferences");
         });
     }
 
+    /** Yup */
+    openAdvancedSettings(): void {
+        this.animator.current?.fadeOut(200, 50, () => {
+            this.props.navigation.navigate("AdvancedComposer");
+        });
+    }
+
     /** When user switches framerate */
-    async onChangeFramerate(e: number, dontSave?: boolean): Promise<void> {
+    async onChangeFramerate(e: number): Promise<void> {
         /* Save to composer config */
-        dontSave && ComposerConfig.setFramerate(e);
+        ComposerConfig.setFramerate(e);
 
         /* How many images the user has taken so far */
         const amountOfImages = ((await LSImage.getImagePointers())?.length ?? 0);
@@ -114,22 +135,39 @@ class Composer extends React.Component<Props, State> {
 
     /** Generate the timmelapse footage */
     async loadingScreen(): Promise<void> {
-        this.animator.current?.fadeOut(300, 50, async () => {
+        this.animator.current?.fadeOut(200, 50, async () => {
             this.props.navigation.navigate("LoadingScreen", {
                 fps: this.framerates[await ComposerConfig.getFramerate()],
                 quality: this.qualities[await ComposerConfig.getQuality()],
-                outputFormat: "gif", // TODO: Change this yk
+                outputFormat: this.formats[await ComposerConfig.getFormat()],
+                bitrateOverride: await ComposerConfig.getBitrate(),
+
+                widthOverride: await ComposerConfig.getWidthOverride(),
             });
         });
     }
 
 	render() {
 		return (
-			<SafeAreaView style={Styles.container}>
+			<SafeAreaView style={[Styles.container]}>
+                <KeyboardAvoidingView behavior="padding" style={Styles.keyboardAvoidingView}>
                 <ScrollView>
-                <View style={Styles.keyboardAvoidingView}>
+                <View style={Styles.containerInner}>
                     <MultiAnimator ref={this.animator}>
                     <Text style={Styles.header}>Composer 🎨</Text>
+
+                    {/* Generate video */}
+                    <View>
+                        <Text style={Styles.paragraph}>Generates the final video and saves it to your camera roll (might take some time)</Text>
+                        <Button
+                            onPress={this.loadingScreen}
+                            active={true}
+                            color="green"
+                            text="Generate  🎥"
+                        />
+                    </View>
+
+                    <View style={Styles.hr} />
 
                     {/* Framerate viewer */}
                     <View style={Styles.row}>
@@ -176,21 +214,32 @@ class Composer extends React.Component<Props, State> {
                         />
                     </View>
 
-                    <View style={Styles.hr} />
-
-                    {/* Generate video */}
+                    {/* Open advanced configuration */}
                     <View>
-                        <Text style={Styles.paragraph}>Generates the video and saves it to your media library</Text>
+                        <Text style={Styles.paragraph}>Open advanced configuration for generating final footage.</Text>
                         <Button
-                            onPress={this.loadingScreen}
-                            active={true}
-                            color="green"
-                            text="Generate  🎥"
+                            color={"blue"}
+                            active
+                            onPress={this.openAdvancedSettings}
+                            text="Advanced settings 🚧"
                         />
                     </View>
+
                     </MultiAnimator>
                 </View>
                 </ScrollView>
+
+                {/* Confirm */}
+                {/* ref={this.bottomNavAnimator} */}
+                <Animator startOpacity={1} style={{ transform: [{ translateY: -12 }], gap: 10 }}>
+                    <Button
+                        onPress={this.goBack}
+                        active={true}
+                        color="blue"
+                        text="Go back  ⚙️"
+                    />
+                </Animator>
+                </KeyboardAvoidingView>
 			</SafeAreaView>
 		);
 	}

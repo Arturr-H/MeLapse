@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Types */
-type StorageKey = "format" | "quality" | "framerate";
+type StorageKey = "format" | "quality" | "framerate" | "bitrate" | "width";
 
 /**
  * This is all the composer scenes configuration.
@@ -29,7 +29,15 @@ export default class ComposerConfig {
      * Therefore these numbers should be likee 0-3 depending
      * on how many diffrent framerates the user can choose from. */
     static async getFramerate(): Promise<number> { return this.tryGet("framerate", 1) } // 1 = 30fps
-    static async setFramerate(value: number) { await AsyncStorage.setItem("framerate", JSON.stringify(value)) }
+    static async setFramerate(value: number) { console.log("setting", value); await AsyncStorage.setItem("framerate", JSON.stringify(value)) }
+
+    /** Override bitrate */
+    static async getBitrate(): Promise<number | null> { return this.tryGet("bitrate", null) }
+    static async setBitrate(value: number | null) { await AsyncStorage.setItem("bitrate", JSON.stringify(value)) }
+
+    /** Override width X */
+    static async getWidthOverride(): Promise<number | null> { return this.tryGet("width", null) }
+    static async setWidthOverride(value: number | null) { await AsyncStorage.setItem("width", JSON.stringify(value)) }
 
     private static async tryGet(key: StorageKey, default_: any): Promise<any> {
         try {
