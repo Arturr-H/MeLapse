@@ -36,4 +36,9 @@ export default StyleSheet.create({
         transform: [{ translateY: -20 }],
         zIndex: 10
     },
+
+    scrollViewContainer: {
+        width: "100%",
+        flex: 1,
+    }
 })
