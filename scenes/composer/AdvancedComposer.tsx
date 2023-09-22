@@ -9,6 +9,7 @@ import { Button } from "../../components/button/Button";
 import { Animator } from "../../components/animator/Animator";
 import Config from "./Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
+import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 
 /* Interfaces */
 export interface Props {
@@ -114,55 +115,58 @@ class AdvancesComposer extends React.Component<Props, State> {
 		return (
 			<SafeAreaView style={Styles.container}>
                 <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
-                    <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                        <MultiAnimator ref={this.animatorComponent}>
-                            <View><Text style={Styles.header}>🚧 Advanced Preferences</Text></View>
+                    <View style={{ width: "100%", flex: 1 }}>
+                        <ScrollGradient />
+                        <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
+                            <MultiAnimator ref={this.animatorComponent}>
+                                <View><Text style={Styles.header}>🚧 Advanced Preferences</Text></View>
 
-                            {/* Override bitrate */}
-                            <View>
-                                <Text style={Styles.header2}>🎛️ Override bitrate</Text>
-                                <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
+                                {/* Override bitrate */}
+                                <View>
+                                    <Text style={Styles.header2}>🎛️ Override bitrate</Text>
+                                    <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
 
-                                <TextInput
-                                    placeholder="Bitrate (M)"
-                                    active
-                                    keyboardType="decimal-pad"
-                                    maxChars={4}
-                                    ref={this.overrideBitrateInput}
-                                    initial={this.state.bitrate?.toString()}
-                                    onChangeText={this.onChangeBitrate}
-                                />
-                            </View>
+                                    <TextInput
+                                        placeholder="Bitrate (M)"
+                                        active
+                                        keyboardType="decimal-pad"
+                                        maxChars={4}
+                                        ref={this.overrideBitrateInput}
+                                        initial={this.state.bitrate?.toString()}
+                                        onChangeText={this.onChangeBitrate}
+                                    />
+                                </View>
 
-                            {/* Override bitrate */}
-                            <View>
-                                <Text style={Styles.header2}>📐 Override output size</Text>
-                                <View><Text style={Styles.paragraph}>Change size on both x and y axis</Text></View>
+                                {/* Override bitrate */}
+                                <View>
+                                    <Text style={Styles.header2}>📐 Override output size</Text>
+                                    <View><Text style={Styles.paragraph}>Change size on both x and y axis</Text></View>
 
 
-                                <TextInput
-                                    placeholder="Width (px)"
-                                    active
-                                    flex
-                                    keyboardType="number-pad"
-                                    maxChars={4}
-                                    ref={this.widthOverride}
-                                    initial={this.state.widthOverride?.toString()}
-                                    onChangeText={(e) => this.onChangeWidthOverride(e)}
-                                />
-                            </View>
+                                    <TextInput
+                                        placeholder="Width (px)"
+                                        active
+                                        flex
+                                        keyboardType="number-pad"
+                                        maxChars={4}
+                                        ref={this.widthOverride}
+                                        initial={this.state.widthOverride?.toString()}
+                                        onChangeText={(e) => this.onChangeWidthOverride(e)}
+                                    />
+                                </View>
 
-                            <View style={Styles.hr} />
+                                <View style={Styles.hr} />
 
-                            {/* Reset config */}
-                            <View>
-                                <Text style={Styles.header2}>🚨 Danger zone</Text>
-                                <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
-                                <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
-                            </View>
-                        </MultiAnimator>
-                    </ScrollView>
-
+                                {/* Reset config */}
+                                <View>
+                                    <Text style={Styles.header2}>🚨 Danger zone</Text>
+                                    <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
+                                    <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
+                                </View>
+                            </MultiAnimator>
+                        </ScrollView>
+                    </View>
+                    
                     {/* Confirm */}
                     <Animator startOpacity={0} ref={this.bottomNavAnimator} style={{ transform: [{ translateY: -12 }] }}>
                         <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="Done" />

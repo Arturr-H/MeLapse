@@ -13,6 +13,7 @@ import ComposerConfig from "./Config";
 import { StitchOptions } from "../compileFootage/LoadingScreen";
 import { ScrollView } from "react-native-gesture-handler";
 import { Animator } from "../../components/animator/Animator";
+import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 
 /* Interfaces */
 interface Props {
@@ -151,83 +152,86 @@ class Composer extends React.Component<Props, State> {
 		return (
 			<SafeAreaView style={[Styles.container]}>
                 <KeyboardAvoidingView behavior="padding" style={Styles.keyboardAvoidingView}>
-                <ScrollView>
-                <View style={Styles.containerInner}>
-                    <MultiAnimator ref={this.animator}>
-                    <Text style={Styles.header}>Composer 🎨</Text>
+                <View style={{ width: "100%", flex: 1 }}>
+                    <ScrollGradient />
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={Styles.containerInner}>
+                        <MultiAnimator ref={this.animator}>
+                        <Text style={Styles.header}>Composer 🎨</Text>
 
-                    {/* Generate video */}
-                    <View>
-                        <Text style={Styles.paragraph}>Generates the final video and saves it to your camera roll (might take some time)</Text>
-                        <Button
-                            onPress={this.loadingScreen}
-                            active={true}
-                            color="green"
-                            text="Generate  🎥"
-                        />
-                    </View>
-
-                    <View style={Styles.hr} />
-
-                    {/* Framerate viewer */}
-                    <View style={Styles.row}>
-                        <View style={Styles.tile}>
-                            <Text style={Styles.header2}>🎞️ Framerate</Text>
-                            <Text style={Styles.paragraph}>How fast would you like your end video to go?</Text>
-
-                            <FramerateScroller 
-                                framerates={this.framerates}
-                                initial={this.state.config.framerate}
-                                onSelect={this.onChangeFramerate}
+                        {/* Generate video */}
+                        <View>
+                            <Text style={Styles.paragraph}>Generates the final video and saves it to your camera roll (might take some time)</Text>
+                            <Button
+                                onPress={this.loadingScreen}
+                                active={true}
+                                color="green"
+                                text="Generate  🎥"
                             />
                         </View>
-                        <View style={Styles.tile}>
-                            <View style={Styles.durationViewer}>
-                                <View style={[Styles.durationViewerInner, Styles.durationViewerInnerCentered]}>
-                                    <Text style={Styles.durationText}>{this.state.duration}s</Text>
-                                    <Text style={Styles.paragraphWhite}>Your footage will be {this.state.duration}s long with {this.framerates[this.state.config.framerate]} fps.</Text>
+
+                        <View style={Styles.hr} />
+
+                        {/* Framerate viewer */}
+                        <View style={Styles.row}>
+                            <View style={Styles.tile}>
+                                <Text style={Styles.header2}>🎞️ Framerate</Text>
+                                <Text style={Styles.paragraph}>How fast would you like your end video to go?</Text>
+
+                                <FramerateScroller 
+                                    framerates={this.framerates}
+                                    initial={this.state.config.framerate}
+                                    onSelect={this.onChangeFramerate}
+                                />
+                            </View>
+                            <View style={Styles.tile}>
+                                <View style={Styles.durationViewer}>
+                                    <View style={[Styles.durationViewerInner, Styles.durationViewerInnerCentered]}>
+                                        <Text style={Styles.durationText}>{this.state.duration}s</Text>
+                                        <Text style={Styles.paragraphWhite}>Your footage will be {this.state.duration}s long with {this.framerates[this.state.config.framerate]} fps.</Text>
+                                    </View>
                                 </View>
                             </View>
                         </View>
+
+                        <View style={Styles.hr} />
+
+                        {/* Output type (?) */}
+                        <View>
+                            <Text style={Styles.header2}>Output settings</Text>
+                            <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is GIF)</Text>
+                            <SelectInput
+                                initial={this.state.config.format}
+                                onChange={ComposerConfig.setFormat}
+                                buttons={["GIF", "MP4"]}
+                            />
+                        </View>
+
+                        {/* Quality */}
+                        <View>
+                            <Text style={Styles.paragraph}>Quality of the output result. Higher quality footage requires more storage.</Text>
+                            <SelectInput
+                                initial={this.state.config.quality}
+                                buttons={["OKAY", "MID", "HIGH"]}
+                                onChange={ComposerConfig.setQuality}
+                            />
+                        </View>
+
+                        {/* Open advanced configuration */}
+                        <View>
+                            <Text style={Styles.paragraph}>Open advanced configuration for generating final footage.</Text>
+                            <Button
+                                color={"blue"}
+                                active
+                                onPress={this.openAdvancedSettings}
+                                text="Advanced settings 🚧"
+                            />
+                        </View>
+
+                        </MultiAnimator>
                     </View>
-
-                    <View style={Styles.hr} />
-
-                    {/* Output type (?) */}
-                    <View>
-                        <Text style={Styles.header2}>Output settings</Text>
-                        <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is GIF)</Text>
-                        <SelectInput
-                            initial={this.state.config.format}
-                            onChange={ComposerConfig.setFormat}
-                            buttons={["GIF", "MP4"]}
-                        />
-                    </View>
-
-                    {/* Quality */}
-                    <View>
-                        <Text style={Styles.paragraph}>Quality of the output result. Higher quality footage requires more storage.</Text>
-                        <SelectInput
-                            initial={this.state.config.quality}
-                            buttons={["OKAY", "MID", "HIGH"]}
-                            onChange={ComposerConfig.setQuality}
-                        />
-                    </View>
-
-                    {/* Open advanced configuration */}
-                    <View>
-                        <Text style={Styles.paragraph}>Open advanced configuration for generating final footage.</Text>
-                        <Button
-                            color={"blue"}
-                            active
-                            onPress={this.openAdvancedSettings}
-                            text="Advanced settings 🚧"
-                        />
-                    </View>
-
-                    </MultiAnimator>
+                    </ScrollView>
                 </View>
-                </ScrollView>
 
                 {/* Confirm */}
                 {/* ref={this.bottomNavAnimator} */}
