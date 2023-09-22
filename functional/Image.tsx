@@ -4,6 +4,7 @@ import * as MediaLibrary from "expo-media-library";
 import RNFS from "react-native-fs";
 import { formatDate } from "./Date";
 import * as fs from "react-native-fs";
+import AppConfig from "../scenes/preferences/Config";
 
 /// We use .jpg because when we flip the image
 /// using `expo-image-manipulator` we save it
@@ -53,8 +54,10 @@ export class LSImage {
 	 * has successfully or unsuccessfully been saved.
 	 */
 	async saveAsync(callback?: () => void): Promise<void> {
-		/* Save image to user media library (ONLY IN DEV MODE) */
-		await MediaLibrary.saveToLibraryAsync(this.path);
+		/* Save image to user media library if that setting is on */
+		if (await AppConfig.getSaveSelfiesToCameraRoll()) {
+			await MediaLibrary.saveToLibraryAsync(this.path);
+		}
 
 		/* Save in fs */
 		saveImage(this, callback);
@@ -115,6 +118,10 @@ export class LSImage {
 					const try_filename = split[split.length - 1];
 
 					if (try_filename === filename) {
+						/* Set image pointers */
+						imagePointers.splice(i, 1);
+						await AsyncStorage.setItem("imagePointers", JSON.stringify(imagePointers));
+
 						const unlinkPath = fs.DocumentDirectoryPath + "/" + try_filename;
 						return fs.unlink(unlinkPath);
 					}
