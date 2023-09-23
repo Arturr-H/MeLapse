@@ -21,8 +21,9 @@ export interface Props {
         Camera: { comesFrom: "preferences" },
         Debug: undefined,
         Composer: undefined,
-        Review: undefined
-    }, "Camera" | "Debug" | "Composer" | "Review">,
+        Review: undefined,
+        Calibration: undefined
+    }, "Camera" | "Debug" | "Composer" | "Review" | "Calibration">,
 }
 export interface State {
     switching: boolean,
@@ -97,6 +98,9 @@ class Preferences extends React.Component<Props, State> {
     reviewScene = () => this.fadeOut(() => 
         this.props.navigation.navigate("Review")
     )
+    calibrationScene = () => this.fadeOut(() => 
+        this.props.navigation.navigate("Calibration")
+    )
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
@@ -124,43 +128,6 @@ class Preferences extends React.Component<Props, State> {
                         <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
                             <MultiAnimator ref={this.animatorComponent}>
                                 <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
-
-                                {/* Username input */}
-                                <View>
-                                    <View><Text style={Styles.paragraph}>Username</Text></View>
-                                    <TextInput
-                                        ref={this.nameInput}
-                                        placeholder="Username..."
-                                        active={!this.state.switching}
-                                        initial={this.state.username}
-                                        onChangeText={AppConfig.setUsername}
-                                        minChars={1}
-                                        maxChars={16}
-                                    />
-                                </View>
-
-                                {/* "How often" input */}
-                                <View>
-                                    <View><Text style={Styles.paragraph}>Your target amount of selfies per day</Text></View>
-                                    <SelectInput
-                                        buttons={["1", "2", "3", "🤷‍♂️"]}
-                                        initial={this.state.timesPerDay}
-                                        onChange={AppConfig.setTargetTimesPerDay}
-                                    />
-                                </View>
-
-                                {/* Transform camera */}
-                                <View>
-                                    <View><Text style={Styles.paragraph}>Transform camera in camera view</Text></View>
-                                    <SelectInput
-                                        buttons={["YES", "NO"]}
-                                        initial={this.state.transformCamera ? 0 : 1}
-                                        onChange={(idx) => {
-                                            this.setState({ transformCamera: idx == 0 ? true : false });
-                                            AppConfig.setTransformCamera(idx == 0 ? true : false);
-                                        }}
-                                    />
-                                </View>
 
                                 {/* Goto composer scene */}
                                 <View>
@@ -220,7 +187,7 @@ class Preferences extends React.Component<Props, State> {
                                 <View>
                                     <Text style={Styles.header2}>🚨 Danger zone</Text>
                                     <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
-                                    <Button color="red" active={!this.state.switching} onPress={() => {}} text="New face calib  📸" />
+                                    <Button color="red" active={!this.state.switching} onPress={this.calibrationScene} text="New face calib  📸" />
                                 </View>
 
                                 {/* Reset config */}
