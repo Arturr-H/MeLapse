@@ -21,9 +21,7 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DocumentDirectoryPath, readdir } from "react-native-fs";
-
-/* Constants */
-const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 239.21041831374168, "y": 386.5854159295559}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
+import CalibrationData from "../calibration/CalibrationData";
 
 /* Interfaces */
 interface Props {
@@ -78,6 +76,9 @@ class Camera extends React.PureComponent<Props, State> {
 	debugOutside       : RefObject<DebugDots>;
 	menuButton         : RefObject<MenuButton>;
 
+	/** Face calibration metadata */
+	calibration: FaceData | null = null;
+
 	constructor(props: Props) {
 		super(props);
 
@@ -110,6 +111,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 		/* Bindings */
 		this.setFlashlightBrightness = this.setFlashlightBrightness.bind(this);
+		this.setFaceMetadata = this.setFaceMetadata.bind(this);
 		this.onFacesDetected = this.onFacesDetected.bind(this);
 		this.gainedFocus = this.gainedFocus.bind(this);
 		this.takePic = this.takePic.bind(this);
@@ -117,6 +119,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
+		await this.setFaceMetadata();
 		this.animateIntro();
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 
@@ -223,11 +226,11 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* On detect faces (expo-face-detector) */
 	onFacesDetected(e: FaceDetectionResult): void {
-		if (e.faces[0]) {
+		if (e.faces[0] && this.calibration) {
 			/* Some face was detected */
 			if (!this.state.anyFaceVisible) this.setState({ anyFaceVisible: true });
 			let ffeatures = getFaceFeatures(e.faces[0]);
-			let transform = getTransforms(ffeatures, temp);
+			let transform = getTransforms(ffeatures, this.calibration);
 			
 			/* Set transforms? */
 			let transformScale = transform.find(e => typeof e.scale == "number").scale ?? 1;
@@ -235,10 +238,10 @@ class Camera extends React.PureComponent<Props, State> {
 
 			this.debugOutside.current?.setBalls([
 				{ balls: [
-					temp.leftEyePosition,
-					temp.rightEyePosition,
-					temp.rightMouthPosition,
-					temp.leftMouthPosition,
+					this.calibration.leftEyePosition,
+					this.calibration.rightEyePosition,
+					this.calibration.rightMouthPosition,
+					this.calibration.leftMouthPosition,
 				], color: "yellow" },
 			]);
 
@@ -255,6 +258,19 @@ class Camera extends React.PureComponent<Props, State> {
 			useNativeDriver: true,
 			duration: 0
 		}).start();
+	}
+
+	/** (try) Set the calibrated face metadata.
+	 * Moves to calibration scene if calibration
+	 * wasn't found */
+	async setFaceMetadata(): Promise<void> {
+		const calibration = await CalibrationData.getCalibration();
+
+		if (calibration) {
+			this.calibration = calibration;
+		}else {
+			alert("Face calibration was not found 😔");
+		}
 	}
 	
 	/* Render */

@@ -21,7 +21,7 @@ interface State {
 
 /* Constants */
 const HEIGHT = Dimensions.get("window").height;
-const DURATION = 1250;
+const DURATION = 800;
 const DEFAULT_ = { easing: Easing.inOut(Easing.exp), useNativeDriver: true };
 const BTN_FINAL_HEIGHT = (HEIGHT/Styles.menuButton.height) * 2.5;
 
