@@ -71,11 +71,16 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
             onPanResponderRelease: async (event, gestureState) => {
 				const { dy } = gestureState;
 				const clampedDy = Math.min(Math.max(dy, -160), 0);
-				this.setState({ active: true });
-				
+
 				const val = clampedDy / -160;
+
+				if (val !== 0) 
+					this.setState({ active: true });
+				else 
+					this.setState({ active: false });
+
 				this.props.onChange(val);
-				if (this.brightnessPermission) await Brightness.setBrightnessAsync(val);
+				if (this.brightnessPermission) await Brightness.setBrightnessAsync(1);
 				this.changeState("static");
             },
         });
@@ -120,9 +125,11 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 			
 			if (active) this.props.onChange(1);
 			else this.props.onChange(0);
-			if (this.brightnessPermission) {
-				if (active) await Brightness.setBrightnessAsync(1);
-				else await Brightness.restoreSystemBrightnessAsync()
+			if (this.brightnessPermission && active) {
+				const { status } = await Brightness.getPermissionsAsync();
+				if (status === "granted") {
+					await Brightness.setBrightnessAsync(1);
+				}
 			}
 		}
 	}

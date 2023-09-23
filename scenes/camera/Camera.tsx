@@ -10,8 +10,7 @@ import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
-import { AlignHelper } from "../calibration/AlignHelper";
-import { FaceData, getAlignTransforms, getError, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
+import { FaceData, getAlignTransforms, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { DebugDots } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
 import { Animator } from "../../components/animator/Animator";
@@ -20,6 +19,8 @@ import { MenuButton } from "./MenuButton";
 import AppConfig from "../preferences/Config";
 import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DocumentDirectoryPath, readdir } from "react-native-fs";
 
 /* Constants */
 const temp: FaceData = { "middle": {x:0,y:0}, "bottomMouthPosition": {"x": 191.72916668653488, "y": 501.15625312924385}, "bounds": {"origin": {"x": 54.70416218042374, "y": 281.23957923054695}, "size": {"height": 275.31875905394554, "width": 275.31875905394554}}, "deltaEye": {"x": 92.19583636522293, "y": 2.96041676402092}, "deltaMouth": {"x": 76.12500250339508, "y": 2.1145834028720856}, "faceID": 34, "leftCheekPosition": {"x": 129.56041464209557, "y": 445.7541679739952}, "leftEarPosition": {"x": 98.68749696016312, "y": 411.4979168474674}, "leftEyePosition": {"x": 149.01458194851875, "y": 383.5854159295559}, "leftMouthPosition": {"x": 151.97499871253967, "y": 482.9708358645439}, "midEye": {"x": 195.11250013113022, "y": 385.06562431156635}, "midMouth": {"x": 190.0374999642372, "y": 484.02812756597996}, "noseBasePosition": {"x": 194.6895834505558, "y": 431.79791751503944}, "rightCheekPosition": {"x": 256.8583354949951, "y": 449.56041809916496}, "rightEarPosition": {"x": 294.92083674669266, "y": 411.075000166893}, "rightEyePosition": {"x": 239.21041831374168, "y": 386.5854159295559}, "rightMouthPosition": {"x": 228.10000121593475, "y": 485.085419267416}, "rollAngle": 1.6910536289215088, "yawAngle": -0.7525003552436829};
@@ -73,8 +74,6 @@ interface State {
 class Camera extends React.PureComponent<Props, State> {
 	pictureManipulator : RefObject<PictureManipulator>;
 	camera             : RefObject<ExpoCamera>;
-	alignHelperAnimator: RefObject<Animator>;
-	alignHelper        : RefObject<AlignHelper>;
 	debug              : RefObject<DebugDots>;
 	debugOutside       : RefObject<DebugDots>;
 	menuButton         : RefObject<MenuButton>;
@@ -104,9 +103,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 		/* Refs */
 		this.pictureManipulator = React.createRef();
-		this.alignHelperAnimator = React.createRef();
 		this.debugOutside = React.createRef();
-		this.alignHelper = React.createRef();
 		this.menuButton = React.createRef();
 		this.camera = React.createRef();
 		this.debug = React.createRef();
@@ -133,8 +130,6 @@ class Camera extends React.PureComponent<Props, State> {
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		this.animateIntro();
 		this.setState({ anyFaceVisible: true });
-		
-		this.alignHelperAnimator.current?.wait(1500).fadeIn().start();
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
@@ -154,7 +149,7 @@ class Camera extends React.PureComponent<Props, State> {
 			}),
 			Animated.timing(this.state.cameraButtonScale, {
 				toValue: 1,
-				duration: 900,
+				duration: 700,
 				easing: Easing.inOut(Easing.exp),
 				useNativeDriver: true,
 			})]).start(() => this.setState({ cameraButtonPadding: 4 }));
@@ -171,7 +166,6 @@ class Camera extends React.PureComponent<Props, State> {
 	async takePic(): Promise<void> {
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
-		this.alignHelperAnimator.current?.fadeOut().start();
 		this.setState({ loadingImage: true });
 
 		/* Take camera picture */
@@ -180,7 +174,7 @@ class Camera extends React.PureComponent<Props, State> {
 		/* Camera button transition */
 		let transition = Animated.timing(this.state.cameraButtonScale, {
 			toValue: 24,
-			duration: 900,
+			duration: 700,
 			easing: Easing.inOut(Easing.exp),
 			useNativeDriver: true,
 		});
@@ -208,7 +202,7 @@ class Camera extends React.PureComponent<Props, State> {
 				}
 				
 				/* !! Image is not saved here it's saved in preview/Preview.tsx !! */
-				let lsimage = new LSImage(path).toLSImageProp();
+				let lsimage = new LSImage(path, "this_str_will_be_overwritten").toLSImageProp();
 				
 				/* Transition */
 				transition.start(() => {
@@ -232,14 +226,9 @@ class Camera extends React.PureComponent<Props, State> {
 		if (e.faces[0]) {
 			/* Some face was detected */
 			if (!this.state.anyFaceVisible) this.setState({ anyFaceVisible: true });
-
 			let ffeatures = getFaceFeatures(e.faces[0]);
 			let transform = getTransforms(ffeatures, temp);
-			let aligntrfm = getAlignTransforms(ffeatures, temp);
 			
-			this.alignHelper
-				&& this.alignHelper.current?.animateNext(aligntrfm);
-
 			/* Set transforms? */
 			let transformScale = transform.find(e => typeof e.scale == "number").scale ?? 1;
 			this.setState({ transform, transformScale, debugTransformCamera: this.state.transformCamera ? transform : [] });
@@ -292,9 +281,6 @@ class Camera extends React.PureComponent<Props, State> {
 					onFacesDetected={this.onFacesDetected}
 				><DebugDots ref={this.debug} /></ExpoCamera>}
 
-				{/* Loading indicator */}
-				{this.state.loadingImage && <ProgressView />}
-
 				{/* Flashlight */}
 				<View pointerEvents="none" style={Styles.flashRingLightContainer}>
 					<Animated.Image
@@ -302,6 +288,9 @@ class Camera extends React.PureComponent<Props, State> {
 						source={require("../../assets/images/flashlight-overlay.png")}
 					/>
 				</View>
+
+				{/* Loading indicator */}
+				{this.state.loadingImage && <ProgressView />}
 
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
@@ -313,7 +302,7 @@ class Camera extends React.PureComponent<Props, State> {
 						<View style={Styles.bottomBarTile}></View>
 
 						{/* Middle - Shutter Button */}
-						<View style={Styles.bottomBarTile}>
+						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>
 							<ShutterButton
 								cameraButtonPadding={this.state.cameraButtonPadding}
 								scale={this.state.cameraButtonScale}

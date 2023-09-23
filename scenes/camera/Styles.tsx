@@ -24,6 +24,7 @@ export default StyleSheet.create({
         display: "flex",
             alignItems: "center",
         flexDirection: "column",
+        zIndex: 52
     },
 
     /* Camera button */
@@ -43,7 +44,7 @@ export default StyleSheet.create({
 
         display: "flex",
         justifyContent: "center",
-            alignItems: "center"
+            alignItems: "center",
     },
     cameraButton: {
         width: 98,
@@ -146,6 +147,8 @@ export default StyleSheet.create({
         width: "100%",
         height: "100%",
         position: "absolute",
+
+        zIndex: 51
     },
     flashRingLight: {
         width: "100%",
@@ -163,7 +166,7 @@ export default StyleSheet.create({
 
         borderRadius: 25,
 
-        paddingVertical: 10
+        paddingVertical: 10,
     },
     flashlightButtonBgLine: {
         width: 2,
