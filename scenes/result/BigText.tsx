@@ -55,7 +55,7 @@ export class BigText extends React.PureComponent<Props, State> {
                 Styles.numberText.fontSize *
                 this.fontSizeFactors[this.state.fontSizeFactorIndex]
         };
-        console.log(this.fontSizeFactors[this.state.fontSizeFactorIndex]);
+
         return (
             <Animated.View style={[
                 Styles.numberTextContainer,

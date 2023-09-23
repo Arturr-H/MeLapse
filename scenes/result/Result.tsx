@@ -170,31 +170,7 @@ class Result extends React.PureComponent<Props, State> {
     /* Returns a string saying how long ago a
         date (unix time) was, like "5 days ago" */
     getTimeAgo(input: number | undefined): string {
-        if (input) {
-            const currentTime = Math.floor(Date.now() / 1000); // Convert to seconds
-            const elapsedTime = currentTime - input / 1000;
-        
-            const intervals = [
-                { label: "year", seconds: 31536000 },
-                { label: "month", seconds: 2592000 },
-                { label: "week", seconds: 604800 },
-                { label: "day", seconds: 86400 },
-                { label: "hour", seconds: 3600 },
-                { label: "minute", seconds: 60 },
-                { label: "second", seconds: 1 },
-            ];
-        
-            for (const interval of intervals) {
-                const count = Math.floor(elapsedTime / interval.seconds);
-                if (count >= 1) {
-                    return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
-                }
-            }
-        
-            return "just now";
-        }else {
-            return ""
-        }
+        return getTimeAgo(input)
     }
 
     /* Skips result animation */
@@ -272,6 +248,36 @@ class Result extends React.PureComponent<Props, State> {
             </View>
 		);
 	}
+}
+
+/** Returns a string saying how long ago a
+    date (unix time) was, like "5 days ago" */
+export function getTimeAgo(input: number | undefined): string {
+    if (input) {
+        const currentTime = Math.floor(Date.now() / 1000); // Convert to seconds
+        const elapsedTime = currentTime - input / 1000;
+    
+        const intervals = [
+            { label: "year", seconds: 31536000 },
+            { label: "month", seconds: 2592000 },
+            { label: "week", seconds: 604800 },
+            { label: "day", seconds: 86400 },
+            { label: "hour", seconds: 3600 },
+            { label: "minute", seconds: 60 },
+            { label: "second", seconds: 1 },
+        ];
+    
+        for (const interval of intervals) {
+            const count = Math.floor(elapsedTime / interval.seconds);
+            if (count >= 1) {
+                return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;
+            }
+        }
+    
+        return "just now";
+    }else {
+        return ""
+    }
 }
 
 export default function(props: any) {

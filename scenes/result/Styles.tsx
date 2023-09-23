@@ -107,12 +107,14 @@ export default StyleSheet.create({
     },
     dateText: {
         fontFamily: "inter-extrabold",
-        fontSize: 45,
+        fontSize: 34,
         letterSpacing: 1,
         color: "#000",
         shadowColor: "#000",
         shadowOpacity: 0.2,
         shadowRadius: 20,
-        textTransform: "uppercase"
+        textTransform: "uppercase",
+        width: WIDTH,
+        textAlign: "center"
     }
 })
