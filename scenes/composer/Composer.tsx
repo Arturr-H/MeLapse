@@ -42,7 +42,7 @@ class Composer extends React.Component<Props, State> {
     framerates: number[] = [24, 30, 60];
     formats: ("gif" | "mp4")[] = ["gif", "mp4"];
     rotationsAnimation: Animated.CompositeAnimation | null = null;
-    qualities: ("okay" | "mid" | "high")[] = ["okay", "mid", "high"];
+    qualities: ("low" | "mid" | "high")[] = ["low", "mid", "high"];
 
     constructor(props: Props) {
         super(props);

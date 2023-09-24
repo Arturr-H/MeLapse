@@ -47,7 +47,7 @@ interface State {
 export interface StitchOptions {
     fps: number,
     outputFormat: "gif" | "mp4",
-    quality: "okay" | "mid" | "high",
+    quality: "low" | "mid" | "high",
     bitrateOverride: number | null,
 
     widthOverride: number | null,
