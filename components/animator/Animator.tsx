@@ -4,14 +4,14 @@ import { Animated, Easing, Image, TouchableOpacity, View, ViewStyle } from "reac
 
 /* Interfaces */
 interface Props {
-    children: JSX.Element[] | JSX.Element,
+    children: JSX.Element[] | JSX.Element | (JSX.Element | boolean)[],
 
     startOpacity?: number,
-    startX?: number,
-    startY?: number,
-
     style?: ViewStyle,
-    pointerEvents?: Animated.Value | "box-none" | "none" | "box-only" | "auto" | Animated.AnimatedInterpolation<string | number> | undefined
+    pointerEvents?: Animated.Value | "box-none" | "none" | "box-only" | "auto" | Animated.AnimatedInterpolation<string | number> | undefined,
+
+    startLeft?: number,
+    startTop?: number,
 }
 interface State {
     translateX: Animated.Value,
@@ -33,8 +33,8 @@ export class Animator extends React.PureComponent<Props, State> {
 
 		/* State */
 		this.state = {
-            translateX: new Animated.Value(this.props.startX ?? 0),
-            translateY: new Animated.Value(this.props.startY ?? 0),
+            translateX: new Animated.Value(this.props.startLeft ?? 0),
+            translateY: new Animated.Value(this.props.startTop ?? 0),
             rotation: new Animated.Value(0),
             opacity: new Animated.Value(this.props.startOpacity ?? 1),
 		};
@@ -46,7 +46,6 @@ export class Animator extends React.PureComponent<Props, State> {
         this.fadeIn = this.fadeIn.bind(this);
         this.start = this.start.bind(this);
         this.wait = this.wait.bind(this);
-        this.exec = this.exec.bind(this);
         this.right = this.right.bind(this);
         this.left = this.left.bind(this);
         this.up = this.up.bind(this);
@@ -94,20 +93,6 @@ export class Animator extends React.PureComponent<Props, State> {
         this.animations.push(AN(new Animated.Value(0), { toValue: 0, duration, useNativeDriver: false }));
         return this
     }
-
-    /* Execute multiple animation functions at the same time */
-    exec(...args: ((duration?: number) => void)[]): void {
-        let animations = [];
-        for (let i = 0; i < args.length; i++) {
-            const element = args[i];
-            animations.push(element);
-
-            element();
-        }
-
-        // Animated.parallel(animations).;
-    }
-
 
     /* Start animation */
     start(callback?: () => void): void {

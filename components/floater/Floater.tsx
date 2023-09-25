@@ -40,7 +40,7 @@ export default class Floater extends React.PureComponent<Props, State> {
 	/* Lifecycle */
 	componentDidMount(): void {
         this._subscribe();
-        Gyroscope.setUpdateInterval(200);
+        Gyroscope.setUpdateInterval(150);
     }
 	componentWillUnmount(): void {
         this._unsubscribe();

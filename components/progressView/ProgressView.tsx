@@ -1,8 +1,6 @@
-import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { ActivityIndicator, Animated, Dimensions, Easing, Image, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, View } from "react-native";
 import { Animator } from "../animator/Animator";
-import { BlurView } from "expo-blur";
 
 /* Interfaces */
 interface Props {}

@@ -1,11 +1,14 @@
 import React, { RefObject } from "react";
 import { Animator } from "./Animator";
-import { StyleProp } from "react-native";
 
 /* Interfaces */
 interface Props {
     children: JSX.Element[],
-    // styles: StyleProp
+    customKey?: string,
+    // styles: StyleProp,
+
+    startLeft?: number,
+    startTop?: number,
 }
 interface State {}
 
@@ -32,29 +35,29 @@ export default class MultiAnimator extends React.PureComponent<Props, State> {
     /* Lifetime */
     componentDidMount(): void {}
 
-    fadeIn(duration?: number, delay?: number, callback?: () => void): void {
+    fadeIn(duration?: number, delay?: number, callback?: () => void, wait?: number): void {
         const len = this.animatorRefs.length;
 
         this.animatorRefs.forEach((animator, index) => {
             const _callback = (index == len - 1) ? callback : undefined;
 
             if (delay) {
-                animator.current?.wait(delay*index).fadeIn(duration).start(_callback)
+                animator.current?.wait(delay*index + (wait ?? 0)).fadeIn(duration).start(_callback)
             }else {
-                animator.current?.fadeIn(duration).start(_callback)
+                animator.current?.wait((wait ?? 0)).fadeIn(duration).start(_callback)
             }
         })
     }
-    fadeOut(duration?: number, delay?: number, callback?: () => void): void {
+    fadeOut(duration?: number, delay?: number, callback?: () => void, wait?: number): void {
         const len = this.animatorRefs.length;
 
         this.animatorRefs.forEach((animator, index) => {
             const _callback = (index == len - 1) ? callback : undefined;
 
             if (delay) {
-                animator.current?.wait(delay*index).fadeOut(duration).start(_callback)
+                animator.current?.wait(delay*index + (wait ?? 0)).fadeOut(duration).start(_callback)
             }else {
-                animator.current?.fadeOut(duration).start(_callback)
+                animator.current?.wait((wait ?? 0)).fadeOut(duration).start(_callback)
             }
         })
     }
@@ -63,7 +66,13 @@ export default class MultiAnimator extends React.PureComponent<Props, State> {
         return (
             <React.Fragment>
                 {this.props.children.map((child, index) => 
-                    <Animator key={"multianimator-" + index} startOpacity={0} ref={this.animatorRefs[index]}>{child}</Animator>    
+                    <Animator
+                        startLeft={this.props.startLeft}
+                        startTop={this.props.startTop}
+                        key={"multianimator-" + index + child.key}
+                        startOpacity={0}
+                        ref={this.animatorRefs[index]}
+                    >{child}</Animator>    
                 )}
             </React.Fragment>
         )

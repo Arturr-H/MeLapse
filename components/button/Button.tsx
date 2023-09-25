@@ -17,7 +17,10 @@ interface Props {
     loading?: boolean,
 
     /** Display a popup message and OK or cancel */
-    confirm?: { message: string, title: string }
+    confirm?: { message: string, title: string },
+
+    /** When the confirm message was denied */
+    onDeny?: () => void
 }
 interface State {
     loading?: boolean,
@@ -80,7 +83,7 @@ export class Button extends React.PureComponent<Props, State> {
                             { style: "destructive", onPress: () => {
                                 this.props.active && this.props.onPress();
                             }, isPreferred: false, text: "Ok" },
-                            { style: "default", isPreferred: true, text: "Cancel" },
+                            { style: "default", isPreferred: true, text: "Cancel", onPress: this.props.onDeny },
                         ])
                     }else {
                         this.props.active && this.props.onPress();
