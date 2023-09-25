@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<{ Camera: undefined }, "Camera">,
+    navigation: StackNavigationProp<{ Calibration: undefined }, "Calibration">,
 }
 export interface State {
     switching: boolean,
@@ -68,7 +68,7 @@ export class HowOften extends React.PureComponent<Props, State> {
         this.fadeOut();
         await AsyncStorage.setItem("setupComplete", "true");
         setTimeout(() => {
-            this.props.navigation.navigate("Camera");
+            this.props.navigation.navigate("Calibration");
         }, 800);
     }
 
