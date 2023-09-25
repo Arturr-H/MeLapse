@@ -37,8 +37,11 @@ export interface State {
     
     skipTransformX: A,
 
-    number: number;
-    previous?: LSImageProp;
+    number: number,
+    previous?: LSImageProp,
+
+    /** If user now has saved first image */
+    isFirst: boolean
 }
 
 class Result extends React.PureComponent<Props, State> {
@@ -61,6 +64,7 @@ class Result extends React.PureComponent<Props, State> {
             skipTransformX: new AV(0),
 
             number: -1,
+            isFirst: false
         };
 
         /* Bindings */
@@ -76,10 +80,18 @@ class Result extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
-        this.intro();
         await this.getStats().then(e => {
             if (e) {
-                this.setState({ number: e.length, previous: e.previous });
+                console.log(e);
+                this.setState({
+                    number: e.length,
+                    previous: e.previous,
+                    isFirst: e.length <= 1
+                }, () => {
+                    this.intro();
+                });
+            }else {
+                this.intro();
             }
         });
     };
@@ -93,19 +105,30 @@ class Result extends React.PureComponent<Props, State> {
         this.anim(this.state.fontSizeFactor, 0.7, 900, Easing.inOut(Easing.exp), 1250);
         
         const FLOAT_DELAY = 200;
-        this.anim(this.state.posterSliderX, 0, 1900, Easing.inOut(Easing.exp), 800, () => {
-            this.anim(this.state.posterSliderX, -WIDTH, 1900, Easing.inOut(Easing.exp))
-        });
-        this.anim(this.state.dateSliderX, 0, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 800 + FLOAT_DELAY, () => {
-            this.anim(this.state.dateSliderX, -WIDTH, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 0, () => {
-                this.outro();
-            })
-        });
 
-        this.prevPoster.current?.rotate(-30, 1200, Easing.inOut(Easing.ease), 3100);
-        this.currentPoster.current?.rotate(-30, 1200, Easing.inOut(Easing.ease), 3100);
-        this.prevPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 3400);
-        this.currentPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 3400);
+        if (!this.state.isFirst) {
+            this.anim(this.state.posterSliderX, 0, 1900, Easing.inOut(Easing.exp), 800, () => {
+                this.anim(this.state.posterSliderX, -WIDTH, 1900, Easing.inOut(Easing.exp))
+            });
+            this.anim(this.state.dateSliderX, 0, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 800 + FLOAT_DELAY, () => {
+                this.anim(this.state.dateSliderX, -WIDTH, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 0, () => {
+                    this.outro();
+                })
+            });
+
+            this.prevPoster.current?.rotate(-30, 1200, Easing.inOut(Easing.ease), 3100);
+            this.currentPoster.current?.rotate(-30, 1200, Easing.inOut(Easing.ease), 3100);
+            this.prevPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 3400);
+            this.currentPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 3400);
+        }else {
+            this.anim(this.state.posterSliderX, -WIDTH, 1900, Easing.inOut(Easing.exp), 1000)
+            this.anim(this.state.dateSliderX, -WIDTH, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 1000, () => {
+                this.outro();
+            });
+
+            this.prevPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 4400);
+            this.currentPoster.current?.rotate(0, 1000, Easing.inOut(Easing.ease), 4400);
+        }
     }
     outro(): void {
         // this.anim(this.state.posterSliderX, 0, 300, Easing.inOut(Easing.exp), 100);
@@ -222,6 +245,7 @@ class Result extends React.PureComponent<Props, State> {
                             lsimage={this.state.previous}
                             skipIntro={true}
                             skipPan={true}
+                            visible={!this.state.isFirst}
                         />
                         <Poster
                             ref={this.currentPoster}
