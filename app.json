@@ -2,10 +2,11 @@
   "expo": {
     "name": "unnamed",
     "slug": "unnamed",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
     "userInterfaceStyle": "light",
+    "privacy": "unlisted",
     "splash": {
       "image": "./assets/brand/splash.png",
       "resizeMode": "contain",
@@ -16,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.arre.unnamed"
+      "bundleIdentifier": "red.artur.unnamed"
     },
     "android": {
       "adaptiveIcon": {
