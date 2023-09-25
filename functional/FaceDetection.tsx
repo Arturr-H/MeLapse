@@ -120,7 +120,7 @@ function c_div(c1: Coordinate, c2: Coordinate): Coordinate {
     return { x: c1.x / c2.x, y: c1.y / c2.y }
 }
 
-/// Taken from my first facelapse prototype
+/// Rewritten 4 times...
 export function getTransforms(faceData: FaceData, calibrated: FaceData) {
     let scale = (
         hypotenuse(calibrated.midMouth, calibrated.midEye)
@@ -133,6 +133,15 @@ export function getTransforms(faceData: FaceData, calibrated: FaceData) {
     let translateY = (
         ((calibrated.leftEyePosition.y - faceData.leftEyePosition.y) + (calibrated.rightEyePosition.y - faceData.rightEyePosition.y)) / 2
     );
+
+    const c_mp_y = (calibrated.leftMouthPosition.y + calibrated.rightMouthPosition.y) / 2;
+    const c_ep_y = (calibrated.leftEyePosition.y + calibrated.rightEyePosition.y) / 2;
+    const f_mp_y = (faceData.leftMouthPosition.y + faceData.rightMouthPosition.y) / 2
+    const f_ep_y = (faceData.leftEyePosition.y + faceData.rightEyePosition.y) / 2;
+
+    const centerAdd = 
+        ((c_mp_y - c_ep_y) - (f_mp_y - f_ep_y)) / 2;
+    translateY += centerAdd;
 
     let rot = (
         Math.atan2(calibrated.rightEyePosition.y - calibrated.leftEyePosition.y, calibrated.rightEyePosition.x - calibrated.leftEyePosition.x) -
@@ -152,14 +161,11 @@ export function getTransforms(faceData: FaceData, calibrated: FaceData) {
         }
     );
 
-    /* Modify translate Y */
-    const deltaMouthY =
-        (((calibrated.midMouth.y - calibrated.midEye.y) -
-        (faceData.midMouth.y - faceData.midEye.y)) / 4);
-    translateY = (translateY + deltaMouthY);
-
-    /* Modify translate X */
-    translateX = translateX - (rot*20);
+    const rotDeg = (rot * (180 / Math.PI)) / 45;
+    const rotAddXMax = (faceData.deltaEye.x + faceData.deltaMouth.x) / 2;
+    const rotAdd = rotAddXMax * rotDeg;
+    
+    translateX -= rotAdd / 2;
 
     return [
         { scale },
