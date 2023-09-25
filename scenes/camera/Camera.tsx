@@ -22,6 +22,7 @@ import FlashLightButton from "./FlashLightButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DocumentDirectoryPath, readdir } from "react-native-fs";
 import CalibrationData from "../calibration/CalibrationData";
+import * as fs from "react-native-fs";
 
 /* Interfaces */
 interface Props {
@@ -57,11 +58,8 @@ interface State {
 	/** If there are any faces visible on screen */
 	anyFaceVisible: boolean,
 
-	/** This value represents how close the users head is to
-	 /* where it needs to be (calibrated). 1 means that it's
-	 /* on spot, < 1 means they need to move head further away
-	 /* > 1 means they need to move closer. */
-	transformScale: number,
+	/** If the camera button / menu button is animating */
+	animating: boolean,
 	loadingImage: boolean,
 	debugTransformCamera: any[],
 	transformCamera: boolean,
@@ -94,7 +92,8 @@ class Camera extends React.PureComponent<Props, State> {
 			flashlightOpacity: new Animated.Value(0),
 
 			transform: [],
-			transformScale: 1,
+
+			animating: true,
 
 			loadingImage: false,
 			debugTransformCamera: [],
@@ -119,6 +118,13 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
+		// const a = await fs.readdir(DocumentDirectoryPath);
+		// for (const b of a) {
+		// 	const c = DocumentDirectoryPath + "/" + b;
+		// 	fs.unlink(c);
+		// }
+		// await AsyncStorage.setItem("imagePointers", JSON.stringify([]));
+
 		await this.setFaceMetadata();
 		this.animateIntro();
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
@@ -137,25 +143,32 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/** Animates the right intro depending on which scene we previously left */
 	animateIntro(): void {
+		this.setState({ animating: true });
+
 		const backMenuButton = () => {
-			this.setState({ cameraButtonScale: new Animated.Value(1), cameraButtonPadding: 4 });
+			this.setState({ cameraButtonScale: new Animated.Value(1), cameraButtonPadding: 4, animating: false });
 			this.menuButton.current?.animateBack();
 		}
 		const backCameraButton = () => {
 			this.menuButton.current?.instanSetBack();
 
 			Animated.sequence([
-			Animated.timing(this.state.cameraButtonScale, {
-				toValue: 24,
-				duration: 0,
-				useNativeDriver: true,
-			}),
-			Animated.timing(this.state.cameraButtonScale, {
-				toValue: 1,
-				duration: 700,
-				easing: Easing.inOut(Easing.exp),
-				useNativeDriver: true,
-			})]).start(() => this.setState({ cameraButtonPadding: 4 }));
+				Animated.timing(this.state.cameraButtonScale, {
+					toValue: 24,
+					duration: 0,
+					useNativeDriver: true,
+				}),
+				Animated.timing(this.state.cameraButtonScale, {
+					toValue: 1,
+					duration: 700,
+					easing: Easing.inOut(Easing.exp),
+					useNativeDriver: true,
+				})
+			]).start(() => this.setState({ cameraButtonPadding: 4 }));
+
+			setTimeout(() =>
+				this.setState({ animating: false })
+			, 1000);
 		}
 
 		/* Menu button */
@@ -196,10 +209,15 @@ class Camera extends React.PureComponent<Props, State> {
 				/* If post processing transforms are on */
 				const shouldTransform = await AppConfig.getPostProcessingTransform();
 				if (shouldTransform && this.state.anyFaceVisible) {
-					path = await this.pictureManipulator.current?.takePictureAsync(
-						flipped.uri,
-						this.state.transform
-					) ?? image.uri;
+					try {
+						path = await this.pictureManipulator.current?.takePictureAsync(
+							flipped.uri,
+							this.state.transform
+						) ?? image.uri;
+					}catch {
+						console.log("[DBG] Image manipulator fail");
+						return this.setState({ loadingImage: false, animating: false });
+					}
 				}else {
 					path = flipped.uri;
 				}
@@ -208,8 +226,9 @@ class Camera extends React.PureComponent<Props, State> {
 				let lsimage = new LSImage(path, "this_str_will_be_overwritten").toLSImageProp();
 				
 				/* Transition */
+				this.setState({ animating: true });
 				transition.start(() => {
-					this.setState({ loadingImage: false });
+					this.setState({ loadingImage: false, animating: false });
 					this.props.navigation.navigate("Preview", { lsimage })
 				});
 				this.setState({ cameraButtonPadding: 0 });
@@ -233,17 +252,7 @@ class Camera extends React.PureComponent<Props, State> {
 			let transform = getTransforms(ffeatures, this.calibration);
 			
 			/* Set transforms? */
-			let transformScale = transform.find(e => typeof e.scale == "number").scale ?? 1;
-			this.setState({ transform, transformScale, debugTransformCamera: this.state.transformCamera ? transform : [] });
-
-			this.debugOutside.current?.setBalls([
-				{ balls: [
-					this.calibration.leftEyePosition,
-					this.calibration.rightEyePosition,
-					this.calibration.rightMouthPosition,
-					this.calibration.leftMouthPosition,
-				], color: "yellow" },
-			]);
+			this.setState({ transform, debugTransformCamera: this.state.transformCamera ? transform : [] });
 
 		}else {
 			/* No face visible */
@@ -268,6 +277,15 @@ class Camera extends React.PureComponent<Props, State> {
 
 		if (calibration) {
 			this.calibration = calibration;
+
+			this.debugOutside.current?.setBalls([
+				{ balls: [
+					calibration.leftEyePosition,
+					calibration.rightEyePosition,
+					calibration.rightMouthPosition,
+					calibration.leftMouthPosition,
+				], color: "yellow" },
+			]);
 		}else {
 			alert("Face calibration was not found 😔");
 		}
@@ -311,7 +329,7 @@ class Camera extends React.PureComponent<Props, State> {
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
 					{/* Button to open preferences */}
-					<MenuButton active={!this.state.loadingImage} ref={this.menuButton} navigation={this.props.navigation} />
+					<MenuButton active={!(this.state.loadingImage || this.state.animating)} ref={this.menuButton} navigation={this.props.navigation} />
 
 					{/* Bottom UI components */}
 					<Floater loosness={3} style={Styles.bottomBar}>
@@ -322,7 +340,7 @@ class Camera extends React.PureComponent<Props, State> {
 							<ShutterButton
 								cameraButtonPadding={this.state.cameraButtonPadding}
 								scale={this.state.cameraButtonScale}
-								loadingImage={this.state.loadingImage}
+								active={!(this.state.loadingImage || this.state.animating)}
 								takePic={this.takePic}
 							/>
 						</View>

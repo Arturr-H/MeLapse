@@ -6,7 +6,7 @@ import * as Haptics from "expo-haptics";
 /* Interfaces */
 interface Props {
 	cameraButtonPadding: number,
-	loadingImage: boolean,
+	active: boolean,
 	takePic: () => void,
 
 	scale: Animated.Value,
@@ -27,19 +27,8 @@ export class ShutterButton extends React.PureComponent<Props, State> {
 		/* Refs */
 
 		/* Bindings */
-		this.onPress = this.onPress.bind(this);
 	}
-
-	/* On click */
-	onPress(): void {
-		Animated.timing(this.state.size, {
-			toValue: 0.8,
-			duration: 100,
-			easing: Easing.inOut(Easing.ease),
-			useNativeDriver: true
-		}).start();
-	}
-
+	
 	render() {
 		return (
 			<Animated.View
@@ -57,7 +46,7 @@ export class ShutterButton extends React.PureComponent<Props, State> {
 						transform: [{ scale: this.state.size }]
 					}]}
 					activeOpacity={1}
-					onPress={this.props.loadingImage ? () => {} : this.props.takePic}
+					onPress={this.props.active ? this.props.takePic : () => {}}
 				/>
 			</Animated.View>
 		);
