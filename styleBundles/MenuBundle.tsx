@@ -1,6 +1,33 @@
 import { Dimensions, StyleSheet } from "react-native";
 
 export default StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+
+        width: "100%",
+        height: "100%",
+    },
+    keyboardAvoidingView: {
+        height: "100%",
+        width: "100%",
+
+        paddingHorizontal: 30,
+    },
+    containerInner: {
+        justifyContent: "center",
+        
+        display: "flex",
+        flexDirection: "column",
+        gap: 15,
+        width: "100%",
+
+        paddingTop: 20 + 25,
+
+        /// Check row style object transform comment
+        paddingBottom: 20 + 10 + 50,
+    },
+
     header: {
         fontFamily: "inter-extrabold",
         fontSize: 42,
@@ -39,7 +66,7 @@ export default StyleSheet.create({
         width: "100%",
         display: "flex",
         flexDirection: "row",
-        gap: 20
+        gap: 20,
     },
     tile: {
         flex: 1,
