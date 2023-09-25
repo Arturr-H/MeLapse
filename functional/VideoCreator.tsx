@@ -1,6 +1,6 @@
 /* Imports */
 import { FFmpegKit } from "ffmpeg-kit-react-native";
-import fs from "react-native-fs";
+import fs, { DocumentDirectoryPath } from "react-native-fs";
 import { StitchOptions } from "../scenes/compileFootage/LoadingScreen";
 
 type StitchCallback = (uri: string) => void;
@@ -20,7 +20,7 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
         high: widthOverride ?? "scale=1440:-1",
     }
     const scaling =
-        options.quality === "okay" ? `-vf "${scales.okay}:flags=lanczos"`
+        options.quality === "low" ? `-vf "${scales.okay}:flags=lanczos"`
         : options.quality === "mid" ? `-vf "${scales.mid}:flags=lanczos"`
         : `-vf "${scales.high}:flags=lanczos"`;
 
@@ -30,7 +30,7 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
     const overwrite = "-y";
 
     /* Bitrate */
-    const quality_bitrate = options.quality === "okay" ? 1 :
+    const quality_bitrate = options.quality === "low" ? 1 :
                             options.quality === "mid" ? 6 : 64;
     const bitrate_ext = options.bitrateOverride !== null
                     ? options.bitrateOverride : quality_bitrate;
