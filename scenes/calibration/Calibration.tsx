@@ -4,7 +4,7 @@ import { Animated, Dimensions, Image, Text, TouchableOpacity, View } from "react
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Camera, CameraType, FaceDetectionResult, PermissionStatus } from "expo-camera";
+import { Camera, CameraType, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Animator } from "../../components/animator/Animator";
 import { FaceData, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
@@ -42,7 +42,7 @@ const middleFace: FaceData = { "middle": {x:0,y:0},
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Camera: { comesFrom: "other" } }, "Camera">,
+    navigation: StackNavigationProp<{ Tutorial: undefined, Camera: { comesFrom: "other" } }, "Tutorial" | "Camera">,
 }
 interface State {
     source: string | null,
@@ -76,14 +76,10 @@ class Calibration extends React.PureComponent<Props, State> {
     saveButton: RefObject<Animator> = React.createRef();
     infoText: RefObject<Animator> = React.createRef();
 
-    calibrationWasFound: boolean = false;
-    debug: RefObject<DebugDots> = React.createRef();
-
     rollRightVisible: boolean = false;
     rollLeftVisible: boolean = false;
 
     animator: RefObject<Animator> = React.createRef();
-
     faceCalibration: FaceData | null = null;
 
     /** We want to show the "save" button on the
@@ -132,7 +128,6 @@ class Calibration extends React.PureComponent<Props, State> {
     /** Facedetection callback */
     onFacesDetected(faces: FaceDetectionResult): void {
         const _face = faces.faces[0];
-        if (this.calibrationWasFound) return;
 
         if (_face) {
             const face = getFaceFeatures(_face);
@@ -257,7 +252,7 @@ class Calibration extends React.PureComponent<Props, State> {
         /* Save */
         CalibrationData.setCalibration(calibration).then(_ => {
             this.animator.current?.fadeOut(300).start(() => {
-                this.props.navigation.navigate("Camera", { comesFrom: "other" });
+                this.props.navigation.navigate("Tutorial");
             });
         });
     }
@@ -304,65 +299,63 @@ class Calibration extends React.PureComponent<Props, State> {
         if (this.state.cameraAvailable === PermissionStatus.DENIED) return <View style={Styles.container}><Text>Please enable camera to be able to use this app.</Text><Text>If you do that, restart the app 😄</Text></View>;
 
 		return (
-            <View style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}>
+            <View style={Styles.mainContainer}>
                 <Animator ref={this.animator} style={Styles.container}>
                     {this.state.canGoBack && <TouchableOpacity style={Styles.cancelButton} activeOpacity={0.5} onPress={this.goBack}>
                         <Text style={Styles.cancelButtonText}>← Cancel</Text>
                     </TouchableOpacity>}
 
-                    <DebugDots ref={this.debug} />
-
                     {/* Face to indicate if user should tilt head to right / left */}
-                    <View style={Styles.headTiltContainer}>
-                        <Animated.Image style={[Styles.headTiltImage, rotation]} source={require("../../assets/images/align/face-filled.png")} />
-                        <Animated.Image style={[Styles.headTiltImage, rotation, opacityLeft]} source={require("../../assets/images/tilt/tilt-left.png")} />
-                        <Animated.Image style={[Styles.headTiltImage, rotation, opacityRight]} source={require("../../assets/images/tilt/tilt-right.png")} />
+                    <View style={Styles.headerContainer}>
+                        <Text style={[Styles.header, { textAlign: "center" }]}>Profile{"\n"}Calibration</Text>
                     </View>
 
-                    {/* Outline to smooth transition from mask to camera */}
-                    <Image
-                        style={Styles.middleFace}
-                        source={require("../../assets/images/align/face-outline.png")}
-                    />
-                    
-                    <MaskedView
-                        style={Styles.absolute}
-                        maskElement={<View style={Styles.maskContainer}><Image
-                            style={Styles.maskImage}
-                            source={require("../../assets/images/masks/face-mask.png")}
-                        /></View>}
-                    >
-                        {this.state.cameraAvailable === PermissionStatus.GRANTED && <Camera
-                            type={CameraType.front}
-                            style={[Styles.camera, { transform: this.state.transforms }]}
-
-                            onFacesDetected={this.onFacesDetected}
-                            faceDetectorSettings={{
-                                mode: FaceDetectorMode.accurate,
-                                detectLandmarks: FaceDetectorLandmarks.all,
-                                runClassifications: FaceDetectorClassifications.all,
-                                minDetectionInterval: 5,
-                                tracking: true,
-                            }}
-                        />}
-
-                        {/* Transitioner */}
-                        <Animated.View
-                            style={[Styles.transitioner, { transform: [{ translateY: this.state.cutoutTransitioner }] }]}
+                    <View style={Styles.cameraCutoutContainer}>
+                        {/* Outline to smooth transition from mask to camera */}
+                        <Image
+                            style={Styles.middleFace}
+                            source={require("../../assets/images/align/face-outline.png")}
                         />
 
-                        {/* Image which is used to "freeze" camera */}
-                        {this.state.source && <Image source={{ uri: this.state.source }} />}
-                    </MaskedView>
+                        <MaskedView
+                            style={Styles.maskedView}
+                            maskElement={<View style={Styles.maskContainer}><Image
+                                style={Styles.maskImage}
+                                source={require("../../assets/images/masks/face-mask.png")}
+                            /></View>}
+                        >
+                            <View style={{ transform: [{ translateX: -5 }, { translateY: -5 }] }}>
+                            {this.state.cameraAvailable === PermissionStatus.GRANTED && <Camera
+                                type={CameraType.front}
+                                style={[Styles.camera, { transform: this.state.transforms }]}
+                                ref={this.camera}
 
-                    {/* Info text */}
+                                onFacesDetected={this.onFacesDetected}
+                                faceDetectorSettings={{
+                                    mode: FaceDetectorMode.accurate,
+                                    detectLandmarks: FaceDetectorLandmarks.all,
+                                    runClassifications: FaceDetectorClassifications.all,
+                                    minDetectionInterval: 5,
+                                    tracking: true,
+                                }}
+                            />}
+                            </View>
+                        </MaskedView>
+
+                        <View style={Styles.headTiltContainer}>
+                            <Animated.Image style={[Styles.headTiltImage, rotation]} source={require("../../assets/images/align/face-filled.png")} />
+                            <Animated.Image style={[Styles.headTiltImage, rotation, opacityLeft]} source={require("../../assets/images/tilt/tilt-left.png")} />
+                            <Animated.Image style={[Styles.headTiltImage, rotation, opacityRight]} source={require("../../assets/images/tilt/tilt-right.png")} />
+                        </View>
+                    </View>
+
                     <View style={Styles.infoTextContainer}>
-                        <Animator startOpacity={1} ref={this.infoText}><Text
+                        <Animator style={{ width: "100%" }} startOpacity={1} ref={this.infoText}><Text
                             style={Styles.infoText}
                             children={"Make sure your face is pointing straight at the camera, and try to keep your facial expressions neutral."}
                         /></Animator>
 
-                        <Animator startOpacity={0} ref={this.saveButton} pointerEvents={"auto"}>
+                        <Animator style={{ width: "100%" }} startOpacity={0} ref={this.saveButton} pointerEvents={"auto"}>
                             <Button color="blue" onPress={this.saveCalibration} text="Save" active={this.state.bottomVisible === "save"} />
                         </Animator>
                     </View>
