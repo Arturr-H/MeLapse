@@ -22,8 +22,9 @@ export interface Props {
         Debug: undefined,
         Composer: undefined,
         Review: undefined,
-        Calibration: undefined
-    }, "Camera" | "Debug" | "Composer" | "Review" | "Calibration">,
+        Calibration: undefined,
+        Tutorial: undefined,
+    }, "Camera" | "Debug" | "Composer" | "Review" | "Calibration" | "Tutorial">,
 }
 export interface State {
     switching: boolean,
@@ -101,6 +102,9 @@ class Preferences extends React.Component<Props, State> {
     calibrationScene = () => this.fadeOut(() => 
         this.props.navigation.navigate("Calibration")
     )
+    tutorialScene = () => this.fadeOut(() => 
+        this.props.navigation.navigate("Tutorial")
+    )
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
@@ -152,6 +156,23 @@ class Preferences extends React.Component<Props, State> {
                                     />
                                 </View>
 
+                                <View style={Styles.hr} /> 
+
+                                {/* Misc */}
+                                <View>
+                                <Text style={Styles.header2}>🛞 Live Transform </Text>
+                                    <View><Text style={Styles.paragraph}>Automatically align your face to the calibrated position in the camera scene</Text></View>
+
+                                    <SelectInput
+                                        buttons={["YES", "NO"]}
+                                        initial={this.state.transformCamera ? 0 : 1}
+                                        onChange={(idx) => {
+                                            this.setState({ transformCamera: idx == 0 ? true : false });
+                                            AppConfig.setTransformCamera(idx == 0 ? true : false);
+                                        }}
+                                    />
+                                </View>
+
                                 <View style={Styles.hr} />
                                 
                                 {/* Post processing */}
@@ -199,6 +220,19 @@ class Preferences extends React.Component<Props, State> {
                                         active={!this.state.switching}
                                         onPress={this.resetSettings}
                                         text="Reset settings  🗑️"
+                                    />
+                                </View>
+
+                                <View style={Styles.hr} />
+
+                                {/* Redo tutorial */}
+                                <View>
+                                    <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
+                                    <Button
+                                        color="blue"
+                                        active={!this.state.switching}
+                                        onPress={this.tutorialScene}
+                                        text="Tutorial 🎓"
                                     />
                                 </View>
                             </MultiAnimator>
