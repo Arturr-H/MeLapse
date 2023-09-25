@@ -18,6 +18,8 @@ export interface Props {
 
     skipPan?: boolean,
     skipIntro?: boolean,
+
+    visible?: boolean
 }
 interface State {
     /// To explain this, ill need a few lines.
@@ -211,7 +213,8 @@ export default class Poster extends React.PureComponent<Props, State> {
                     this.props.skipIntro !== true && { transform: [
                         { translateX: this.state.introTransform.x },
                         { translateY: this.state.introTransform.y },
-                    ]}
+                    ]},
+                    { opacity: this.props.visible === false ? 0 : undefined }
                 ]}
             >
                 {/* Pin (at the top of the poster) */}
