@@ -37,7 +37,8 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
     const bitrate = `-b:v ${bitrate_ext}M`;
 
     /* Format and framerate */
-    const framerate = `-r ${options.fps}`;
+    const framerateOverride = options.framerateOverride;
+    const framerate = `-r ${framerateOverride ?? options.fps}`;
     const output = options.outputFormat === "gif" ? `${picDirPath}/output_all.gif` : `${picDirPath}/output_all.mp4`;
     
     /* Commmands */
