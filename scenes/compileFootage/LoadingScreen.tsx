@@ -51,6 +51,7 @@ export interface StitchOptions {
     bitrateOverride: number | null,
 
     widthOverride: number | null,
+    framerateOverride: number | null,
 }
 
 class LoadingScreen extends React.Component<Props, State> {

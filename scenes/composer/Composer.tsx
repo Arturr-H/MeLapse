@@ -134,7 +134,7 @@ class Composer extends React.Component<Props, State> {
         })
     }
 
-    /** Generate the timmelapse footage */
+    /** Generate the timelapse footage */
     async loadingScreen(): Promise<void> {
         this.animator.current?.fadeOut(200, 50, async () => {
             this.props.navigation.navigate("LoadingScreen", {
@@ -142,7 +142,7 @@ class Composer extends React.Component<Props, State> {
                 quality: this.qualities[await ComposerConfig.getQuality()],
                 outputFormat: this.formats[await ComposerConfig.getFormat()],
                 bitrateOverride: await ComposerConfig.getBitrate(),
-
+                framerateOverride: await ComposerConfig.getFramerateOverride(),
                 widthOverride: await ComposerConfig.getWidthOverride(),
             });
         });
