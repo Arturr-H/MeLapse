@@ -11,7 +11,10 @@ type FrameAnimation = { scale: Animated.Value, opacity: Animated.Value };
 interface Props {
     framerates: number[],
     onSelect: (index: number) => void,
-    initial: number
+    initial: number,
+
+    /** If framerate is overwritten in advanced settings */
+    overwritten?: boolean
 }
 interface State {
     pan: Animated.ValueXY,
@@ -109,7 +112,7 @@ export default class FramerateScroller extends React.Component<Props, State> {
     }).start();
 
     render() {
-        return (
+        if (this.props.overwritten !== true) return (
             <View style={Styles.framerateScrollerWrapper} {...this.panResponder.panHandlers}>
                 <Animated.View style={[Styles.framerateScroller, { transform: [{ translateX: this.state.pan.x }] }]}>
                     {this.framerates.map((e, index) => <View key={"framrateselect-" + e} style={Styles.framerateSelectionContainer}>
@@ -126,7 +129,12 @@ export default class FramerateScroller extends React.Component<Props, State> {
                     {[0,1,2].map(e => <View key={"nrfm" + e} style={[Styles.framerateViewDot, this.state.active === e && Styles.framerateViewDotActive]} />)}
                 </View>
             </View>
-		);
+		)
+        else return (
+            <View style={[Styles.framerateScrollerWrapper, { justifyContent: "center", alignItems: "center" }]}>
+                <Text style={Styles.paragraphWhite}>Framerate Overwritten {"\n"} (advanced)</Text>
+            </View>
+        )
 	}
 }
 

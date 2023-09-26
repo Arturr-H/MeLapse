@@ -30,7 +30,13 @@ interface State {
      * a small display saying how many seconds
      * the footage will last for (calculated
      * via the number of photos taken / fps) */
-    duration: number
+    duration: number,
+
+    /** If user has overwritten framerate in
+     * advanced settings, we don't display the
+     * regular 24, 30, 60 fps. Instead we display
+     * a message saying it's overwritten  */
+    framerateIsOverwritten: [boolean, number]
 }
 
 class Composer extends React.Component<Props, State> {
@@ -56,9 +62,11 @@ class Composer extends React.Component<Props, State> {
             },
 
             duration: 5,
+            framerateIsOverwritten: [false, 0],
         };
 
         /* Bindings */
+        this.updateFramerateOverwritten = this.updateFramerateOverwritten.bind(this);
         this.openAdvancedSettings = this.openAdvancedSettings.bind(this);
         this.onChangeFramerate = this.onChangeFramerate.bind(this);
         this.loadingScreen = this.loadingScreen.bind(this);
@@ -78,6 +86,7 @@ class Composer extends React.Component<Props, State> {
         this.props.navigation.removeListener("focus", this.onFocus);
     }
     async onFocus(): Promise<void> {
+        this.updateFramerateOverwritten();
         this.fadeIn();
         const [format, quality, framerate] = [
             await ComposerConfig.getFormat(),
@@ -92,6 +101,12 @@ class Composer extends React.Component<Props, State> {
             quality,
             framerate
         } });
+    }
+    async updateFramerateOverwritten(): Promise<void> {
+        const fover = await ComposerConfig.getFramerateOverride();
+        this.setState({
+            framerateIsOverwritten: [fover !== null, fover ?? 0]
+        })
     }
 
     /** Fades in scene (duh) */
@@ -182,13 +197,24 @@ class Composer extends React.Component<Props, State> {
                                     framerates={this.framerates}
                                     initial={this.state.config.framerate}
                                     onSelect={this.onChangeFramerate}
+                                    overwritten={this.state.framerateIsOverwritten[0]}
                                 />
                             </View>
                             <View style={Styles.tile}>
                                 <View style={Styles.durationViewer}>
                                     <View style={[Styles.durationViewerInner, Styles.durationViewerInnerCentered]}>
-                                        <Text style={Styles.durationText}>{this.state.duration}s</Text>
-                                        <Text style={Styles.paragraphWhite}>Your footage will be {this.state.duration}s long with {this.framerates[this.state.config.framerate]} fps.</Text>
+
+                                        {/* If framerate is overwritten */}
+                                        {this.state.framerateIsOverwritten[0]
+                                            ? <>
+                                                <Text style={Styles.durationText}>{this.state.framerateIsOverwritten[1]}</Text>
+                                                <Text style={Styles.paragraphWhite}>FPS</Text>
+                                            </>
+                                            : <>
+                                                <Text style={Styles.durationText}>{this.state.duration}s</Text>
+                                                <Text style={Styles.paragraphWhite}>Your footage will be {this.state.duration}s long with {this.framerates[this.state.config.framerate]} fps.</Text>
+                                            </>
+                                        }
                                     </View>
                                 </View>
                             </View>
