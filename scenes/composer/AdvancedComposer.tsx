@@ -20,6 +20,7 @@ export interface State {
     loadingReset: boolean,
 
     widthOverride?: number,
+    framerateOverride?: number,
     bitrate?: number,
 }
 
@@ -28,6 +29,7 @@ class AdvancesComposer extends React.Component<Props, State> {
     bottomNavAnimator: RefObject<Animator> = React.createRef();
     overrideBitrateInput: RefObject<TextInput> = React.createRef();
     widthOverride: RefObject<TextInput> = React.createRef();
+    framerateOverride: RefObject<TextInput> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -54,6 +56,7 @@ class AdvancesComposer extends React.Component<Props, State> {
         this.setState({
             bitrate: await Config.getBitrate() ?? undefined,
             widthOverride: await Config.getWidthOverride() ?? undefined,
+            framerateOverride: await Config.getFramerateOverride() ?? undefined,
         })
     }
     componentWillUnmount(): void {
@@ -99,14 +102,32 @@ class AdvancesComposer extends React.Component<Props, State> {
         }
     }
 
+    /** Override FPS */
+    async onChangeFramerateOverride(fps: null | string): Promise<void> {
+        if (fps !== null) {
+            let num = parseInt(fps);
+            if (!Number.isNaN(num)) {
+                if (num >= 1 && num <= 120) {
+                    await Config.setFramerateOverride(num);
+                }else {
+                    await Config.setFramerateOverride(null);    
+                }
+            }else {
+                await Config.setFramerateOverride(null);
+            };
+        }
+    }
+
     /** Reset the advanced settings */
     async resetAdvancedConfig(): Promise<void> {
         this.setState({ loadingReset: true });
         this.overrideBitrateInput.current?.setState({ value: "" });
         this.widthOverride.current?.setState({ value: "" });
+        this.framerateOverride.current?.setState({ value: "" });
 
         await Config.setBitrate(null);
         await Config.setWidthOverride(null);
+        await Config.setFramerateOverride(null);
 
         this.setState({ loadingReset: false });
     }
@@ -140,8 +161,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                                 {/* Override bitrate */}
                                 <View>
                                     <Text style={Styles.header2}>📐 Override output size</Text>
-                                    <View><Text style={Styles.paragraph}>Change size on both x and y axis</Text></View>
-
+                                    <View><Text style={Styles.paragraph}>Change width of image (height will scale proportionally keeping aspect ratio)</Text></View>
 
                                     <TextInput
                                         placeholder="Width (px)"
@@ -152,6 +172,23 @@ class AdvancesComposer extends React.Component<Props, State> {
                                         ref={this.widthOverride}
                                         initial={this.state.widthOverride?.toString()}
                                         onChangeText={(e) => this.onChangeWidthOverride(e)}
+                                    />
+                                </View>
+
+                                {/* Override FPS */}
+                                <View>
+                                    <Text style={Styles.header2}>⏲️ Override framerate</Text>
+                                    <View><Text style={Styles.paragraph}>Set frames per second from anywhere between 1 - 120</Text></View>
+
+                                    <TextInput
+                                        placeholder="Framerate"
+                                        active
+                                        flex
+                                        keyboardType="number-pad"
+                                        maxChars={3}
+                                        ref={this.framerateOverride}
+                                        initial={this.state.framerateOverride?.toString()}
+                                        onChangeText={(e) => this.onChangeFramerateOverride(e)}
                                     />
                                 </View>
 

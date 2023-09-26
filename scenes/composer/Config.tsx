@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Types */
-type StorageKey = "format" | "quality" | "framerate" | "bitrate" | "width";
+type StorageKey = "format" | "quality" | "framerate" | "bitrate" | "width" | "framerateOverride";
 
 /**
  * This is all the composer scenes configuration.
@@ -38,6 +38,10 @@ export default class ComposerConfig {
     /** Override width X */
     static async getWidthOverride(): Promise<number | null> { return this.tryGet("width", null) }
     static async setWidthOverride(value: number | null) { await AsyncStorage.setItem("width", JSON.stringify(value)) }
+
+    /** Override FPS */
+    static async getFramerateOverride(): Promise<number | null> { return this.tryGet("framerateOverride", null) }
+    static async setFramerateOverride(value: number | null) { await AsyncStorage.setItem("framerateOverride", JSON.stringify(value)) }
 
     private static async tryGet(key: StorageKey, default_: any): Promise<any> {
         try {
