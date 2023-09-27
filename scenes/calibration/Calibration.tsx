@@ -75,7 +75,7 @@ class Calibration extends React.PureComponent<Props, State> {
 
     saveButton: RefObject<Animator> = React.createRef();
     infoText: RefObject<Animator> = React.createRef();
-
+    
     rollRightVisible: boolean = false;
     rollLeftVisible: boolean = false;
 
@@ -136,16 +136,17 @@ class Calibration extends React.PureComponent<Props, State> {
 
             /* Left eye positiom, right eye pos... */
             const [w, h] = [Dimensions.get("window").width, Dimensions.get("window").height];
-            let [lep, rep, lmp, rmp] = [
+            let [lep, rep, lmp, rmp, nose] = [
                 face.leftEyePosition, face.rightEyePosition,
                 face.leftMouthPosition, face.rightMouthPosition,
+                face.noseBasePosition,
             ];
 
             /* Move to middle x */
-            [lep, rep, lmp, rmp].map(e => e.x += (w / 2 - (face.midEye.x + face.midMouth.x) / 2));
+            [lep, rep, lmp, rmp, nose].map(e => e.x += (w / 2 - (face.midEye.x + face.midMouth.x) / 2));
             
             /* Move to middle y */
-            [lmp, rmp, lep, rep].map(e => e.y += (h / 2 - (face.midEye.y + face.midMouth.y) / 2));
+            [lep, rep, lmp, rmp, nose].map(e => e.y += (h / 2 - (face.midEye.y + face.midMouth.y) / 2));
 
             /* The difference between the width between (∆eye x, ∆mouth x)  and (∆eye1y_mouth1y, ∆eye2y_mouth2y) */
             const heightDiff = (
@@ -181,6 +182,7 @@ class Calibration extends React.PureComponent<Props, State> {
             rep.y -= dy;
             lmp.y += dy;
             rmp.y += dy;
+            nose.y += dy;
 
             this.updateRollIndicators(face.rollAngle, true);
 
