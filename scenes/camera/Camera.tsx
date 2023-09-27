@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Easing, Image, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Easing, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -9,20 +9,18 @@ import { useIsFocused, useNavigation } from "@react-navigation/native";
 import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
-import { FlipType, SaveFormat, manipulateAsync } from "expo-image-manipulator";
-import { FaceData, getAlignTransforms, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
+import { FlipType, manipulateAsync } from "expo-image-manipulator";
+import { FaceData, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { DebugDots } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
-import { Animator } from "../../components/animator/Animator";
 import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
 import AppConfig from "../preferences/Config";
 import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DocumentDirectoryPath, readdir } from "react-native-fs";
 import CalibrationData from "../calibration/CalibrationData";
-import * as fs from "react-native-fs";
+import { CalibratedOverlay } from "./CalibratedOverlay";
+import { FaceRotationView } from "./FaceRotationView";
 
 /* Interfaces */
 interface Props {
@@ -64,15 +62,19 @@ interface State {
 	debugTransformCamera: any[],
 	transformCamera: boolean,
 
+	/** Facial features, used for `FaceRotationView` */
+	facialFeatures: FaceData | null,
+
 	flashlightOpacity: Animated.Value
 }
 
 class Camera extends React.PureComponent<Props, State> {
-	pictureManipulator : RefObject<PictureManipulator>;
-	camera             : RefObject<ExpoCamera>;
-	debug              : RefObject<DebugDots>;
-	debugOutside       : RefObject<DebugDots>;
-	menuButton         : RefObject<MenuButton>;
+	pictureManipulator : RefObject<PictureManipulator> = React.createRef();;
+	camera             : RefObject<ExpoCamera> = React.createRef();;
+	debug              : RefObject<DebugDots> = React.createRef();;
+	debugOutside       : RefObject<DebugDots> = React.createRef();;
+	menuButton         : RefObject<MenuButton> = React.createRef();;
+	faceRotationView   : RefObject<FaceRotationView> = React.createRef();;
 
 	/** Face calibration metadata */
 	calibration: FaceData | null = null;
@@ -92,6 +94,7 @@ class Camera extends React.PureComponent<Props, State> {
 			flashlightOpacity: new Animated.Value(0),
 
 			transform: [],
+			facialFeatures: null,
 
 			animating: true,
 
@@ -100,13 +103,6 @@ class Camera extends React.PureComponent<Props, State> {
 			transformCamera: false,
 			anyFaceVisible: false,
 		};
-
-		/* Refs */
-		this.pictureManipulator = React.createRef();
-		this.debugOutside = React.createRef();
-		this.menuButton = React.createRef();
-		this.camera = React.createRef();
-		this.debug = React.createRef();
 
 		/* Bindings */
 		this.setFlashlightBrightness = this.setFlashlightBrightness.bind(this);
@@ -180,6 +176,11 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Take pic */
 	async takePic(): Promise<void> {
+		const transform = [...this.state.transform]; // clone transform
+
+		/* Freeze camera */
+		this.camera.current?.pausePreview();
+
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
 		this.setState({ loadingImage: true });
@@ -212,7 +213,7 @@ class Camera extends React.PureComponent<Props, State> {
 					try {
 						path = await this.pictureManipulator.current?.takePictureAsync(
 							flipped.uri,
-							this.state.transform
+							transform
 						) ?? image.uri;
 					}catch {
 						console.log("[DBG] Image manipulator fail");
@@ -248,13 +249,24 @@ class Camera extends React.PureComponent<Props, State> {
 		if (e.faces[0] && this.calibration) {
 			/* Some face was detected */
 			if (!this.state.anyFaceVisible) this.setState({ anyFaceVisible: true });
-			let ffeatures = getFaceFeatures(e.faces[0]);
-			let transform = getTransforms(ffeatures, this.calibration);
-			
+
 			/* Set transforms? */
-			this.setState({ transform, debugTransformCamera: this.state.transformCamera ? transform : [] });
+			if (!this.state.loadingImage) {
+				let ffeatures = getFaceFeatures(e.faces[0]);
+				let transform = getTransforms(ffeatures, this.calibration);
+	
+				// this.debug.current?.setBalls([{ balls: [ffeatures.leftEyePosition, ffeatures.rightEyePosition, ffeatures.leftMouthPosition, ffeatures.rightMouthPosition], color: "blue" }])
+
+				this.setState({
+					transform,
+					facialFeatures: ffeatures,
+					debugTransformCamera: this.state.transformCamera ? transform : [],
+				});
+			}
 
 		}else {
+			this.faceRotationView.current?.resetFaceRotation();
+
 			/* No face visible */
 			this.setState({ anyFaceVisible: false });
 		}
@@ -278,14 +290,15 @@ class Camera extends React.PureComponent<Props, State> {
 		if (calibration) {
 			this.calibration = calibration;
 
-			this.debugOutside.current?.setBalls([
-				{ balls: [
-					calibration.leftEyePosition,
-					calibration.rightEyePosition,
-					calibration.rightMouthPosition,
-					calibration.leftMouthPosition,
-				], color: "yellow" },
-			]);
+			// this.debugOutside.current?.setBalls([
+			// 	{ balls: [
+			// 		calibration.leftEyePosition,
+			// 		calibration.rightEyePosition,
+			// 		calibration.rightMouthPosition,
+			// 		calibration.leftMouthPosition,
+			// 		calibration.noseBasePosition,
+			// 	], color: "yellow" },
+			// ]);
 		}else {
 			alert("Face calibration was not found 😔");
 		}
@@ -295,7 +308,8 @@ class Camera extends React.PureComponent<Props, State> {
 	render() {
 		return (
 			<View style={Styles.container}>
-				<DebugDots ref={this.debugOutside} />
+				<CalibratedOverlay calibrated={this.calibration} />
+				{/* <DebugDots ref={this.debugOutside} /> */}
 				
 				{/* Transforms image and saves it */}
 				<PictureManipulator ref={this.pictureManipulator} />
@@ -313,7 +327,9 @@ class Camera extends React.PureComponent<Props, State> {
 						tracking: true,
 					}}
 					onFacesDetected={this.onFacesDetected}
-				><DebugDots ref={this.debug} /></ExpoCamera>}
+				>
+					{/* <DebugDots ref={this.debug} /> */}
+					</ExpoCamera>}
 
 				{/* Flashlight */}
 				<View pointerEvents="none" style={Styles.flashRingLightContainer}>
@@ -333,7 +349,14 @@ class Camera extends React.PureComponent<Props, State> {
 
 					{/* Bottom UI components */}
 					<Floater loosness={3} style={Styles.bottomBar}>
-						<View style={Styles.bottomBarTile}></View>
+						<View style={Styles.bottomBarTile}>
+							<FaceRotationView
+								ref={this.faceRotationView}
+								visible
+								faceData={this.state.facialFeatures}
+								calibrated={this.calibration}
+							/>
+						</View>
 
 						{/* Middle - Shutter Button */}
 						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>

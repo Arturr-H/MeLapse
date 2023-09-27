@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet } from "react-native";
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
+export const OVERLAY_FEATURE_HEIGHT = 10;
 
 export default StyleSheet.create({
     container: {
@@ -63,36 +64,6 @@ export default StyleSheet.create({
 
         backgroundColor: "#fff",
         borderRadius: 49,
-    },
-    alignGrid: {
-        width: "100%",
-        height: "100%",
-        opacity: 0.5,
-        position: "absolute"
-    },
-    alignFace: {
-        // opacity: 0.1,
-        width: 70,
-        height: 70,
-        position: "absolute",
-        backgroundColor: "blue",
-        objectFit: "contain",
-
-        display: "flex",
-        justifyContent: "center",
-            alignItems: "center"
-    },
-    alignFaceMask: {
-        // opacity: 0.1,
-        width: "100%",
-        height: "100%",
-        objectFit: "contain"
-    },
-    alignFaceInner: {
-        width: "100%",
-        height: "100%",
-        position: "absolute",
-        backgroundColor: "red",
     },
 
     viewShot: {
@@ -204,5 +175,82 @@ export default StyleSheet.create({
         color: "#fff",
         fontSize: 30,
         fontFamily: "inter-black",
+    },
+
+    calibratedOverlayContainer: {
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+
+        zIndex: 1,
+        pointerEvents: "none"
+    },
+    calibratedFeature: {
+        position: "absolute",
+        backgroundColor: "#fff",
+
+        height: OVERLAY_FEATURE_HEIGHT,
+        borderRadius: OVERLAY_FEATURE_HEIGHT / 2,
+        opacity: 0.4,
+    },
+    
+    faceRotationViewContainer: {
+        width: "100%",
+        height: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+    },
+    alignGrid: {
+        width: "100%",
+        height: "100%",
+        opacity: 0.5,
+
+        objectFit: "contain",
+        position: "absolute",
+    },
+
+
+    faceRotationImageContainer: {
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
+    rotationMaskedView: {
+        height: "100%",
+        width: "40%",
+        position: "absolute",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+        backgroundColor: "green"
+    },
+    rotationMaskElement: {
+        height: "100%",
+        width: "100%",
+        objectFit: "contain",
+        position: "absolute",
+    },
+    faceRotationImage: {
+        width: "100%",
+        height: "100%",
+    },
+    gradientOverlayContainer: {
+        width: "100%",
+        height: "100%",
+
+        position: "absolute"
+    },
+    gradientOverlay: {
+        width: "100%",
+        height: "100%",
     }
 })
