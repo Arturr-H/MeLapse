@@ -47,6 +47,7 @@ export interface State {
 class Result extends React.PureComponent<Props, State> {
     prevPoster: RefObject<Poster>;
     currentPoster: RefObject<Poster>;
+    isSkipped: boolean = false;
 
     constructor(props: Props) {
         super(props);
@@ -80,6 +81,7 @@ class Result extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
+        this.isSkipped = false;
         await this.getStats().then(e => {
             if (e) {
                 console.log(e);
@@ -138,7 +140,7 @@ class Result extends React.PureComponent<Props, State> {
         const FLOAT_DELAY = 200;
         this.anim(this.state.posterSliderX, -WIDTH*2, 1900, Easing.inOut(Easing.exp), 200, () => {
             /* SWITCH SCENE */
-            this.props.navigation.navigate("Camera", { comesFrom: "other" });
+            if (!this.isSkipped) this.props.navigation.navigate("Camera", { comesFrom: "other" });
         });
         this.anim(this.state.dateSliderX, -WIDTH*2, 1900 - FLOAT_DELAY, Easing.inOut(Easing.exp), 200 + FLOAT_DELAY);
     }
@@ -198,6 +200,7 @@ class Result extends React.PureComponent<Props, State> {
 
     /* Skips result animation */
     skipAnimation(): void {
+        this.isSkipped = true;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         this.anim(this.state.skipTransformX, WIDTH*2, 500, Easing.exp, 0, () => {
             this.props.navigation.navigate("Camera", { comesFrom: "other" });
