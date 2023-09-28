@@ -94,10 +94,10 @@ export default StyleSheet.create({
     },
     infoText: {
         fontSize: 18,
-        fontWeight: "400",
         width: "100%",
+        fontFamily: "manrope-light",
 
-        color: "#dedede",
+        color: "#d0d0d0",
         textAlign: "center",
 
         position: "absolute",
