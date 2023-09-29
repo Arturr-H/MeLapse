@@ -25,7 +25,6 @@ import { FaceRotationView } from "./FaceRotationView";
 /* Interfaces */
 interface Props {
 	navigation: StackNavigationProp<{ Preview: { lsimage: LSImageProp }, Preferences: undefined }, "Preview", "Preferences">,
-	isFocused: boolean,
 
 	/**
 	 * Is used to determine which intro animation to play
@@ -39,13 +38,6 @@ interface Props {
 interface State {
 	/** User needs to allow app to use camera */
 	cameraAllowed: boolean,
-
-	/** Needed for scaling into transition */
-	cameraButtonScale: Animated.Value,
-	cameraButtonInnerScale: Animated.Value,
-
-	/** Needed when scaling button, because we don't want it to scale with the rim */
-	cameraButtonPadding: number,
 
 	/* Animated values */
 	yawAngle: Animated.Value,
@@ -75,6 +67,7 @@ class Camera extends React.PureComponent<Props, State> {
 	debugOutside       : RefObject<DebugDots> = React.createRef();;
 	menuButton         : RefObject<MenuButton> = React.createRef();;
 	faceRotationView   : RefObject<FaceRotationView> = React.createRef();;
+	shutterButton      : RefObject<ShutterButton> = React.createRef();;
 
 	/** Face calibration metadata */
 	calibration: FaceData | null = null;
@@ -85,9 +78,6 @@ class Camera extends React.PureComponent<Props, State> {
 		/* State */
 		this.state = {
 			cameraAllowed: false,
-			cameraButtonScale: new Animated.Value(24),
-			cameraButtonInnerScale: new Animated.Value(1),
-			cameraButtonPadding: 0,
 
 			yawAngle: new Animated.Value(0),
 			rollAngle: new Animated.Value(0),
@@ -114,57 +104,40 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
-		// const a = await fs.readdir(DocumentDirectoryPath);
-		// for (const b of a) {
-		// 	const c = DocumentDirectoryPath + "/" + b;
-		// 	fs.unlink(c);
-		// }
-		// await AsyncStorage.setItem("imagePointers", JSON.stringify([]));
-
-		await this.setFaceMetadata();
-		this.animateIntro();
-		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
+		this.gainedFocus();
+		this.props.navigation.addListener("focus", this.gainedFocus);
 
 		/* Get camera permission */
 		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
 		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
 	}
+	async componentWillUnmount(): Promise<void> {
+		this.props.navigation.removeListener("focus", this.gainedFocus);
+	}
 
 	/* Called via the export default function (navigation handler) */
-	gainedFocus(): void {
+	async gainedFocus(): Promise<void> {
+		/* Try get face calibration */
+		await this.setFaceMetadata();
+
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		this.animateIntro();
 		this.setState({ anyFaceVisible: true });
+		this.camera.current?.resumePreview();
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
 	animateIntro(): void {
 		this.setState({ animating: true });
+		setTimeout(() => this.setState({ animating: false }), 1000);
 
 		const backMenuButton = () => {
-			this.setState({ cameraButtonScale: new Animated.Value(1), cameraButtonPadding: 4, animating: false });
 			this.menuButton.current?.animateBack();
+			this.shutterButton.current?.instantSetBack();
 		}
 		const backCameraButton = () => {
+			this.shutterButton.current?.animateBack();
 			this.menuButton.current?.instanSetBack();
-
-			Animated.sequence([
-				Animated.timing(this.state.cameraButtonScale, {
-					toValue: 24,
-					duration: 0,
-					useNativeDriver: true,
-				}),
-				Animated.timing(this.state.cameraButtonScale, {
-					toValue: 1,
-					duration: 700,
-					easing: Easing.inOut(Easing.exp),
-					useNativeDriver: true,
-				})
-			]).start(() => this.setState({ cameraButtonPadding: 4 }));
-
-			setTimeout(() =>
-				this.setState({ animating: false })
-			, 1000);
 		}
 
 		/* Menu button */
@@ -177,6 +150,7 @@ class Camera extends React.PureComponent<Props, State> {
 	/* Take pic */
 	async takePic(): Promise<void> {
 		const transform = [...this.state.transform]; // clone transform
+		const anyFaceVisible = this.state.anyFaceVisible;
 
 		/* Freeze camera */
 		this.camera.current?.pausePreview();
@@ -187,14 +161,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 		/* Take camera picture */
 		const image = await this.camera.current?.takePictureAsync();
-
-		/* Camera button transition */
-		let transition = Animated.timing(this.state.cameraButtonScale, {
-			toValue: 24,
-			duration: 700,
-			easing: Easing.inOut(Easing.exp),
-			useNativeDriver: true,
-		});
 
 		if (image) {
 			let flipped = await manipulateAsync(
@@ -207,9 +173,8 @@ class Camera extends React.PureComponent<Props, State> {
 				/* Use pic manipulator to (try) take transformed pic */
 				let path: string;
 
-				/* If post processing transforms are on */
-				const shouldTransform = await AppConfig.getPostProcessingTransform();
-				if (shouldTransform && this.state.anyFaceVisible) {
+				/* Try flip */
+				if (anyFaceVisible) {
 					try {
 						path = await this.pictureManipulator.current?.takePictureAsync(
 							flipped.uri,
@@ -228,11 +193,10 @@ class Camera extends React.PureComponent<Props, State> {
 				
 				/* Transition */
 				this.setState({ animating: true });
-				transition.start(() => {
+				this.shutterButton.current?.scaleUp(() => {
 					this.setState({ loadingImage: false, animating: false });
 					this.props.navigation.navigate("Preview", { lsimage })
 				});
-				this.setState({ cameraButtonPadding: 0 });
 			}else {
 				alert("Can't flip image");
 			}
@@ -255,8 +219,6 @@ class Camera extends React.PureComponent<Props, State> {
 				let ffeatures = getFaceFeatures(e.faces[0]);
 				let transform = getTransforms(ffeatures, this.calibration);
 	
-				// this.debug.current?.setBalls([{ balls: [ffeatures.leftEyePosition, ffeatures.rightEyePosition, ffeatures.leftMouthPosition, ffeatures.rightMouthPosition], color: "blue" }])
-
 				this.setState({
 					transform,
 					facialFeatures: ffeatures,
@@ -289,16 +251,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 		if (calibration) {
 			this.calibration = calibration;
-
-			// this.debugOutside.current?.setBalls([
-			// 	{ balls: [
-			// 		calibration.leftEyePosition,
-			// 		calibration.rightEyePosition,
-			// 		calibration.rightMouthPosition,
-			// 		calibration.leftMouthPosition,
-			// 		calibration.noseBasePosition,
-			// 	], color: "yellow" },
-			// ]);
 		}else {
 			alert("Face calibration was not found 😔");
 		}
@@ -315,7 +267,7 @@ class Camera extends React.PureComponent<Props, State> {
 				<PictureManipulator ref={this.pictureManipulator} />
 
 				{/* Camera */}
-				{(this.state.cameraAllowed && this.props.isFocused) && <ExpoCamera
+				{this.state.cameraAllowed && <ExpoCamera
 					ref={this.camera}
 					style={[Styles.container, { transform: this.state.debugTransformCamera }]}
 					type={CameraType.front}
@@ -329,7 +281,7 @@ class Camera extends React.PureComponent<Props, State> {
 					onFacesDetected={this.onFacesDetected}
 				>
 					{/* <DebugDots ref={this.debug} /> */}
-					</ExpoCamera>}
+				</ExpoCamera>}
 
 				{/* Flashlight */}
 				<View pointerEvents="none" style={Styles.flashRingLightContainer}>
@@ -361,10 +313,9 @@ class Camera extends React.PureComponent<Props, State> {
 						{/* Middle - Shutter Button */}
 						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>
 							<ShutterButton
-								cameraButtonPadding={this.state.cameraButtonPadding}
-								scale={this.state.cameraButtonScale}
 								active={!(this.state.loadingImage || this.state.animating)}
 								takePic={this.takePic}
+								ref={this.shutterButton}
 							/>
 						</View>
 
@@ -384,24 +335,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 export default function(props: any) {
 	const navigation = useNavigation();
-	const isFocused = useIsFocused();
-	const CameraRef: RefObject<null | Camera> = React.useRef(null);
-
-	{/* Because react native navigation doesn't unmount
-		scenes we need a way of detecting which scene is
-		currently active (for playing intro animations) */}
-	React.useEffect(() => {
-		const unsubscribe = navigation.addListener("focus", () => {
-			CameraRef.current?.gainedFocus();
-		});
-		return unsubscribe;
-	}, [navigation]);
   
-	return <Camera
-		comesFrom={props.route.params.comesFrom}
-		isFocused={isFocused}
-		ref={CameraRef}
-		{...props}
-		navigation={navigation}
-	/>;
+	return <Camera {...props} navigation={navigation} comesFrom={props.route.params.comesFrom} />;
 }

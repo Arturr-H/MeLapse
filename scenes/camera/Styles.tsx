@@ -224,24 +224,26 @@ export default StyleSheet.create({
     },
     rotationMaskedView: {
         height: "100%",
-        width: "40%",
+        width: "50%",
         position: "absolute",
 
         display: "flex",
         justifyContent: "center",
             alignItems: "center",
-
-        backgroundColor: "green"
     },
     rotationMaskElement: {
         height: "100%",
         width: "100%",
-        objectFit: "contain",
+        
         position: "absolute",
+        objectFit: "contain",
     },
     faceRotationImage: {
         width: "100%",
         height: "100%",
+
+        objectFit: "contain",
+        transform: [{ scale: 1.2 }]
     },
     gradientOverlayContainer: {
         width: "100%",
