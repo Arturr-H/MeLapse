@@ -20,6 +20,8 @@ type FeatureData = {
 interface Props {
 	/** The calibrated facial features (static) */
 	calibrated: FaceData | null,
+
+	color?: string
 }
 interface State {
 	/** The overlay width, rotation, and position */
@@ -102,7 +104,7 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 							{ translateY: this.state.overlay.eyes.translate.y },
 							{ rotate: this.state.overlay.eyes.rotate },
 						],
-					}]}
+					}, this.props.color ? { backgroundColor: this.props.color } : {}]}
 				/>
 				<View
 					style={[Styles.calibratedFeature, {
@@ -112,7 +114,7 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 							{ translateY: this.state.overlay.mouth.translate.y },
 							{ rotate: this.state.overlay.mouth.rotate },
 						],
-					}]}
+					}, this.props.color ? { backgroundColor: this.props.color } : {}]}
 				/>
 			</View>
 		);
