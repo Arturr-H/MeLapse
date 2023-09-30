@@ -1,6 +1,9 @@
 import { Dimensions, StyleSheet } from "react-native";
+import MenuBundle from "../../styleBundles/MenuBundle";
 
 export default StyleSheet.create({
+    ...MenuBundle,
+
     container: {
         flex: 1,
         backgroundColor: "#fff",
@@ -12,10 +15,46 @@ export default StyleSheet.create({
         width: "100%",
         height: "100%",
     },
+    headerView: {
+        width: "100%",
+        flex: 2,
 
-    reviewImage: {
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    body: {
+        width: "100%",
+        flex: 9,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    footer: {
+        width: "100%",
+        flex: 2,
+
+        flexDirection: "row",
+        justifyContent: "center",
+            alignItems: "center",
+
+        paddingHorizontal: 20,
+        gap: 15
+    },
+
+    reviewImageContainer: {
         width: "100%",
         height: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
+    reviewImage: {
+        height: "100%",
+        width: "75%",
+        objectFit: "contain",
     },
 
     bottom: {
@@ -49,7 +88,7 @@ export default StyleSheet.create({
         flex: 1,
         height: 80,
 
-        borderRadius: 20,
+        borderRadius: 15,
         backgroundColor: "rgb(90, 200, 245)",
         borderColor: "rgb(80, 190, 245)",
         borderWidth: 2,
@@ -59,7 +98,8 @@ export default StyleSheet.create({
             alignItems: "center",    
     },
     timewarpButtonText: {
-        fontSize: 30
+        fontSize: 30,
+        color: "#fff"
     },
     safeAreaView: {
         width: "100%",
@@ -78,5 +118,46 @@ export default StyleSheet.create({
         width: "100%",
         paddingHorizontal: 40,
         marginTop: 50
+    },
+
+    contextMenu: {
+        position: "absolute",
+        top: "5%",
+        right: "25%",
+
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        gap: 10
+    },
+    contextMenuButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+
+        backgroundColor: "#fff",
+
+        borderColor: "#ddd",
+        borderWidth: 2,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
+    contextMenuButtonText: {
+        fontSize: 24
+    },
+    contextBtnContainer: {
+        width: 140,
+        padding: 4,
+
+        backgroundColor: "#fff",
+
+        borderColor: "#ddd",
+        borderWidth: 2,
+        borderRadius: 10,
+        gap: 6
+    },
+    contextBtn: {
     }
 })

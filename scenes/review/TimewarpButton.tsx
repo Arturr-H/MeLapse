@@ -1,13 +1,14 @@
 import React from "react";
 import { Text, TouchableHighlight } from "react-native";
 import Styles from "./Styles";
+import { ImpactFeedbackStyle, impactAsync } from "expo-haptics";
 
 type Callback = () => void;
 
 /* Interface */
 interface Props {
     onTouchStart: (callback: Callback) => void,
-    onTouchEnd: (callback: Callback) => void,
+    onTouchEnd: () => void,
 
     callback: Callback,
 
@@ -23,11 +24,14 @@ export default class TimewarpButton extends React.PureComponent<Props> {
     render(): React.ReactNode {
         return (
             <TouchableHighlight
-                onPressIn={() => this.props.onTouchStart(this.props.callback)}
-                onPressOut={() => this.props.onTouchEnd(this.props.callback)}
+                onPressIn={() => {
+                    impactAsync(ImpactFeedbackStyle.Light);
+                    this.props.onTouchStart(this.props.callback);
+                }}
+                onPressOut={() => this.props.onTouchEnd()}
                 underlayColor={"rgb(80, 190, 245)"}
                 style={Styles.timewarpButton}
-                children={<Text style={Styles.timewarpButtonText}>{this.props.direction === "forwards" ? "👉" : "👈"}</Text>}
+                children={<Text style={Styles.timewarpButtonText}>{this.props.direction === "forwards" ? "▶︎" : "◀︎"}</Text>}
             />
         )
     }
