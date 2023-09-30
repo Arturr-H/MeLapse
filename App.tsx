@@ -1,5 +1,5 @@
 import React from "react";
-import { NavigationContainer, NavigationProp, ParamListBase, useNavigation } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 /* Resources */
@@ -71,7 +71,8 @@ const App = () => {
 	const [fontsLoaded] = useFonts({
 		"inter-extrabold": require("./assets/fonts/Inter-ExtraBold.ttf"),
 		"inter-black": require("./assets/fonts/Inter-Black.ttf"),
-		"poppins-black": require("./assets/fonts/Poppins-Black.ttf"),
+		"manrope-black": require("./assets/fonts/Manrope-ExtraBold.ttf"),
+		"manrope-light": require("./assets/fonts/Manrope-Light.ttf"),
 	});
 
 	if (!fontsLoaded || !resourcesLoaded) return <SplashScene />;
