@@ -67,6 +67,7 @@ export default StyleSheet.create({
 		fontSize: 12,
 		fontWeight: "300",
 		color: "#999",
+		fontFamily: "manrope-light",
 
 		position: "absolute",
 		right: 5,

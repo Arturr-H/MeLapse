@@ -44,11 +44,11 @@ export default StyleSheet.create({
     buttonText: {
         color: "#000",
         fontSize: 20,
-        fontFamily: "inter-black",
+        fontFamily: "manrope-black",
     },
     buttonTextActive: {
         color: "#fff",
         fontSize: 20,
-        fontFamily: "inter-black",
+        fontFamily: "manrope-black",
     },
 })

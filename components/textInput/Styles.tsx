@@ -22,6 +22,7 @@ export default StyleSheet.create({
     textInput: {
         flex: 2,
         height: "100%",
+        fontFamily: "manrope-light"
     },
     focused: {
         borderColor: "rgb(90, 200, 245)",

@@ -106,7 +106,7 @@ export default StyleSheet.create({
         paddingBottom: 125,
     },
     dateText: {
-        fontFamily: "inter-extrabold",
+        fontFamily: "manrope-black",
         fontSize: 34,
         letterSpacing: 1,
         color: "#000",
