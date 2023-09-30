@@ -109,20 +109,19 @@ export class LSImage {
 			try {
 				let imagePointers: LSImageProp[] = JSON.parse(imagePointers_str) as LSImageProp[];
 				const filename = image.filename;
-				const filepath = image.path;
 				
 				/* Find removable element */
 				for (let i = 0; i < imagePointers.length; i++) {
 					const element = imagePointers[i];
 					const split = element.path.split("/");
-					const try_filename = split[split.length - 1];
+					const try_filename = split[split.length - 1].split(".")[0];
 
 					if (try_filename === filename) {
 						/* Set image pointers */
 						imagePointers.splice(i, 1);
 						await AsyncStorage.setItem("imagePointers", JSON.stringify(imagePointers));
 
-						const unlinkPath = fs.DocumentDirectoryPath + "/" + try_filename;
+						const unlinkPath = fs.DocumentDirectoryPath + "/" + try_filename + ".jpg";
 						return fs.unlink(unlinkPath);
 					}
 				}
