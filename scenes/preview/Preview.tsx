@@ -13,6 +13,7 @@ import Floater from "../../components/floater/Floater";
 import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Background from "./Background";
 
 /* Interfaces */
 interface Props {
@@ -24,7 +25,6 @@ interface Props {
 interface State {
     confirmButtonY: Animated.Value,
     scrapButtonX: Animated.Value,
-    bgTranslateY: Animated.Value,
 
     deactivateButtons: boolean,
     lsimage?: LSImageProp
@@ -37,8 +37,8 @@ const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
 
 class Preview extends React.PureComponent<Props, State> {
-    poster: RefObject<Poster>;
-    background: RefObject<Animator>;
+    poster: RefObject<Poster> = React.createRef();
+    background: RefObject<Background> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -47,41 +47,28 @@ class Preview extends React.PureComponent<Props, State> {
         this.state = {
             confirmButtonY: new Animated.Value(200),
             scrapButtonX: new Animated.Value(-200),
-            bgTranslateY: new Animated.Value(-HEIGHT),
-
             deactivateButtons: false,
         };
 
         /* Bindings */
+        this.outroButtons = this.outroButtons.bind(this);
+        this.introButtons = this.introButtons.bind(this);
         this.onDelete = this.onDelete.bind(this);
         this.onFocus = this.onFocus.bind(this);
         this.onSave = this.onSave.bind(this);
-
-        /* Refs */
-        this.background = React.createRef();
-        this.poster = React.createRef();
     };
 
     /* Lifetime */
     componentDidMount(): void {
         this.props.navigation.addListener("focus", this.onFocus);
-        this.setState({ lsimage: this.props.lsimage });
-        this.setState({ deactivateButtons: false });
-        Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0 }).start();
-        Animated.timing(this.state.scrapButtonX, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 150 }).start();
-        this.background.current?.fadeIn(1000).start();
-
-        Animated.loop(Animated.timing(this.state.bgTranslateY, {
-            toValue: 0,
-            duration: 10000,
-            easing: Easing.linear,
-            useNativeDriver: true
-        })).start();
+        this.onFocus();
     }
     componentWillUnmount(): void {
         this.props.navigation.removeListener("focus", this.onFocus);
     }
     onFocus(): void {
+        this.background.current?.fadeIn();
+        this.introButtons();
         this.setState({ lsimage: this.props.lsimage });
     }
 
@@ -96,10 +83,8 @@ class Preview extends React.PureComponent<Props, State> {
             await AsyncStorage.setItem("scrappedSelfies", (count+1).toString());
         }catch {}
 
-        Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200, delay: 150 }).start();
-        Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200 }).start();
-        this.background.current?.fadeOut(500).start();
-
+        this.background.current?.fadeOut();
+        this.outroButtons();
         this.poster.current?.delete(() => {
             this.props.navigation.navigate("Camera", { comesFrom: "other" });
         });
@@ -112,13 +97,22 @@ class Preview extends React.PureComponent<Props, State> {
 
         /* Animations */
         Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
-        this.background.current?.fadeOut(500).start();
-        Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200 }).start();
-        Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200, delay: 150 }).start();
+        this.background.current?.fadeOut();
+        this.outroButtons();
 
         this.poster.current?.save(() => {
             this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
         });
+    }
+
+    /* Button animations */
+    introButtons(): void {
+        Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0 }).start();
+        Animated.timing(this.state.scrapButtonX, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 150 }).start();
+    }
+    outroButtons(): void {
+        Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200 }).start();
+        Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200, delay: 150 }).start();
     }
 
 	render() {
@@ -159,43 +153,14 @@ class Preview extends React.PureComponent<Props, State> {
                         >
                             {this.state.deactivateButtons
                                 ? <ActivityIndicator color={"white"} />
-                                : <Text style={Styles.acceptButtonText}>YEA 👍</Text>
+                                : <Text style={Styles.acceptButtonText}>SAVE 👍</Text>
                             }
                         </TouchableOpacity>
                     </Floater>
                 </View>
 
                 {/* Background */}
-                <Floater loosness={2} style={{
-                    position: "absolute",
-                    width: WIDTH,
-                    height: "100%",
-
-                    zIndex: -2,
-                }}>
-                    <Animator startOpacity={0} ref={this.background} pointerEvents="none" style={{
-                        width: WIDTH,
-                        height: "100%",
-                        position: "absolute",
-
-                        display: "flex",
-                        justifyContent: "center",
-                            alignItems: "center",
-                    }}>
-                        
-                        <Animated.Text numberOfLines={1} style={{
-                            position: "absolute",
-                            fontSize: WIDTH * 0.5,
-                            width: WIDTH*8,
-                            textAlign: "center",
-
-                            transform: [{ rotate: "90deg" }, { translateX: this.state.bgTranslateY }],
-                            color: "#eee",
-                            fontFamily: "inter-black",
-                            
-                        }}>SAVE?{"  "}SAVE?{"  "}SAVE?</Animated.Text>
-                    </Animator>
-                </Floater>
+                <Background ref={this.background} />
 
                 {/* Time, battery & more */}
                 <StatusBar style="dark" />
