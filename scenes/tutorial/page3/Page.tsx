@@ -1,20 +1,24 @@
 /* Imports */
-import React, { RefObject } from "react";
-import { Text, View } from "react-native";
+import React from "react";
+import { Dimensions, Image, Text, View } from "react-native";
 import Styles from "../Styles";
-import { Button } from "../../../components/button/Button";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { Animator } from "../../../components/animator/Animator";
+import PageStyles from "./PageStyles";
+import { CalibratedOverlay } from "../../camera/CalibratedOverlay";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const W = Dimensions.get("window").width;
+const CALIBRATION: any = {
+    "leftEyePosition":{"x": W/2 - 50,"y": 357},
+    "rightEyePosition":{"x":W/2 + 50,"y":354},
+    "leftMouthPosition":{"x":W/2 - 43,"y":458},
+    "rightMouthPosition":{"x":W/2 + 43,"y":453},
+};
 
 /* Interfaces */
-interface Props {
-    navigation: StackNavigationProp<{ Camera: { comesFrom: string } }, "Camera">,
-}
+interface Props {  }
 interface State {  }
 
 export default class extends React.PureComponent<Props, State> {
-    animator: RefObject<Animator> = React.createRef();
-
     constructor(props: Props) {
         super(props);
 
@@ -23,20 +27,11 @@ export default class extends React.PureComponent<Props, State> {
         };
 
         /* Bindings */
-        this.cameraScene = this.cameraScene.bind(this);
     };
 
     /** Called externally from this component, 
-     * triggered when scrollview is focused */
+     * triggered when scrollview reaches this item */
     setFocused(): void {
-        this.animator.current?.fadeIn(0).start();
-    }
-
-    /** Switch to camera scene */
-    cameraScene(): void {
-        this.animator.current?.fadeOut(100).start(() => {
-            this.props.navigation.navigate("Camera", { comesFrom: "other" });
-        });
     }
 
     /* Lifetime */
@@ -45,24 +40,26 @@ export default class extends React.PureComponent<Props, State> {
 
 	render() {
 		return (
-            <Animator ref={this.animator} style={Styles.page}>
+            <View style={Styles.page}>
                 <View style={Styles.pageHeader}>
                 </View>
                 <View style={Styles.pageBody}>
                     <View style={Styles.textContainer}>
-                        <Text style={Styles.header2}>Good luck 😄</Text>
-                        <Text style={Styles.infoText}>I hope you find joy in capturing daily selfies to document the evolution of your face!</Text>
+                        <Text style={Styles.header2}>← Aligning →</Text>
+                        <Text style={Styles.infoText}>
+                            Try your best to align your face to the two calibrated indicators.
+                            Eyes go in each end of the upper line, and the mouth is placed beneath the lower line.
+                        </Text>
+                    </View>
+
+                    <View style={PageStyles.faceContainer}>
+                        {/* <Image style={PageStyles.face} source={require("./assets/face.png")} /> */}
                     </View>
                 </View>
                 <View style={Styles.pageFooter}>
-                    <Button
-                        color="blue"
-                        onPress={this.cameraScene}
-                        active
-                        text="Done"
-                    />
                 </View>
-            </Animator>
+                <CalibratedOverlay color="#000" calibrated={CALIBRATION} />
+            </View>
 		);
 	}
 }

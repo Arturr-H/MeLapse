@@ -47,8 +47,6 @@ export default StyleSheet.create({
     page: {
         width: WIDTH,
         height: "100%",
-        
-        paddingHorizontal: 40,
 
         display: "flex",
         justifyContent: "center",
@@ -56,6 +54,7 @@ export default StyleSheet.create({
         flexDirection: "column"
     },
     pageHeader: {
+        paddingHorizontal: 40,
         width: "100%",
         flex: 1,
 
@@ -64,6 +63,7 @@ export default StyleSheet.create({
         flexDirection: "column"
     },
     pageBody: {
+        paddingHorizontal: 40,
         width: "100%",
         flex: 5,
 
@@ -73,6 +73,7 @@ export default StyleSheet.create({
         flexDirection: "column",
     },
     pageFooter: {
+        paddingHorizontal: 40,
         width: "100%",
         flex: 1,
     },
@@ -87,8 +88,9 @@ export default StyleSheet.create({
     },
     infoText: {
         textAlign: "center",
+        fontFamily: "manrope-light",
         width: "100%",
         fontSize: 20,
-        color: "#dedede"
+        color: "#d8d8d8"
     }
 })

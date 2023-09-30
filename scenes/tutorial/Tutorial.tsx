@@ -7,6 +7,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import Page1 from "./page1/Page";
 import Page2 from "./page2/Page";
 import Page3 from "./page3/Page";
+import Page4 from "./page4/Page";
 import { WIDTH } from "../result/Result";
 
 /* Interfaces */
@@ -22,7 +23,7 @@ interface State {
 
 class Tutorial extends React.PureComponent<Props, State> {
     pages: JSX.Element[];
-    page3: RefObject<Page3> = React.createRef();
+    page4: RefObject<Page4> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -40,14 +41,15 @@ class Tutorial extends React.PureComponent<Props, State> {
         this.pages = [
             <Page1 key="pg1" />,
             <Page2 key="pg2" />,
-            <Page3 key="pg3" ref={this.page3} navigation={this.props.navigation} />,
+            <Page3 key="pg3" />,
+            <Page4 key="pg4" ref={this.page4} navigation={this.props.navigation} />,
         ];
     };
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
         this.props.navigation.addListener("focus", () => {
-            this.page3.current?.setFocused();
+            this.page4.current?.setFocused();
         })
     };
 
