@@ -22,8 +22,8 @@ export default StyleSheet.create({
     buttonText: {
         color: "#fff",
         fontSize: 20,
-        fontFamily: "inter-black",
+        fontFamily: "manrope-black",
 
-        textTransform: "uppercase"
+        textTransform: "uppercase",
     }
 })
