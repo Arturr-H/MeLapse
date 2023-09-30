@@ -1,11 +1,11 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Easing, SafeAreaView, View } from "react-native";
+import { Animated, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
@@ -20,7 +20,6 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
-import { FaceRotationView } from "./FaceRotationView";
 
 /* Interfaces */
 interface Props {
@@ -66,7 +65,6 @@ class Camera extends React.PureComponent<Props, State> {
 	debug              : RefObject<DebugDots> = React.createRef();;
 	debugOutside       : RefObject<DebugDots> = React.createRef();;
 	menuButton         : RefObject<MenuButton> = React.createRef();;
-	faceRotationView   : RefObject<FaceRotationView> = React.createRef();;
 	shutterButton      : RefObject<ShutterButton> = React.createRef();;
 
 	/** Face calibration metadata */
@@ -227,8 +225,6 @@ class Camera extends React.PureComponent<Props, State> {
 			}
 
 		}else {
-			this.faceRotationView.current?.resetFaceRotation();
-
 			/* No face visible */
 			this.setState({ anyFaceVisible: false });
 		}
@@ -301,14 +297,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 					{/* Bottom UI components */}
 					<Floater loosness={3} style={Styles.bottomBar}>
-						<View style={Styles.bottomBarTile}>
-							<FaceRotationView
-								ref={this.faceRotationView}
-								visible
-								faceData={this.state.facialFeatures}
-								calibrated={this.calibration}
-							/>
-						</View>
+						<View style={Styles.bottomBarTile} />
 
 						{/* Middle - Shutter Button */}
 						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>
