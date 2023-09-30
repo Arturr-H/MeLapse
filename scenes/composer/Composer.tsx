@@ -35,7 +35,10 @@ interface State {
     /** If user has overwritten framerate in
      * advanced settings, we don't display the
      * regular 24, 30, 60 fps. Instead we display
-     * a message saying it's overwritten  */
+     * a message saying it's overwritten. First 
+     * value determines wheter if it's overwritten
+     * or not second is the fps why do I write this
+     * no one including me will ever read this */
     framerateIsOverwritten: [boolean, number]
 }
 
@@ -170,19 +173,26 @@ class Composer extends React.Component<Props, State> {
                 <View style={{ width: "100%", flex: 1 }}>
                     <ScrollGradient />
                     <ScrollView showsVerticalScrollIndicator={false}>
+
                     <View style={Styles.containerInner}>
                         <MultiAnimator ref={this.animator}>
                         <Text style={Styles.header}>Composer 🎨</Text>
 
                         {/* Generate video */}
-                        <View>
-                            <Text style={Styles.paragraph}>Generates the final video and saves it to your camera roll (might take some time)</Text>
-                            <Button
-                                onPress={this.loadingScreen}
-                                active={true}
-                                color="green"
-                                text="Generate  🎥"
-                            />
+                        <View style={Styles.row}>
+                            <View style={Styles.tile}>
+                            
+                                <Button
+                                    onPress={this.loadingScreen}
+                                    active={true}
+                                    flex
+                                    color="green"
+                                    height={120}
+                                >
+                                    <Text style={Styles.framerateSelectionText}>📀</Text>
+                                    <Text style={Styles.paragraphWhite}>Render →</Text>
+                                </Button>
+                            </View>
                         </View>
 
                         <View style={Styles.hr} />
@@ -191,7 +201,7 @@ class Composer extends React.Component<Props, State> {
                         <View style={Styles.row}>
                             <View style={Styles.tile}>
                                 <Text style={Styles.header2}>🎞️ Framerate</Text>
-                                <Text style={Styles.paragraph}>How fast would you like your end video to go?</Text>
+                                <Text style={Styles.paragraph}>Footage frame rate (frames per second)</Text>
 
                                 <FramerateScroller 
                                     framerates={this.framerates}
@@ -224,7 +234,7 @@ class Composer extends React.Component<Props, State> {
 
                         {/* Output type (?) */}
                         <View>
-                            <Text style={Styles.header2}>Output settings</Text>
+                            <Text style={Styles.header2}>🔧 Output settings</Text>
                             <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is GIF)</Text>
                             <SelectInput
                                 initial={this.state.config.format}
@@ -238,35 +248,36 @@ class Composer extends React.Component<Props, State> {
                             <Text style={Styles.paragraph}>Quality of the output result. Higher quality footage requires more storage.</Text>
                             <SelectInput
                                 initial={this.state.config.quality}
-                                buttons={["OKAY", "MID", "HIGH"]}
+                                buttons={["LOW", "MID", "HIGH"]}
                                 onChange={ComposerConfig.setQuality}
                             />
                         </View>
 
+                        <View style={Styles.hr} />
+
                         {/* Open advanced configuration */}
                         <View>
-                            <Text style={Styles.paragraph}>Open advanced configuration for generating final footage.</Text>
+                            <Text style={Styles.header2}>🚧 Advanced</Text>
+                            <Text style={Styles.paragraph}>Opens advanced configuration for generating final footage. Not recommended as it can break rendering process if not careful.</Text>
                             <Button
                                 color={"blue"}
                                 active
                                 onPress={this.openAdvancedSettings}
-                                text="Advanced settings 🚧"
+                                text="Advanced settings →"
                             />
                         </View>
-
                         </MultiAnimator>
                     </View>
                     </ScrollView>
                 </View>
 
                 {/* Confirm */}
-                {/* ref={this.bottomNavAnimator} */}
                 <Animator startOpacity={1} style={{ transform: [{ translateY: -12 }], gap: 10 }}>
                     <Button
                         onPress={this.goBack}
                         active={true}
                         color="blue"
-                        text="Go back  ⚙️"
+                        text="← Back"
                     />
                 </Animator>
                 </KeyboardAvoidingView>
