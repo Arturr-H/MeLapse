@@ -30,10 +30,6 @@ export default class AppConfig {
     static async getTransformCamera(): Promise<boolean> { return this.tryGet("transformCamera", false) }
     static async setTransformCamera(value: boolean) { await AsyncStorage.setItem("transformCamera", JSON.stringify(value)) }
 
-    /** Transform camera before saving (post processing) */
-    static async getPostProcessingTransform(): Promise<boolean> { return this.tryGet("postProcessingTransform", true) }
-    static async setPostProcessingTransform(value: boolean) { await AsyncStorage.setItem("postProcessingTransform", JSON.stringify(value)) }
-
     /** Also save selfie to camera roll */
     static async getSaveSelfiesToCameraRoll(): Promise<boolean> { return this.tryGet("saveSelfiesToCameraRoll", false) }
     static async setSaveSelfiesToCameraRoll(value: boolean) { await AsyncStorage.setItem("saveSelfiesToCameraRoll", JSON.stringify(value)) }

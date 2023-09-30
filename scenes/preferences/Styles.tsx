@@ -19,24 +19,6 @@ export default StyleSheet.create({
         fontFamily: "inter-black",
     },
 
-    row: {
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 15,
-
-        backgroundColor: "#fff",
-        borderColor: "#eee",
-        borderWidth: 2,
-        borderRadius: 20,
-        padding: 5,
-
-        /// So the white corners won't be visible
-        /// through the borderradius bevels
-        transform: [{ translateY: -20 }],
-        zIndex: 10
-    },
-
     scrollViewContainer: {
         width: "100%",
         flex: 1,

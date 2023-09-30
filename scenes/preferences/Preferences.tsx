@@ -30,7 +30,6 @@ export interface State {
     switching: boolean,
 
     saveSelfiesToCameraRoll: boolean,
-    postProcessingTransform: boolean,
     transformCamera: boolean,
     timesPerDay: number,
     username: string,
@@ -48,7 +47,6 @@ class Preferences extends React.Component<Props, State> {
         this.state = {
             switching: false,
             timesPerDay: TargetTimesPerDay.Twice,
-            postProcessingTransform: true,
             saveSelfiesToCameraRoll: false,
             username: "",
             transformCamera: false,
@@ -71,7 +69,6 @@ class Preferences extends React.Component<Props, State> {
             timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
             username: await AppConfig.getUsername(),
             transformCamera: await AppConfig.getTransformCamera(),
-            postProcessingTransform: await AppConfig.getPostProcessingTransform(),
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
         });
     }
@@ -111,14 +108,12 @@ class Preferences extends React.Component<Props, State> {
         await AppConfig.setTargetTimesPerDay(TargetTimesPerDay.NotSet);
         await AppConfig.setUsername("User");
         await AppConfig.setTransformCamera(false);
-        await AppConfig.setPostProcessingTransform(true);
         await AppConfig.setSaveSelfiesToCameraRoll(false);
 
         this.setState({
             timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
             username: await AppConfig.getUsername(),
             transformCamera: await AppConfig.getTransformCamera(),
-            postProcessingTransform: await AppConfig.getPostProcessingTransform(),
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
         });
     }
@@ -134,48 +129,19 @@ class Preferences extends React.Component<Props, State> {
                                 <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
 
                                 {/* Goto composer scene */}
-                                <View>
-                                    <Text style={Styles.paragraph}>Go to composer scene for creating your final timelapse-footage.</Text>
-                                    <Button color="green" active={!this.state.switching} onPress={this.composerScene} text="Generate video  🎨" />
-                                </View>
-
-                                <View style={Styles.hr} />
-
-                                {/* Post processing */}
-                                <View>
-                                    <Text style={Styles.header2}>⭐️ Post processing</Text>
-                                    <View><Text style={Styles.paragraph}>Automatically align your face to the calibrated position after taking photo (recommended)</Text></View>
-
-                                    <SelectInput
-                                        buttons={["ALIGN", "STATIC"]}
-                                        initial={this.state.postProcessingTransform ? 0 : 1}
-                                        onChange={(idx) => {
-                                            this.setState({ postProcessingTransform: idx == 0 ? true : false });
-                                            AppConfig.setPostProcessingTransform(idx == 0 ? true : false);
-                                        }}
-                                    />
-                                </View>
-
-                                <View style={Styles.hr} /> 
-
-                                {/* Misc */}
-                                <View>
-                                <Text style={Styles.header2}>🛞 Live Transform </Text>
-                                    <View><Text style={Styles.paragraph}>Automatically align your face to the calibrated position in the camera scene</Text></View>
-
-                                    <SelectInput
-                                        buttons={["YES", "NO"]}
-                                        initial={this.state.transformCamera ? 0 : 1}
-                                        onChange={(idx) => {
-                                            this.setState({ transformCamera: idx == 0 ? true : false });
-                                            AppConfig.setTransformCamera(idx == 0 ? true : false);
-                                        }}
-                                    />
+                                <View style={Styles.row}>
+                                    <View style={Styles.tile}>
+                                        <Button flex color="green" active={!this.state.switching} onPress={this.composerScene} text="Create →" />
+                                    </View>
+                                    <View style={Styles.tile}>
+                                        <Text style={Styles.header2}>🎨 Composer</Text>
+                                        <Text style={Styles.paragraph}>Create your final timelapse-footage.</Text>
+                                    </View>
                                 </View>
 
                                 <View style={Styles.hr} />
                                 
-                                {/* Post processing */}
+                                {/* Review images */}
                                 <View>
                                     <Text style={Styles.header2}>🧹 Review images</Text>
                                     <View><Text style={Styles.paragraph}>Cycle through all of your selfies, and remove the ones you don't like</Text></View>
@@ -184,7 +150,7 @@ class Preferences extends React.Component<Props, State> {
                                         color="blue"
                                         onPress={this.reviewScene}
                                         active
-                                        text="Review images"
+                                        text="Review images →"
                                     />
                                 </View>
 
@@ -208,7 +174,7 @@ class Preferences extends React.Component<Props, State> {
                                 <View>
                                     <Text style={Styles.header2}>🚨 Danger zone</Text>
                                     <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
-                                    <Button color="red" active={!this.state.switching} onPress={this.calibrationScene} text="New face calib  📸" />
+                                    <Button color="red" active={!this.state.switching} onPress={this.calibrationScene} text="New face calib →" />
                                 </View>
 
                                 {/* Reset config */}
@@ -219,7 +185,7 @@ class Preferences extends React.Component<Props, State> {
                                         color="red"
                                         active={!this.state.switching}
                                         onPress={this.resetSettings}
-                                        text="Reset settings  🗑️"
+                                        text="Reset settings"
                                     />
                                 </View>
 
@@ -232,7 +198,7 @@ class Preferences extends React.Component<Props, State> {
                                         color="blue"
                                         active={!this.state.switching}
                                         onPress={this.tutorialScene}
-                                        text="Tutorial 🎓"
+                                        text="Tutorial"
                                     />
                                 </View>
                             </MultiAnimator>
@@ -241,7 +207,7 @@ class Preferences extends React.Component<Props, State> {
 
                     {/* Confirm */}
                     <Animator startOpacity={0} ref={this.bottomNavAnimator} style={{ transform: [{ translateY: -12 }] }}>
-                        <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="Done" />
+                        <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="← Back" />
                     </Animator>
                 </KeyboardAvoidingView>
 
