@@ -150,7 +150,7 @@ class LoadingScreen extends React.Component<Props, State> {
     render() {
         const statComponents: (JSX.Element[])[] = [
             [
-                <Poster lsimage={this.state.stats.firstImage} ref={e => {
+                <Poster key={"pg1-1"} lsimage={this.state.stats.firstImage} ref={e => {
                     if (this.posterHasAnimated === false) {
                         this.posterHasAnimated = true;
                         setTimeout(() => {
@@ -159,32 +159,32 @@ class LoadingScreen extends React.Component<Props, State> {
                         }, 5000)
                     };
                 }} />,
-                <Text style={[Styles.amountOfImagesText, { transform: [{ translateY: -100 }], textAlign: "center" }]}>😉 Your first selfie</Text>
+                <Text key={"pg1-2"} style={[Styles.amountOfImagesText, { transform: [{ translateY: -100 }], textAlign: "center" }]}>😉 Your first selfie</Text>
             ],
 
             [
-                <QuickCounter from={0} to={Math.round((new Date().getTime() - this.state.stats.daysSinceFirstSelfie) / (24 * 60 * 60 * 1000))} duration={4000} callback={this.nextStat} />,
-                <Text style={Styles.amountOfImagesText}>⏱️ Days since first selfie ({formatDate(this.state.stats.daysSinceFirstSelfie)})</Text>
+                <QuickCounter key={"pg2-1"} from={0} to={Math.round((new Date().getTime() - this.state.stats.daysSinceFirstSelfie) / (24 * 60 * 60 * 1000))} duration={4000} callback={this.nextStat} />,
+                <Text key={"pg2-2"} style={Styles.amountOfImagesText}>⏱️ Days since first selfie ({formatDate(this.state.stats.daysSinceFirstSelfie)})</Text>
             ],
 
             [
-                <QuickCounter from={0} to={this.state.stats.selfiesCaptures} duration={4000} callback={this.nextStat} />,
-                <Text style={Styles.amountOfImagesText}>📸 Selfies captured</Text>
+                <QuickCounter key={"pg3-1"} from={0} to={this.state.stats.selfiesCaptures} duration={4000} callback={this.nextStat} />,
+                <Text key={"pg3-2"} style={Styles.amountOfImagesText}>📸 Selfies captured</Text>
             ],
 
             [
-                <QuickCounter from={0} to={this.state.stats.mostImagesOneDay.nr} duration={2000} delay={2000} callback={this.nextStat} />,
-                <Text style={Styles.amountOfImagesText}>🔥 Most images taken on one day ({formatDate(this.state.stats.mostImagesOneDay.date)})</Text>
+                <QuickCounter key={"pg4-1"} from={0} to={this.state.stats.mostImagesOneDay.nr} duration={2000} delay={2000} callback={this.nextStat} />,
+                <Text key={"pg4-2"} style={Styles.amountOfImagesText}>🔥 Most images taken on one day ({formatDate(this.state.stats.mostImagesOneDay.date)})</Text>
             ],
 
             [
-                <QuickCounter from={0} to={this.state.stats.numberOfScrappedSelfies} duration={4000} callback={this.nextStat} />,
-                <Text style={Styles.amountOfImagesText}>🗑️ Total amount of images scrapped</Text>
+                <QuickCounter key={"pg5-1"} from={0} to={this.state.stats.numberOfScrappedSelfies} duration={4000} callback={this.nextStat} />,
+                <Text key={"pg5-2"} style={Styles.amountOfImagesText}>🗑️ Total amount of images scrapped</Text>
             ],
 
             [
-                <Text style={Styles.thankYou}>Thank you for using {"my app"}</Text>,
-                <Text style={Styles.thankYou}>😄</Text>
+                <Text key={"pg6-1"} style={Styles.thankYou}>Thank you for using {"my app"}</Text>,
+                <Text key={"pg6-2"} style={Styles.thankYou}>😄</Text>
             ],
         ];
 
