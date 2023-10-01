@@ -4,12 +4,17 @@ import fs, { DocumentDirectoryPath, readdir } from "react-native-fs";
 import { StitchOptions } from "../scenes/compileFootage/LoadingScreen";
 
 type StitchCallback = (uri: string) => void;
+type ProgressCallback = (progress: number) => void;
 
 /**
  * input: Takes a list of image paths which are located
  * on the users file system.
  */
-export async function stitchImages(callback: StitchCallback, options: StitchOptions): Promise<void> {
+export async function stitchImages(
+    callback: StitchCallback,
+    options: StitchOptions,
+    progressCallback: ProgressCallback
+): Promise<void> {
     const widthOverride = options.widthOverride !== null
         ? `scale=${options.widthOverride}:-1`
         : null;
@@ -45,14 +50,18 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
     const search = `-pattern_type glob -i '${picDirPath}/*.${ext}'`;
 
     /* Commmands */
-    const cmd_gif = `${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} '${output}'`;
-    const cmd_mp4 = `${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} -c:v h264 -pix_fmt yuv420p '${output}'`;
+    const cmd_gif = `-loglevel error ${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} '${output}'`;
+    const cmd_mp4 = `-loglevel error ${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} -c:v h264 -pix_fmt yuv420p '${output}'`;
     const cmd = options.outputFormat === "gif" ? cmd_gif : cmd_mp4;
 
+    /* Get amount of images in folder */
+    const amountOfImages = (await readdir(DocumentDirectoryPath)).filter(e => e.endsWith(".jpg")).length;
+
     try {
-        await FFmpegKit.executeAsync(cmd, (e) => {
-            console.log(output, "WAS DOME VIA", cmd);
+        await FFmpegKit.executeAsync(cmd, (_) => {
             callback(output);
+        }, undefined, (e) => {
+            progressCallback(e.getVideoFrameNumber() / amountOfImages);
         });
     }
     catch (e) {
