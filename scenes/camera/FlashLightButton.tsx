@@ -22,6 +22,11 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 	startTime: number = 0;
 	brightnessPermission: boolean = false;
 
+	/** What the user has set as brightness, so
+	 * we can revert changes after taking pic
+	 * with flashlight (value between 0 - 1) */
+	userPreviousBrightness: number = 0;
+
 	/**	There are two diffrent types of ways to change the
 		brightness of this flashlight. First one you only
 		need to click to toggle it. It cycles between 0 and
@@ -89,7 +94,12 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 	async componentDidMount(): Promise<void> {
 		const { status: brightnessStatus } = await Brightness.requestPermissionsAsync();
 		if (brightnessStatus === "granted") {
+			this.userPreviousBrightness = await Brightness.getBrightnessAsync();
 			this.brightnessPermission = true;
+
+			Brightness.addBrightnessListener(e => {
+				this.userPreviousBrightness = e.brightness;
+			})
 		}
 	}
 
@@ -126,15 +136,17 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 			if (active) this.props.onChange(1);
 			else this.props.onChange(0);
 			if (this.brightnessPermission && active) {
-				const { status } = await Brightness.getPermissionsAsync();
-				if (status === "granted") {
-					await Brightness.setBrightnessAsync(1);
-				}
+				await Brightness.setBrightnessAsync(1);
 			}
 		}
 	}
 	onTouchStart(): void {
 		this.changeType = "click";
+	}
+
+	/** Called externally. Resets the phone brightness */
+	async resetBrightness(): Promise<void> {
+		await Brightness.setSystemBrightnessAsync(this.userPreviousBrightness);
 	}
 
 	render() {

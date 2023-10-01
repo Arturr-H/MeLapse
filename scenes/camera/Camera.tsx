@@ -65,6 +65,7 @@ class Camera extends React.PureComponent<Props, State> {
 	debug              : RefObject<DebugDots> = React.createRef();;
 	debugOutside       : RefObject<DebugDots> = React.createRef();;
 	menuButton         : RefObject<MenuButton> = React.createRef();;
+	flashLightButton   : RefObject<FlashLightButton> = React.createRef();;
 	shutterButton      : RefObject<ShutterButton> = React.createRef();;
 
 	/** Face calibration metadata */
@@ -121,7 +122,10 @@ class Camera extends React.PureComponent<Props, State> {
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		this.animateIntro();
 		this.setState({ anyFaceVisible: true });
-		this.camera.current?.resumePreview();
+
+		/* Simulator throws error bc no camera */
+		try { this.camera.current?.resumePreview(); }
+		catch {}
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
@@ -166,6 +170,9 @@ class Camera extends React.PureComponent<Props, State> {
 				[{ flip: FlipType.Horizontal }],
 			).then(e => e)
 			.catch(_ => null);
+
+			/* Revert brightness */
+			this.flashLightButton.current?.resetBrightness();
 
 			if (flipped) {
 				/* Use pic manipulator to (try) take transformed pic */
@@ -248,7 +255,7 @@ class Camera extends React.PureComponent<Props, State> {
 		if (calibration) {
 			this.calibration = calibration;
 		}else {
-			alert("Face calibration was not found 😔");
+			console.error("No face calibration found")
 		}
 	}
 	
@@ -310,7 +317,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 						{/* Right */}
 						<View style={Styles.bottomBarTile}>
-							<FlashLightButton onChange={this.setFlashlightBrightness}/>
+							<FlashLightButton ref={this.flashLightButton} onChange={this.setFlashlightBrightness}/>
 						</View>
 					</Floater>
 				</SafeAreaView>
