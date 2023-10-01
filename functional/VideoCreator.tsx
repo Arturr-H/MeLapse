@@ -41,9 +41,11 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
     const framerate = `-r ${framerateOverride ?? options.fps}`;
     const output = options.outputFormat === "gif" ? `${picDirPath}/output_all.gif` : `${picDirPath}/output_all.mp4`;
     
+    const search = `'${picDirPath}/%15d.${ext}'`;
+
     /* Commmands */
-    const cmd_gif = `-pattern_type glob -i '${picDirPath}/*.${ext}' ${overwrite} ${scaling} ${framerate} ${bitrate} '${output}'`;
-    const cmd_mp4 = `-framerate ${options.fps} -pattern_type glob -i '${picDirPath}/*.${ext}' ${scaling} ${bitrate} ${overwrite} -c:v h264 -pix_fmt yuv420p '${output}'`;
+    const cmd_gif = `-pattern_type glob -i ${search} ${overwrite} ${scaling} ${framerate} ${bitrate} '${output}'`;
+    const cmd_mp4 = `-framerate ${options.fps} -pattern_type glob -i ${search} ${scaling} ${bitrate} ${overwrite} -c:v h264 -pix_fmt yuv420p '${output}'`;
     const cmd = options.outputFormat === "gif" ? cmd_gif : cmd_mp4;
 
     try {
