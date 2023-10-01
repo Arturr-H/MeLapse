@@ -29,13 +29,13 @@ export default StyleSheet.create({
     },
 
     header: {
-        fontFamily: "inter-extrabold",
+        fontFamily: "manrope-black",
         fontSize: 42,
 
-        marginBottom: 10
+        marginBottom: 10,
     },
     header2: {
-        fontFamily: "inter-bold",
+        fontFamily: "manrope-black",
         fontSize: 22,
         marginBottom: 5,
     },
@@ -43,7 +43,7 @@ export default StyleSheet.create({
         fontSize: 16,
         color: "#d0d0d0",
         marginBottom: 5,
-        fontWeight: "300",
+        fontFamily: "manrope-light",
 
         paddingHorizontal: 5
     },
@@ -51,15 +51,14 @@ export default StyleSheet.create({
     paragraphWhite: {
         fontSize: 16,
         color: "#fff",
-        fontWeight: "800",
 
         paddingHorizontal: 10,
-        textAlign: "center"
+        textAlign: "center",
+        fontFamily: "manrope-black",
     },
     italic: {
         fontStyle: "italic",
         color: "#5c5c5c",
-        fontWeight: "200"
     },
 
     row: {
