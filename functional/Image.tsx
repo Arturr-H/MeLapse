@@ -151,7 +151,6 @@ export async function saveImage(lsimage: LSImage, callback?: () => void): Promis
 	/* Push image to pointers */
 	if (imagePointers !== null) {
 		let push = new LSImage(path, filename);
-		console.log("pushing", push.toLSImageProp());
 		let array: LSImage[] = JSON.parse(imagePointers);
 
 		if (array) {
@@ -167,15 +166,14 @@ export async function saveImage(lsimage: LSImage, callback?: () => void): Promis
 	/* Save image */
 	RNFS.copyFile(lsimage.path, path)
 		.then(callback)
-		.catch(error => console.error('Error saving image:', error));
+		.catch(error => console.error("Error saving image:", error));
 }
 
-function generateFileName() {
-	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	let result = '';
-	for (let i = 0; i < 16; i++) {
-		const randomIndex = Math.floor(Math.random() * characters.length);
-		result += characters.charAt(randomIndex);
-	}
-	return result;
+/** Generates a date filename */
+export function generateFileName() {
+	const length = 15;
+	const timestampStr = new Date().getTime().toString();
+	const padding = "0".repeat(length - timestampStr.length);
+  
+	return padding + timestampStr;
 };
