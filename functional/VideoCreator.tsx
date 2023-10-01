@@ -1,6 +1,6 @@
 /* Imports */
 import { FFmpegKit } from "ffmpeg-kit-react-native";
-import fs, { DocumentDirectoryPath } from "react-native-fs";
+import fs, { DocumentDirectoryPath, readdir } from "react-native-fs";
 import { StitchOptions } from "../scenes/compileFootage/LoadingScreen";
 
 type StitchCallback = (uri: string) => void;
@@ -38,14 +38,15 @@ export async function stitchImages(callback: StitchCallback, options: StitchOpti
 
     /* Format and framerate */
     const framerateOverride = options.framerateOverride;
-    const framerate = `-r ${framerateOverride ?? options.fps}`;
+    const framerate = `-framerate ${framerateOverride ?? options.fps}`;
+    const r = `-r ${framerateOverride ?? options.fps}`;
     const output = options.outputFormat === "gif" ? `${picDirPath}/output_all.gif` : `${picDirPath}/output_all.mp4`;
     
-    const search = `'${picDirPath}/%15d.${ext}'`;
+    const search = `-pattern_type glob -i '${picDirPath}/*.${ext}'`;
 
     /* Commmands */
-    const cmd_gif = `-pattern_type glob -i ${search} ${overwrite} ${scaling} ${framerate} ${bitrate} '${output}'`;
-    const cmd_mp4 = `-framerate ${options.fps} -pattern_type glob -i ${search} ${scaling} ${bitrate} ${overwrite} -c:v h264 -pix_fmt yuv420p '${output}'`;
+    const cmd_gif = `${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} '${output}'`;
+    const cmd_mp4 = `${framerate} ${search} ${r} ${overwrite} ${scaling} ${bitrate} -c:v h264 -pix_fmt yuv420p '${output}'`;
     const cmd = options.outputFormat === "gif" ? cmd_gif : cmd_mp4;
 
     try {
