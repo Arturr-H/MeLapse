@@ -59,7 +59,7 @@ class Composer extends React.Component<Props, State> {
         /* State */
         this.state = {
             config: {
-                format: 0,
+                format: 1,
                 quality: 1,
                 framerate: 1
             },

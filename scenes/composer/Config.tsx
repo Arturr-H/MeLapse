@@ -15,7 +15,7 @@ export default class ComposerConfig {
     private constructor() { throw new Error("ComposerConfig is not initializable. All methods are static") }
 
     /** Output format */
-    static async getFormat(): Promise<number> { return this.tryGet("format", 0) } // 0 = GIF
+    static async getFormat(): Promise<number> { return this.tryGet("format", 1) } // 1 = MP4
     static async setFormat(value: number) { await AsyncStorage.setItem("format", JSON.stringify(value)) }
 
     /** Output quality */
