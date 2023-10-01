@@ -21,18 +21,23 @@ const WIDTH = Dimensions.get("window").width;
 interface Props {
 }
 interface State {
-    bgTranslate: Animated.Value
+    bgTranslate: Animated.Value,
+    textAnimationSpeed: Animated.Value,
+    textWidth?: number
 }
 
 export default class Background extends React.PureComponent<Props, State> {
     background: RefObject<Animator> = React.createRef();
+    isFadedIn: boolean = false;
+    textOffsets: number[] = [-25, 13, 62, -11, 2, -41, 42];
 
     constructor(props: Props) {
         super(props);
 
         /* State */
         this.state = {
-            bgTranslate: new Animated.Value(-WIDTH),
+            bgTranslate: new Animated.Value(0),
+            textAnimationSpeed: new Animated.Value(1),
         };
 
         /* Bindings */
@@ -40,13 +45,20 @@ export default class Background extends React.PureComponent<Props, State> {
         this.fadeIn = this.fadeIn.bind(this);
     };
 
-    /** Fades in background. Called externally */
-    fadeIn(): void {
-        this.background.current?.fadeIn(1000).start();
+    onLayout(textWidth: number): void {
+        this.setState({ textWidth });
+        if (!this.isFadedIn) {
+            this.fadeIn(textWidth);
+        }
+    }
 
+    /** Fades in background */
+    fadeIn(textWidth: number): void {
+        this.background.current?.fadeIn(1000).start();
+        
         Animated.loop(Animated.timing(this.state.bgTranslate, {
-            toValue: WIDTH,
-            duration: 10000,
+            toValue: textWidth,
+            duration: 4000,
             easing: Easing.linear,
             useNativeDriver: true
         })).start();
@@ -54,40 +66,56 @@ export default class Background extends React.PureComponent<Props, State> {
 
     /** Fades out background. Called externally */
     fadeOut(): void {
+        Animated.timing(this.state.textAnimationSpeed, {
+            toValue: 5,
+            useNativeDriver: true,
+            easing: Easing.in(Easing.ease),
+            duration: 1000
+        }).start();
         this.background.current?.fadeOut(1000).start();
     }
 
 	render() {
 		return (
-            <Floater loosness={2} style={{
-                position: "absolute",
-                width: WIDTH,
-                height: "100%",
-
-                zIndex: -2,
-            }}>
-                <Animator startOpacity={0} ref={this.background} pointerEvents="none" style={{
-                    width: WIDTH,
-                    height: "100%",
-                    position: "absolute",
-
-                    display: "flex",
-                    justifyContent: "center",
-                        alignItems: "center",
-                }}>
-                    <Animated.Text numberOfLines={1} style={{
-                        position: "absolute",
-                        fontSize: WIDTH * 0.5,
-                        width: WIDTH*8,
-                        textAlign: "center",
-
-                        transform: [{ translateX: this.state.bgTranslate }],
-                        color: "#eee",
-                        fontFamily: "inter-black",
-                        
-                    }}>SAVE{"  "}SAVE{"  "}SAVE</Animated.Text>
-                </Animator>
-            </Floater>
+            <Animator startOpacity={0} ref={this.background} pointerEvents="none" style={Styles.textContainer}>
+                {[0.25,0.5,0.8,1,0.8,0.5,0.25].map((opacity, i) => 
+                    <Animated.Text
+                        key={"bgtxtrow" + i}
+                        numberOfLines={1}
+                        style={[Styles.backgroundTextRow, {
+                            transform: [{ translateX: 
+                                Animated.add(
+                                    Animated.multiply(
+                                        this.state.bgTranslate,
+                                        Animated.multiply(
+                                            1 + Math.abs(2 - i + 1),
+                                            this.state.textAnimationSpeed
+                                        )
+                                    ),
+                                    this.textOffsets[i]
+                                ),
+                            }],
+                            opacity
+                        }]}
+                    >
+                        {[0,0,0,0,0,0,0,0,0,0,0].map((_,i_) =>
+                            <View key={"bgtxt" + i_}>
+                                <Text
+                                    style={[
+                                        Styles.backgroundText,
+                                        this.state.textWidth ? { width: this.state.textWidth } : {}
+                                    ]}
+                                    onLayout={e => {
+                                        if (i_ === 0 && e.nativeEvent.layout.width !== 0)
+                                            this.onLayout(e.nativeEvent.layout.width)
+                                    }}
+                                    children="SAVE  "
+                                />
+                            </View>
+                        )}
+                    </Animated.Text>
+                )}
+            </Animator>
 		);
 	}
 }

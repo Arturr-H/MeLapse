@@ -67,7 +67,6 @@ class Preview extends React.PureComponent<Props, State> {
         this.props.navigation.removeListener("focus", this.onFocus);
     }
     onFocus(): void {
-        this.background.current?.fadeIn();
         this.introButtons();
         this.setState({ lsimage: this.props.lsimage });
     }
@@ -85,24 +84,35 @@ class Preview extends React.PureComponent<Props, State> {
 
         this.background.current?.fadeOut();
         this.outroButtons();
-        this.poster.current?.delete(() => {
-            this.props.navigation.navigate("Camera", { comesFrom: "other" });
-        });
+        const navigate = () => this.props.navigation.navigate("Camera", { comesFrom: "other" });
+        
+        if (this.poster.current) {
+            this.poster.current?.delete(navigate);
+        }else {
+            navigate();
+        }
     }
     async onSave(): Promise<void> {
-        this.setState({ deactivateButtons: true });
+        if (this.props.lsimage) {
+            this.setState({ deactivateButtons: true });
 
-        /* Save the image to fs */
-        await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
+            /* Save the image to fs */
+            await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
 
-        /* Animations */
-        Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
-        this.background.current?.fadeOut();
-        this.outroButtons();
+            /* Animations */
+            Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
+            this.background.current?.fadeOut();
+            this.outroButtons();
 
-        this.poster.current?.save(() => {
-            this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
-        });
+            if (this.poster.current) {
+                this.poster.current?.save(() => {
+                    this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
+                });
+            }
+        }else {
+            alert("No image found.");
+            this.props.navigation.navigate("Camera", { comesFrom: "other" });
+        }
     }
 
     /* Button animations */
@@ -118,6 +128,9 @@ class Preview extends React.PureComponent<Props, State> {
 	render() {
 		return (
 			<SafeAreaView style={Styles.container}>
+                {/* Background */}
+                <Background ref={this.background} />
+
                 <View style={Styles.posterContainer}>
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
@@ -153,14 +166,11 @@ class Preview extends React.PureComponent<Props, State> {
                         >
                             {this.state.deactivateButtons
                                 ? <ActivityIndicator color={"white"} />
-                                : <Text style={Styles.acceptButtonText}>SAVE 👍</Text>
+                                : <Text style={Styles.acceptButtonText}>SAVE →</Text>
                             }
                         </TouchableOpacity>
                     </Floater>
                 </View>
-
-                {/* Background */}
-                <Background ref={this.background} />
 
                 {/* Time, battery & more */}
                 <StatusBar style="dark" />

@@ -105,5 +105,37 @@ export default StyleSheet.create({
         color: "#fff",
         fontSize: 20,
         fontFamily: "inter-black",
+    },
+
+    backgroundContainer: {
+        width: "100%",
+        backgroundColor: "red",
+
+        position: "absolute",
+        zIndex: -4,
+
+        display: "flex",
+        flexDirection: "column"
+    },
+    textContainer: {
+        position: "absolute",
+        width: WIDTH,
+        height: "100%",
+        // position: "absolute",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
+    backgroundTextRow: {
+        width: WIDTH*4,
+
+        display: "flex",
+        flexDirection: "row",
+    },
+    backgroundText: {
+        fontSize: 45,
+        color: "#eee",
+        fontFamily: "inter-black",
     }
 })
