@@ -24,7 +24,10 @@ export class PosterInner extends React.PureComponent<Props> {
                 <View style={Styles.poster}>
                     {/* The actual image */}
                     <Image style={Styles.image} source={{
-                        uri: this.props.lsimage?.path
+                        uri: this.props.lsimage &&
+                            this.props.lsimage.path.length === 0
+                                ? LSImage.fromLSImageProp(this.props.lsimage).getPath()
+                                : this.props.lsimage?.path
                     }} />
 
                     {/* Date? (yes / no) */}
