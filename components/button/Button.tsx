@@ -1,8 +1,14 @@
 import React, { RefObject } from "react";
-import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, ActivityIndicator, Alert } from "react-native";
+import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, ActivityIndicator, Alert, StyleProp, ViewStyle } from "react-native";
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
 import * as Haptics from "expo-haptics";
+
+/* Constants */
+const SCALE_ANIM_CONFIG = {
+    duration: 50, useNativeDriver: true,
+    easing: Easing.inOut(Easing.ease)
+};
 
 /* Interfaces */
 interface Props {
@@ -28,9 +34,13 @@ interface Props {
     /* Override w/h */
     width?: number,
     height?: number,
+
+    /** Add styles */
+    style?: StyleProp<ViewStyle>
 }
 interface State {
     loading?: boolean,
+    scale: Animated.Value
 }
 
 export class Button extends React.PureComponent<Props, State> {
@@ -46,6 +56,7 @@ export class Button extends React.PureComponent<Props, State> {
 		/* State */
 		this.state = {
             loading: false,
+            scale: new Animated.Value(1)
         };
 
         /* Static */
@@ -54,6 +65,10 @@ export class Button extends React.PureComponent<Props, State> {
             "red": ["rgb(255, 45, 85)", "rgb(235, 25, 75)"],
             "green": ["rrgb(90, 200, 245)", "rgb(80, 190, 245)"]
         }
+
+        /* Bindings */
+        this.onTouchStart = this.onTouchStart.bind(this);
+        this.onTouchEnd = this.onTouchEnd.bind(this);
 	}
 
     /* Lifetime */
@@ -66,55 +81,75 @@ export class Button extends React.PureComponent<Props, State> {
         }
     }
 
+    /* Touch */
+    onTouchStart(): void {
+        Animated.timing(this.state.scale, { ...SCALE_ANIM_CONFIG, toValue: 0.95 }).start();
+    }
+    onTouchEnd(): void {
+        Animated.timing(this.state.scale, { ...SCALE_ANIM_CONFIG, toValue: 1 }).start();
+    }
+
 	render() {
+        const scale = this.state.scale;
+
 		return (
-            <TouchableHighlight
-                underlayColor={this.colors[this.props.color ?? "blue"][1]}
+            <Animated.View
                 style={[
-                    Styles.button,
-                    {
-                        backgroundColor: this.colors[this.props.color ?? "blue"][0],
-                        borderColor: this.colors[this.props.color ?? "blue"][1],
-                    },
                     this.props.flex && { flex: 1 },
-                    this.props.small && {
-                        borderRadius: 5,
-                        height: 40,
-                        minHeight: 40
-                    },
-                    this.props.width !== undefined ? { width: this.props.width } : {},
-                    this.props.height !== undefined ? { height: this.props.height } : {},
+                    { transform: [{ scale }] }
                 ]}
-                onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (this.props.confirm) {
-                        Alert.alert(this.props.confirm.title, this.props.confirm.message, [
-                            { style: "destructive", onPress: () => {
-                                this.props.active === true && this.props.onPress();
-                            }, isPreferred: false, text: "Ok" },
-                            { style: "default", isPreferred: true, text: "Cancel", onPress: this.props.onDeny },
-                        ])
-                    }else {
-                        this.props.active === true && this.props.onPress();
-                    }
-                }}
             >
-                {
-                    this.state.loading === true
+                <TouchableHighlight
+                    underlayColor={this.colors[this.props.color ?? "blue"][1]}
+                    style={[
+                        this.props.style,
+                        Styles.button,
+                        {
+                            backgroundColor: this.colors[this.props.color ?? "blue"][0],
+                            borderColor: this.colors[this.props.color ?? "blue"][1],
+                        },
+                        this.props.flex && { flex: 1 },
+                        this.props.small && {
+                            borderRadius: 5,
+                            height: 40,
+                            minHeight: 40
+                        },
+                        this.props.width !== undefined ? { width: this.props.width } : {},
+                        this.props.height !== undefined ? { height: this.props.height } : {},
+                    ]}
+                    onPressIn={this.onTouchStart}
+                    onPressOut={this.onTouchEnd}
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        if (this.props.confirm) {
+                            Alert.alert(this.props.confirm.title, this.props.confirm.message, [
+                                { style: "destructive", onPress: () => {
+                                    this.props.active === true && this.props.onPress();
+                                }, isPreferred: false, text: "Ok" },
+                                { style: "default", isPreferred: true, text: "Cancel", onPress: this.props.onDeny },
+                            ])
+                        }else {
+                            this.props.active === true && this.props.onPress();
+                        }
+                    }}
+                >
+                    {
+                        this.state.loading === true
 
-                    /* Loading */
-                    ? <ActivityIndicator color={"white"} />
+                        /* Loading */
+                        ? <ActivityIndicator color={"white"} />
 
-                    /* Children */
-                    : this.props.children ? <>{this.props.children}</>
+                        /* Children */
+                        : this.props.children ? <>{this.props.children}</>
 
-                    /* Text */
-                    : <Text style={[
-                        Styles.buttonText,
-                        this.props.small && { fontSize: 16 }
-                    ]}>{this.props.text}</Text>
-                }
-            </TouchableHighlight>
+                        /* Text */
+                        : <Text style={[
+                            Styles.buttonText,
+                            this.props.small && { fontSize: 16 }
+                        ]}>{this.props.text}</Text>
+                    }
+                </TouchableHighlight>
+            </Animated.View>
         );
 	}
 }
