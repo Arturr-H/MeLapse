@@ -30,19 +30,19 @@ export interface State {
     loading: boolean,
 
     /** Image we're reviewing right now */
-    currentImage?: LSImageProp,
+    currentImage?: LSImage,
 
     /** Deleting an image takes some time, show progress view */
     deleting: boolean,
 }
 
 class Review extends React.PureComponent<Props, State> {
-    lsImages: { path: string, filename: string, date: number }[] = [];
+    lsImages: LSImage[] = [];
     contextMenu: RefObject<ContextMenu> = React.createRef();
 
     /** Index of which image we're reviewing right now */
     searchIndex: number = 0;
-    currentImage?: LSImageProp;
+    currentImage?: LSImage;
 
     /* For holding (repeating next / prev image switch) */
     holdInterval?: NodeJS.Timeout;
@@ -65,21 +65,29 @@ class Review extends React.PureComponent<Props, State> {
         this.previousImage = this.previousImage.bind(this);
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
+        this.loadImages = this.loadImages.bind(this);
         this.nextImage = this.nextImage.bind(this);
         this.goBack = this.goBack.bind(this);
     };
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
+        this.loadImages().then(_ => 
+            this.props.navigation.addListener("focus", this.loadImages)
+        );
+    };
+
+    /** Loads images */
+    async loadImages(): Promise<void> {
         const lsimgs = await LSImage.getImagePointers();
 
-        if (lsimgs) {
-            let images: LSImageProp[] = [];
+        if (lsimgs && lsimgs.length !== 0) {
+            let images: LSImage[] = [];
 
             /** Get all images */
             lsimgs.forEach(a => {
-                const { path, filename, date } = a;
-                if (this.getFileExt(path) === "jpg") images.push({ path, filename, date });
+                const lsimage = LSImage.fromLSImageProp(a);
+                images.push(lsimage);
             });
 
             this.lsImages = images;
@@ -89,7 +97,7 @@ class Review extends React.PureComponent<Props, State> {
             alert("Could not load images");
             this.props.navigation.navigate("Preferences");
         }
-    };
+    }
 
     /** Timewarp button interactions */
     onTouchStart(callback: () => void): void {
@@ -173,7 +181,7 @@ class Review extends React.PureComponent<Props, State> {
         const SEARCH_INDEX = this.searchIndex;
         const CURRENT_IMAGE = this.lsImages[SEARCH_INDEX];
 
-        saveToLibraryAsync(CURRENT_IMAGE.path).then(_ => alert("Image saved!"));
+        saveToLibraryAsync(CURRENT_IMAGE.getPath()).then(_ => alert("Image saved!"));
     }
 
     /** Update image */
@@ -185,7 +193,7 @@ class Review extends React.PureComponent<Props, State> {
 		return (
 			<SafeAreaView style={Styles.container}>
                 <View style={Styles.headerView}>
-                    <Text style={Styles.header}>{formatDate(this.state.currentImage?.date ?? undefined)}</Text>
+                    <Text style={Styles.header}>{formatDate(this.state.currentImage?.getDate() ?? undefined)}</Text>
                 </View>
 
                 <View style={Styles.body}>
@@ -194,7 +202,7 @@ class Review extends React.PureComponent<Props, State> {
                         {/* CURR */}
                         <Animated.Image
                             source={{ uri: 
-                                this.state.currentImage?.path
+                                this.state.currentImage?.getPath()
                             }}
                             style={Styles.reviewImage}
                         />
