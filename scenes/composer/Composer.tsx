@@ -89,6 +89,7 @@ class Composer extends React.Component<Props, State> {
         this.props.navigation.removeListener("focus", this.onFocus);
     }
     async onFocus(): Promise<void> {
+        console.log("FOCUS");
         this.updateFramerateOverwritten();
         this.fadeIn();
         const [format, quality, framerate] = [
@@ -235,7 +236,7 @@ class Composer extends React.Component<Props, State> {
                         {/* Output type (?) */}
                         <View>
                             <Text style={Styles.header2}>🔧 Output settings</Text>
-                            <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is GIF)</Text>
+                            <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is MP4)</Text>
                             <SelectInput
                                 initial={this.state.config.format}
                                 onChange={ComposerConfig.setFormat}
@@ -272,14 +273,14 @@ class Composer extends React.Component<Props, State> {
                 </View>
 
                 {/* Confirm */}
-                <Animator startOpacity={1} style={{ transform: [{ translateY: -12 }], gap: 10 }}>
+                <View style={{ transform: [{ translateY: -12 }] }}>
                     <Button
                         onPress={this.goBack}
                         active={true}
                         color="blue"
                         text="← Back"
                     />
-                </Animator>
+                </View>
                 </KeyboardAvoidingView>
 			</SafeAreaView>
 		);

@@ -26,7 +26,6 @@ export interface State {
 
 class AdvancesComposer extends React.Component<Props, State> {
     animatorComponent: RefObject<MultiAnimator> = React.createRef();
-    bottomNavAnimator: RefObject<Animator> = React.createRef();
     overrideBitrateInput: RefObject<TextInput> = React.createRef();
     widthOverride: RefObject<TextInput> = React.createRef();
     framerateOverride: RefObject<TextInput> = React.createRef();
@@ -66,11 +65,9 @@ class AdvancesComposer extends React.Component<Props, State> {
         this.animatorComponent.current?.fadeOut(0, 0, () => {
             this.animatorComponent.current?.fadeIn(200, 50);
         });
-        this.bottomNavAnimator.current?.fadeOut(0).fadeIn(750).start();
     }
     fadeOut = (callback?: () => void) => {
-        this.animatorComponent.current?.fadeOut(200, 50);
-        this.bottomNavAnimator.current?.fadeOut(750).start(callback);
+        this.animatorComponent.current?.fadeOut(200, 50, callback);
     }
 
     /* Scene switches */
@@ -205,9 +202,9 @@ class AdvancesComposer extends React.Component<Props, State> {
                     </View>
                     
                     {/* Confirm */}
-                    <Animator startOpacity={0} ref={this.bottomNavAnimator} style={{ transform: [{ translateY: -12 }] }}>
-                        <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="Done" />
-                    </Animator>
+                    <View style={{ transform: [{ translateY: -12 }] }}>
+                        <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="← Back" />
+                    </View>
                 </KeyboardAvoidingView>
 			</SafeAreaView>
 		);
