@@ -24,7 +24,9 @@ export interface Props {
         Review: undefined,
         Calibration: undefined,
         Tutorial: undefined,
-    }, "Camera" | "Debug" | "Composer" | "Review" | "Calibration" | "Tutorial">,
+        PrivacyPolicy: undefined,
+    }, "Camera" | "Debug" | "Composer" | "Review"
+    | "Calibration" | "Tutorial" | "PrivacyPolicy">,
 }
 export interface State {
     switching: boolean,
@@ -81,26 +83,31 @@ class Preferences extends React.Component<Props, State> {
         });
         this.bottomNavAnimator.current?.fadeOut(0).fadeIn(400).start();
     }
-    fadeOut = (callback?: () => void) => {
-        this.animatorComponent.current?.fadeOut(200, 50);
-        this.bottomNavAnimator.current?.fadeOut(400).start(callback);
+    fadeOut = (shouldIgnoreBottomNavAnim: boolean, callback?: () => void) => {
+        this.animatorComponent.current?.fadeOut(200, 50, callback);
+
+        if (!shouldIgnoreBottomNavAnim)
+            this.bottomNavAnimator.current?.fadeOut(400).start();
     }
 
     /* Scene switches */
-    cameraScene = () => this.fadeOut(() => 
+    cameraScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("Camera", { comesFrom: "preferences" })
     )
-    composerScene = () => this.fadeOut(() => 
+    composerScene = () => this.fadeOut(true, () => 
         this.props.navigation.navigate("Composer")
     )
-    reviewScene = () => this.fadeOut(() => 
+    reviewScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("Review")
     )
-    calibrationScene = () => this.fadeOut(() => 
+    calibrationScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("Calibration")
     )
-    tutorialScene = () => this.fadeOut(() => 
+    tutorialScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("Tutorial")
+    )
+    privacyPolicyScene = () => this.fadeOut(false, () => 
+        this.props.navigation.navigate("PrivacyPolicy")
     )
 
     /** Reset all settings to default */
@@ -144,7 +151,7 @@ class Preferences extends React.Component<Props, State> {
                                 {/* Review images */}
                                 <View>
                                     <Text style={Styles.header2}>🧹 Review images</Text>
-                                    <View><Text style={Styles.paragraph}>Cycle through all of your selfies, and remove the ones you don't like</Text></View>
+                                    <View><Text style={Styles.paragraph}>Review all the selfies you've taken so far. Delete, save, or keep them</Text></View>
 
                                     <Button
                                         color="blue"
@@ -170,6 +177,30 @@ class Preferences extends React.Component<Props, State> {
 
                                 <View style={Styles.hr} />
 
+                                {/* Redo tutorial */}
+                                <View>
+                                    <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
+                                    <Button
+                                        color="blue"
+                                        active={!this.state.switching}
+                                        onPress={this.tutorialScene}
+                                        text="Tutorial →"
+                                    />
+                                </View>
+
+                                {/* "Privacy policy" */}
+                                <View>
+                                    <Text style={Styles.paragraph}>View the privacy policy</Text>
+                                    <Button
+                                        color="blue"
+                                        active={!this.state.switching}
+                                        onPress={this.privacyPolicyScene}
+                                        text="Privacy policy →"
+                                    />
+                                </View>
+
+                                <View style={Styles.hr} />
+
                                 {/* Redo face calibration */}
                                 <View>
                                     <Text style={Styles.header2}>🚨 Danger zone</Text>
@@ -186,19 +217,6 @@ class Preferences extends React.Component<Props, State> {
                                         active={!this.state.switching}
                                         onPress={this.resetSettings}
                                         text="Reset settings"
-                                    />
-                                </View>
-
-                                <View style={Styles.hr} />
-
-                                {/* Redo tutorial */}
-                                <View>
-                                    <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
-                                    <Button
-                                        color="blue"
-                                        active={!this.state.switching}
-                                        onPress={this.tutorialScene}
-                                        text="Tutorial"
                                     />
                                 </View>
                             </MultiAnimator>
