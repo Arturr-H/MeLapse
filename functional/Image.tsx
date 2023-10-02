@@ -1,5 +1,4 @@
 /* Imports */
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as MediaLibrary from "expo-media-library";
 import RNFS from "react-native-fs";
 import { formatDate } from "./Date";
@@ -9,7 +8,10 @@ import AppConfig from "../scenes/preferences/Config";
 /// We use .jpg because when we flip the image
 /// using `expo-image-manipulator` we save it
 /// as jpg in the end (it's good for space)
-const EXT = "jpg";
+const EXT = ".jpg";
+const DOC_DIR = RNFS.DocumentDirectoryPath + "/";
+const IMAGE_POINTER_FILENAME = "imagepointers.json";
+const FILE_PATH = DOC_DIR + IMAGE_POINTER_FILENAME;
 
 /**
  * The `LSImage` class can't be passed as prop, it leads 
@@ -19,27 +21,30 @@ const EXT = "jpg";
  * for converting it back into a LSImage.
 */
 export interface LSImageProp {
-	/** Path to the file which is stored in fs */
-	path: string;
-
-	/**	Used when storing images (is randomly
-	 * generated) and can be used for ex keys. */
-	filename: string;
+	/**	Used when storing images (is the date in
+	 * unix time ms) and can be used for ex keys. */
+	filename: string,
 	
+	/** In preview scene, we've not saved the image
+	 * yet, and it lies in the temporary dir. Otherwise
+	 * we always use the .getPath() method to use the
+	 * correct directory */
+	path: string,
+
 	/** Unix time stamp (ms) */
-	date: number;
+	date: number,
 }
 
 /** Locally Stored Image */
 export class LSImage {
-	path: string;
+	private path: string;
 	private filename: string;
-	date: number;
+	private date: number;
 
-	constructor(path: string, filename: string) {
-		this.path = path;
-		this.filename = filename;
+	constructor() {
+		this.path = "";
 		this.date = new Date().getTime();
+		this.filename = this.date.toString();
 
 		/* Bindings */
 		this.getDateFormatted = this.getDateFormatted.bind(this);
@@ -56,7 +61,7 @@ export class LSImage {
 	async saveAsync(callback?: () => void): Promise<void> {
 		/* Save image to user media library if that setting is on */
 		if (await AppConfig.getSaveSelfiesToCameraRoll()) {
-			await MediaLibrary.saveToLibraryAsync(this.path);
+			await MediaLibrary.saveToLibraryAsync(this.getPath());
 		}
 
 		/* Save in fs */
@@ -65,7 +70,8 @@ export class LSImage {
 
 	/** Convert `LSImageProp` into this class */
 	static fromLSImageProp(prop: LSImageProp): LSImage {
-		let lsimage = new LSImage(prop.path, prop.filename);
+		let lsimage = new LSImage();
+		lsimage.path = prop.path;
 		lsimage.filename = prop.filename;
 		lsimage.date = prop.date;
 
@@ -74,52 +80,82 @@ export class LSImage {
 	/** Convert this class into `LSImageProp` */
 	toLSImageProp(): LSImageProp {
 		return {
-			path: this.path,
 			filename: this.filename,
-			date: this.date
+			path: this.path,
+			date: this.date,
 		}
 	}
 
-	/* Getters */
-	getDateFormatted(): string { return formatDate(this.date) };
+	/* Filename */
 	getFilename(): string { return this.filename };
+	withFilename(filename: string): this { this.filename = filename; return this; }
+	
+	/* Path */
+	getPath(): string { return RNFS.DocumentDirectoryPath + "/" + this.filename + EXT };
+	getRawPath(): string { return this.path };
+	withPath(path: string): this { this.path = path; return this; }
+
+	/* Date & path */
+	getDateFormatted(): string { return formatDate(this.date) };
 	getDate(): number { return this.date };
-	getPath(): string { return this.path };
 
 	/** Gets all image paths */
 	public static async getImagePointers(): Promise<LSImageProp[] | null> {
 		try {
-			const ret = await AsyncStorage.getItem("imagePointers");
+			const ret = await RNFS.readFile(DOC_DIR + IMAGE_POINTER_FILENAME);
 			return JSON.parse(ret!) as LSImageProp[];
 		} catch {
 			return null
 		}
 	}
-	
-	/** Removes file extension from only filename */
-	static removeFileExt(name: string): string {
-		return name.split(".")[0];
+
+	/** Push to the image pointers file. If the
+	 * file is not set up, we set it up. */
+	public static async pushToImagesPointers(push: LSImage): Promise<void> {
+
+		/** Push to file (File now is guaranteed to exist) */
+		async function processFileContent(content: string): Promise<void> {
+			try {
+				let ret: LSImageProp[] = JSON.parse(content);
+				ret.push(push.toLSImageProp());
+				const PARSED = JSON.stringify(ret);
+				
+				/* Write to file */
+				RNFS.writeFile(FILE_PATH, PARSED);
+			}catch (e){
+				console.error("Could not parse", e);
+			}
+		}
+
+		return await RNFS.readFile(FILE_PATH)
+			.then(processFileContent)
+			.catch(_ => processFileContent("[]"));
+	}
+
+	/** Dangerous function. Resets the file contents of imagepointers.json */
+	public static async resetImagePointersFile(): Promise<void> {
+		console.info("Clearing imagepointers.json file");
+		await RNFS.writeFile(FILE_PATH, "[]");
 	}
 
 	/** Delete image */
-	public static async deleteImageAsync(image: { path: string, filename: string }): Promise<void> {
+	public static async deleteImageAsync(image: LSImage): Promise<void> {
 		/* Check if we've got a local image pointer array to delete from */
-		const imagePointers_str = await AsyncStorage.getItem("imagePointers");
-		if (imagePointers_str !== null) {
+		let imagePointers = await this.getImagePointers();
+		if (imagePointers !== null) {
 			try {
-				let imagePointers: LSImageProp[] = JSON.parse(imagePointers_str) as LSImageProp[];
 				const filename = image.filename;
 				
 				/* Find removable element */
 				for (let i = 0; i < imagePointers.length; i++) {
-					const element = imagePointers[i];
-					const split = element.path.split("/");
+					const element = LSImage.fromLSImageProp(imagePointers[i]);
+					const split = element.getPath().split("/");
 					const try_filename = split[split.length - 1].split(".")[0];
 
 					if (try_filename === filename) {
 						/* Set image pointers */
 						imagePointers.splice(i, 1);
-						await AsyncStorage.setItem("imagePointers", JSON.stringify(imagePointers));
+						RNFS.writeFile(FILE_PATH, JSON.stringify(imagePointers));
 
 						const unlinkPath = fs.DocumentDirectoryPath + "/" + try_filename + ".jpg";
 						return fs.unlink(unlinkPath);
@@ -138,33 +174,13 @@ export class LSImage {
 
 /* Save image to users fs */
 export async function saveImage(lsimage: LSImage, callback?: () => void): Promise<void> {
-	/* Check if we've got a local image pointer array */
-	if (await AsyncStorage.getItem("imagePointers") === null) {
-		AsyncStorage.setItem("imagePointers", JSON.stringify([]));
-	}
-
 	/* Push & create filename */
 	const filename = generateFileName();
-	const path = `${RNFS.DocumentDirectoryPath}/${filename}.${EXT}`;
-	let imagePointers = await AsyncStorage.getItem("imagePointers");
-
-	/* Push image to pointers */
-	if (imagePointers !== null) {
-		let push = new LSImage(path, filename);
-		let array: LSImage[] = JSON.parse(imagePointers);
-
-		if (array) {
-			array.push(push);
-
-			AsyncStorage.setItem(
-				"imagePointers",
-				JSON.stringify(array)
-			);
-		}
-	};
+	const path = `${RNFS.DocumentDirectoryPath}/${filename}${EXT}`;
+	LSImage.pushToImagesPointers(new LSImage().withFilename(filename));
 
 	/* Save image */
-	RNFS.copyFile(lsimage.path, path)
+	RNFS.copyFile(lsimage.getRawPath(), path)
 		.then(callback)
 		.catch(error => console.error("Error saving image:", error));
 }
