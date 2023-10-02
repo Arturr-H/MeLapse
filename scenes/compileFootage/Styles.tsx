@@ -35,46 +35,6 @@ export default StyleSheet.create({
         color: "#ddd"
     },
 
-    emojiView: {
-        width: "100%",
-        height: "100%",
-        position: "absolute",
-
-        display: "flex",
-        justifyContent: "space-between",
-            alignItems: "center",
-        flexDirection: "column",
-
-        gap: 10,
-        opacity: 0.5
-    },
-    emojiViewBlur: {
-        width: "100%",
-        height: "100%",
-        zIndex: 10,
-        position: "absolute",
-    },
-    emojiCorner: {
-        flex: 1,
-        width: "100%",
-
-        display: "flex",
-        justifyContent: "center",
-            alignItems: "center",
-    },
-    emojiCornerTextTop: {
-        fontSize: WIDTH / 1,
-        position: "absolute",
-
-        transform: [{ translateX: -EMOJI_MOVE }, { translateY: -EMOJI_MOVE*0.4 }, { rotate: "-35deg" }, { scaleY: -1 }]
-    },
-    emojiCornerTextBottom: {
-        fontSize: WIDTH / 1,
-        position: "absolute",
-
-        transform: [{ translateX: EMOJI_MOVE }, { translateY: EMOJI_MOVE*0.4 }, { rotate: "-35deg" }, { scaleX: -1 }]
-    },
-
     loadingContainer: {
         width: "100%",
         position: "absolute",
@@ -92,18 +52,13 @@ export default StyleSheet.create({
         fontWeight: "500"
     },
 
-    cancelButton: {
-        height: 50,
-
+    disk: {
         position: "absolute",
 
-        top: 60,
-        left: 20,
-        zIndex: 50
-    },
-    cancelButtonText: {
-        fontSize: 24,
-        color: "#ddd",
-        fontWeight: "600"
+        fontSize: 98,
+        overflow: "hidden",
+        zIndex: -1,
+        right: -25,
+        opacity: 0.4
     }
 });

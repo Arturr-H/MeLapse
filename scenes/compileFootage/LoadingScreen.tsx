@@ -16,7 +16,8 @@ import { LSImage, LSImageProp } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { formatDate } from "../../functional/Date";
-
+import { ProgressBar } from "../../components/progressBar/ProgressBar";
+import ButtonStyles from "../../components/button/Styles";
 
 /* Interfaces */
 interface Stats {
@@ -34,6 +35,7 @@ interface Props {
 interface State {
     amountOfImages: number,
     amountOfImagesTranslateX: Animated.Value,
+    diskRotation: Animated.Value,
 
     /** This scene displays a bunch of stats, this
      * value keeps track of which to display */
@@ -57,7 +59,11 @@ export interface StitchOptions {
 class LoadingScreen extends React.Component<Props, State> {
     /* Refs */
     multianimator: RefObject<MultiAnimator> = React.createRef();
+    progressBar: RefObject<ProgressBar> = React.createRef();
     posterHasAnimated: boolean = false;
+
+    /** Should cancel ffmpeg stitching */
+    shouldCancel: boolean = false;
 
     constructor(props: Props) {
         super(props);
@@ -66,6 +72,7 @@ class LoadingScreen extends React.Component<Props, State> {
         this.state = {
             amountOfImages: 0,
             amountOfImagesTranslateX: new Animated.Value(-WIDTH),
+            diskRotation: new Animated.Value(0),
 
             statIndex: 0,
             loading: true,
@@ -79,6 +86,7 @@ class LoadingScreen extends React.Component<Props, State> {
         };
 
         /* Bindings */
+        this.onProgressUpdate = this.onProgressUpdate.bind(this);
         this.generateVideo = this.generateVideo.bind(this);
         this.nextStat = this.nextStat.bind(this);
         this.goBack = this.goBack.bind(this);
@@ -94,6 +102,13 @@ class LoadingScreen extends React.Component<Props, State> {
 
         const imagePointers = await LSImage.getImagePointers();
         if (imagePointers) this.setState({ stats: await getAllStats(imagePointers) });
+
+        Animated.loop(Animated.timing(this.state.diskRotation, {
+            toValue: 360,
+            easing: Easing.linear,
+            useNativeDriver: true,
+            duration: 5000
+        })).start()
     }
 
     /** Animate intro for amount of images text */
@@ -110,13 +125,18 @@ class LoadingScreen extends React.Component<Props, State> {
     async generateVideo(): Promise<void> {
         try {
             await stitchImages(async (e) => {
-                await MediaLibrary.saveToLibraryAsync(e).then(() => {
+                if (!this.shouldCancel) await MediaLibrary.saveToLibraryAsync(e).then(() => {
                     this.setState({ loading: false });
                 });
-            }, this.props.params);
+            }, this.props.params, this.onProgressUpdate);
         } catch {
             alert("Couldn't generate video");
         }
+    }
+
+    /** New progress recieved */
+    onProgressUpdate(pgr: number): void {
+        this.progressBar.current?.updateProgress(pgr);
     }
 
     /** Display the next stat */
@@ -131,6 +151,8 @@ class LoadingScreen extends React.Component<Props, State> {
     /** Can cancel the ffmpeg gif stitching process
      * and switches back scene */
     goBack(shouldCancel: boolean, to: "Camera" | "Composer"): void {
+        this.shouldCancel = shouldCancel;
+
         let nav: () => void;
         if (to === "Camera") {
             nav = () => this.props.navigation.navigate(to, { comesFrom: "other" });
@@ -194,12 +216,13 @@ class LoadingScreen extends React.Component<Props, State> {
             else { return [] as JSX.Element[] }
         });
 
+        const diskRotation = { transform: [{ rotate: this.state.diskRotation.interpolate({
+            inputRange: [0, 360],
+            outputRange: ["0deg", "360deg"],
+        }) }] };
+
         return (
             <SafeAreaView style={Styles.container}>
-                <TouchableOpacity style={Styles.cancelButton} activeOpacity={0.5} onPress={() => this.goBack(true, "Composer")}>
-                    <Text style={Styles.cancelButtonText}>← Cancel</Text>
-                </TouchableOpacity>
-
                 <View style={Styles.padding}>
                     <View style={Styles.innerContainer}>
                         <MultiAnimator ref={this.multianimator}>
@@ -209,10 +232,19 @@ class LoadingScreen extends React.Component<Props, State> {
 
                     <View style={Styles.loadingContainer}>
                         {this.state.loading ? (
-                            <React.Fragment>
-                                <Text style={Styles.loadingText}>Generating</Text>
-                                <ActivityIndicator color={"#ddd"} />
-                            </React.Fragment>
+                            <View style={{ flexDirection: "column", gap: 10, width: "100%" }}>
+                                <ProgressBar ref={this.progressBar} />
+                                <Button
+                                    flex
+                                    active={true}
+                                    color="blue"
+                                    style={{ overflow: "hidden" }}
+                                    onPress={() => this.goBack(true, "Camera")}
+                                >
+                                    <Text style={ButtonStyles.buttonText}>Cancel</Text>
+                                    <Animated.Text style={[ButtonStyles.buttonText, Styles.disk, diskRotation]}>📀</Animated.Text>
+                                </Button>
+                            </View>
                         )
                             : (
                                 <View style={{ flexDirection: "column", gap: 10, width: "100%" }}>
