@@ -1,8 +1,8 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, SafeAreaView, View } from "react-native";
+import { Animated, LogBox, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
-import { CameraType, Camera as ExpoCamera, FaceDetectionResult, PermissionStatus } from "expo-camera"
+import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
@@ -20,6 +20,7 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
+import { DocumentDirectoryPath, copyFile, readdir, unlink } from "react-native-fs";
 
 /* Interfaces */
 interface Props {
@@ -47,7 +48,7 @@ interface State {
 	/** If there are any faces visible on screen */
 	anyFaceVisible: boolean,
 
-	/** If the camera button / menu button is animating */
+	/** Deactivate buttons when transitioning */
 	animating: boolean,
 	loadingImage: boolean,
 	debugTransformCamera: any[],
@@ -56,7 +57,9 @@ interface State {
 	/** Facial features, used for `FaceRotationView` */
 	facialFeatures: FaceData | null,
 
-	flashlightOpacity: Animated.Value
+	/** Flashlight overlay opacity */
+	flashlightOpacity: Animated.Value,
+	flashlightOn: boolean,
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -81,6 +84,7 @@ class Camera extends React.PureComponent<Props, State> {
 			yawAngle: new Animated.Value(0),
 			rollAngle: new Animated.Value(0),
 			flashlightOpacity: new Animated.Value(0),
+			flashlightOn: false,
 
 			transform: [],
 			facialFeatures: null,
@@ -116,16 +120,23 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Called via the export default function (navigation handler) */
 	async gainedFocus(): Promise<void> {
+		// await LSImage.resetImagePointersFile();
+		// readdir(DocumentDirectoryPath).then(e => e.forEach(a => unlink(DocumentDirectoryPath + "/" + a)));
+		// readdir(DocumentDirectoryPath).then(e => console.log(e));
+
 		/* Try get face calibration */
 		await this.setFaceMetadata();
 
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		this.animateIntro();
-		this.setState({ anyFaceVisible: true });
+		this.setState({
+			anyFaceVisible: true,
+			animating: false,
+		});
 
 		/* Simulator throws error bc no camera */
-		try { this.camera.current?.resumePreview(); }
-		catch {}
+		// try { this.camera.current?.resumePreview(); }
+		// catch {}
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
@@ -151,15 +162,16 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Take pic */
 	async takePic(): Promise<void> {
+		this.setState({ loadingImage: true, animating: true });
 		const transform = [...this.state.transform]; // clone transform
 		const anyFaceVisible = this.state.anyFaceVisible;
 
 		/* Freeze camera */
-		this.camera.current?.pausePreview();
+		// try { this.camera.current?.pausePreview(); }
+		// catch {}
 
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
-		this.setState({ loadingImage: true });
 
 		/* Take camera picture */
 		const image = await this.camera.current?.takePictureAsync();
@@ -194,7 +206,7 @@ class Camera extends React.PureComponent<Props, State> {
 				}
 				
 				/* !! Image is not saved here it's saved in preview/Preview.tsx !! */
-				let lsimage = new LSImage(path, "this_str_will_be_overwritten").toLSImageProp();
+				let lsimage = new LSImage().withPath(path).toLSImageProp();
 				
 				/* Transition */
 				this.setState({ animating: true });
@@ -255,7 +267,7 @@ class Camera extends React.PureComponent<Props, State> {
 		if (calibration) {
 			this.calibration = calibration;
 		}else {
-			console.error("No face calibration found")
+			console.log("No face calibration found")
 		}
 	}
 	
@@ -274,6 +286,7 @@ class Camera extends React.PureComponent<Props, State> {
 					ref={this.camera}
 					style={[Styles.container, { transform: this.state.debugTransformCamera }]}
 					type={CameraType.front}
+					flashMode={this.state.flashlightOn ? FlashMode.on : FlashMode.off}
 					faceDetectorSettings={{
 						mode: FaceDetector.FaceDetectorMode.accurate,
 						detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
@@ -300,7 +313,12 @@ class Camera extends React.PureComponent<Props, State> {
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
 					{/* Button to open preferences */}
-					<MenuButton active={!(this.state.loadingImage || this.state.animating)} ref={this.menuButton} navigation={this.props.navigation} />
+					<MenuButton
+						active={!(this.state.loadingImage || this.state.animating)}
+						ref={this.menuButton}
+						navigation={this.props.navigation}
+						onAnimating={(animating) => this.setState({ animating })}
+					/>
 
 					{/* Bottom UI components */}
 					<Floater loosness={3} style={Styles.bottomBar}>
@@ -317,7 +335,11 @@ class Camera extends React.PureComponent<Props, State> {
 
 						{/* Right */}
 						<View style={Styles.bottomBarTile}>
-							<FlashLightButton ref={this.flashLightButton} onChange={this.setFlashlightBrightness}/>
+							<FlashLightButton
+								ref={this.flashLightButton}
+								onChange={this.setFlashlightBrightness}
+								setFlashlightActive={e => this.setState({ flashlightOn: e })}	
+							/>
 						</View>
 					</Floater>
 				</SafeAreaView>

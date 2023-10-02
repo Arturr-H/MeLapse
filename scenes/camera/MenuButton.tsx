@@ -11,6 +11,8 @@ interface Props {
 		Preferences: undefined
 	}, "Preview", "Preferences">,
 	active: boolean,
+
+	onAnimating: (is: boolean) => void
 }
 interface State {
 	size: Animated.Value,
@@ -47,7 +49,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 	}
 
 	async componentDidMount(): Promise<void> {
-		this.setState({ animating: false });
+		this.isAnimating(false);
 		Animated.timing(this.state.opacity, { duration: 750, toValue: 1, useNativeDriver: false }).start();
 	}
 
@@ -61,16 +63,16 @@ export class MenuButton extends React.PureComponent<Props, State> {
 			Animated.timing(this.state.size, { ...OPT, toValue: 1 }),
 			Animated.timing(this.state.opacity, { ...OPT, toValue: 1 }),
 			Animated.timing(this.state.rotate, { ...OPT, toValue: 0 })
-		]).start(() => {
-			this.setState({ animating: false });
-		});
+		]).start(() => 
+			this.isAnimating(false)
+		);
 	}
 
 	/** Instantly set back size without animation */
 	instanSetBack(): void {
+		this.isAnimating(false);
 		this.setState({
 			size: new Animated.Value(1),
-			animating: false,
 			rotate: new Animated.Value(0)
 		});
 	}
@@ -79,7 +81,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 	onPress(): void {
 		if(this.props.active) {
 			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-			this.setState({ animating: true });
+			this.isAnimating(true)
 			
 			/* Animate opacity and scale */
 			Animated.parallel([
@@ -101,6 +103,11 @@ export class MenuButton extends React.PureComponent<Props, State> {
 				
 			]).start(this.openPreferencesScene);
 		}
+	}
+
+	isAnimating(is: boolean): void {
+		this.setState({ animating: is });
+		this.props.onAnimating(is);
 	}
 
 	/* Switch scene after anim */

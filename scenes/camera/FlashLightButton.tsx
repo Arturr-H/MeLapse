@@ -6,7 +6,8 @@ import * as Brightness from "expo-brightness";
 
 /* Interfaces */
 interface Props {
-	onChange: (value: number) => void
+	onChange: (value: number) => void,
+	setFlashlightActive: (to: boolean) => void
 }
 interface State {
 	scaleY: Animated.Value,
@@ -130,6 +131,7 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 	async onTouchEnd(): Promise<void> {
 		if (this.changeType === "click") {
 			let active = this.state.active ? false:true;
+			this.props.setFlashlightActive(active);
 			this.setState({ active });
 			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 			
@@ -137,6 +139,8 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 			else this.props.onChange(0);
 			if (this.brightnessPermission && active) {
 				await Brightness.setBrightnessAsync(1);
+			}else {
+				await Brightness.setBrightnessAsync(this.userPreviousBrightness);
 			}
 		}
 	}
