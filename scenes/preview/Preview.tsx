@@ -25,6 +25,8 @@ interface Props {
 interface State {
     confirmButtonY: Animated.Value,
     scrapButtonX: Animated.Value,
+    confirmButtonScale: Animated.Value,
+    scrapButtonScale: Animated.Value,
 
     deactivateButtons: boolean,
     lsimage?: LSImageProp
@@ -47,6 +49,9 @@ class Preview extends React.PureComponent<Props, State> {
         this.state = {
             confirmButtonY: new Animated.Value(200),
             scrapButtonX: new Animated.Value(-200),
+            confirmButtonScale: new Animated.Value(0.2),
+            scrapButtonScale: new Animated.Value(0.2),
+
             deactivateButtons: false,
         };
 
@@ -117,12 +122,16 @@ class Preview extends React.PureComponent<Props, State> {
 
     /* Button animations */
     introButtons(): void {
-        Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0 }).start();
+        Animated.timing(this.state.confirmButtonY, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 100 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_SHOW_CONFIG, toValue: 0, delay: 150 }).start();
+        Animated.timing(this.state.scrapButtonScale, { ...BUTTON_SHOW_CONFIG, toValue: 1, delay: 190 }).start();
+        Animated.timing(this.state.confirmButtonScale, { ...BUTTON_SHOW_CONFIG, toValue: 1, delay: 40 }).start();
     }
     outroButtons(): void {
-        Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200 }).start();
+        Animated.timing(this.state.confirmButtonY, { ...BUTTON_HIDE_CONFIG, toValue: 200, delay: 100 }).start();
         Animated.timing(this.state.scrapButtonX, { ...BUTTON_HIDE_CONFIG, toValue: -200, delay: 150 }).start();
+        Animated.timing(this.state.scrapButtonScale, { ...BUTTON_HIDE_CONFIG, toValue: 0.2, delay: 100 }).start();
+        Animated.timing(this.state.confirmButtonScale, { ...BUTTON_HIDE_CONFIG, toValue: 0.2, delay: 100 }).start();
     }
 
 	render() {
@@ -143,9 +152,10 @@ class Preview extends React.PureComponent<Props, State> {
                     <Floater loosness={1} style={Styles.row}>
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            style={[Styles.deleteButton, { transform: [{
-                                translateX: this.state.scrapButtonX
-                            }] }]}
+                            style={[Styles.deleteButton, { transform: [
+                                { translateX: this.state.scrapButtonX },
+                                { scale: this.state.scrapButtonScale }
+                            ] }]}
                             onPress={!this.state.deactivateButtons ? this.onDelete : () => {}}
                         >
                             {this.state.deactivateButtons
@@ -159,9 +169,10 @@ class Preview extends React.PureComponent<Props, State> {
                     <Floater loosness={1} style={Styles.row}>
                         <TouchableOpacity
                             activeOpacity={0.8}
-                            style={[Styles.acceptButton, { transform: [{
-                                translateY: this.state.confirmButtonY
-                            }] }]}
+                            style={[Styles.acceptButton, { transform: [
+                                { translateY: this.state.confirmButtonY },
+                                { scale: this.state.confirmButtonScale }
+                            ] }]}
                             onPress={!this.state.deactivateButtons ? this.onSave : () => {}}
                         >
                             {this.state.deactivateButtons
