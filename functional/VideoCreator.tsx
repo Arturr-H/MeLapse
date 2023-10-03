@@ -1,7 +1,8 @@
 /* Imports */
 import { FFmpegKit } from "ffmpeg-kit-react-native";
-import fs, { DocumentDirectoryPath, readdir } from "react-native-fs";
+import fs, { DocumentDirectoryPath, readdir, unlink } from "react-native-fs";
 import { StitchOptions } from "../scenes/compileFootage/LoadingScreen";
+import { saveToLibraryAsync } from "expo-media-library";
 
 type StitchCallback = (uri: string) => void;
 type ProgressCallback = (progress: number) => void;
@@ -12,12 +13,13 @@ export const QUALITY_OPTION_BITRATE = {
     "MID": 6,
     "HIGH": 64
 }
+const OUTPUT_NAME_NO_EXT = "render";
 
 /**
  * input: Takes a list of image paths which are located
  * on the users file system.
  */
-export async function stitchImages(
+async function stitchImages(
     callback: StitchCallback,
     options: StitchOptions,
     progressCallback: ProgressCallback
@@ -57,7 +59,7 @@ export async function stitchImages(
     const framerateOverride = options.framerateOverride;
     const framerate = `-framerate ${framerateOverride ?? options.fps}`;
     const r = `-r ${framerateOverride ?? options.fps}`;
-    const output = options.outputFormat === "gif" ? `${picDirPath}/output_all.gif` : `${picDirPath}/output_all.mp4`;
+    const output = options.outputFormat === "gif" ? `${picDirPath}/${OUTPUT_NAME_NO_EXT}.gif` : `${picDirPath}/${OUTPUT_NAME_NO_EXT}.mp4`;
     
     const search = `-pattern_type glob -i '${picDirPath}/*.${ext}'`;
 
@@ -81,4 +83,27 @@ export async function stitchImages(
         alert("Couldn't stitch video. Check advanced settings which often break the video creating process");
         throw new Error("errror stitching")
     };
+}
+
+/** Clears temp video output from fs */
+async function clearVideo(options: StitchOptions): Promise<void> {
+    unlink(DocumentDirectoryPath + "/" + OUTPUT_NAME_NO_EXT + "." + options.outputFormat);
+}
+
+/** Creates the video from start to finish whilst giving
+ * progress updates. Saves the video to user's media
+ * library and then removes the temporary output file from fs */
+export async function generateVideo(
+    callback: () => void,
+    options: StitchOptions,
+    progressCallback: ProgressCallback
+): Promise<void> {
+    await stitchImages(
+        async (e) => 
+            await saveToLibraryAsync(e)
+                .then(callback)
+                .then(_ => clearVideo(options)), 
+        options,
+        progressCallback
+    );
 }
