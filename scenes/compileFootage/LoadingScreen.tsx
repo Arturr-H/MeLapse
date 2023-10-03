@@ -1,12 +1,11 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { ActivityIndicator, Animated, Easing, SafeAreaView, Text, View, TouchableOpacity } from "react-native";
+import { Animated, Easing, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { stitchImages } from "../../functional/VideoCreator";
-import * as MediaLibrary from "expo-media-library";
-import { WIDTH, getTimeAgo } from "../result/Result";
+import { generateVideo } from "../../functional/VideoCreator";
+import { WIDTH } from "../result/Result";
 import QuickCounter from "./QuickCounter";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 import { FFmpegKit } from "ffmpeg-kit-react-native";
@@ -87,14 +86,14 @@ class LoadingScreen extends React.Component<Props, State> {
 
         /* Bindings */
         this.onProgressUpdate = this.onProgressUpdate.bind(this);
-        this.generateVideo = this.generateVideo.bind(this);
+        this._generateVideo = this._generateVideo.bind(this);
         this.nextStat = this.nextStat.bind(this);
         this.goBack = this.goBack.bind(this);
     };
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
-        await this.generateVideo();
+        await this._generateVideo();
 
         this.setState({ amountOfImages: 10 });
         this.animateAmountOfImages();
@@ -122,12 +121,10 @@ class LoadingScreen extends React.Component<Props, State> {
     }
 
     /** Generate the timmelapse footage */
-    async generateVideo(): Promise<void> {
+    async _generateVideo(): Promise<void> {
         try {
-            await stitchImages(async (e) => {
-                if (!this.shouldCancel) await MediaLibrary.saveToLibraryAsync(e).then(() => {
-                    this.setState({ loading: false });
-                });
+            await generateVideo(async () => {
+                this.setState({ loading: false });
             }, this.props.params, this.onProgressUpdate);
         } catch {
             alert("Couldn't generate video");
