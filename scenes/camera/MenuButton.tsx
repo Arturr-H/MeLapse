@@ -3,6 +3,7 @@ import { Animated, Dimensions, Easing, Image, Text, TouchableOpacity, View } fro
 import Styles from "./Styles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Haptics from "expo-haptics";
+import { WIDTH } from "../result/Result";
 
 /* Interfaces */
 interface Props {
@@ -18,7 +19,8 @@ interface State {
 	size: Animated.Value,
 	opacity: Animated.Value,
 	rotate: Animated.Value,
-	animating: boolean
+	x: Animated.Value,
+	animating: boolean,
 }
 
 /* Constants */
@@ -35,6 +37,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		this.state = {
 			size: new Animated.Value(BTN_FINAL_HEIGHT),
 			opacity: new Animated.Value(0),
+			x: new Animated.Value(0),
 			animating: false,
 			rotate: new Animated.Value(0),
 		};
@@ -44,7 +47,9 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		/* Bindings */
 		this.openPreferencesScene = this.openPreferencesScene.bind(this);
 		this.instanSetBack = this.instanSetBack.bind(this);
+		this.fadeInButton = this.fadeInButton.bind(this);
 		this.animateBack = this.animateBack.bind(this);
+		this.moveAway = this.moveAway.bind(this);
 		this.onPress = this.onPress.bind(this);
 	}
 
@@ -73,8 +78,27 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		this.isAnimating(false);
 		this.setState({
 			size: new Animated.Value(1),
-			rotate: new Animated.Value(0)
+			rotate: new Animated.Value(0),
+			x: new Animated.Value(0),
 		});
+	}
+
+	/** Fades in the settings icon */
+	fadeInButton(): void {
+		Animated.timing(this.state.opacity, {
+			...DEFAULT_,
+			duration: DURATION,
+			toValue: 1
+		}).start();
+	}
+
+	/** Moves away out of screen */
+	moveAway(): void {
+		Animated.timing(this.state.x, {
+			...DEFAULT_,
+			duration: DURATION,
+			toValue: -WIDTH / 3
+		}).start();
 	}
 
 	/* On click */
@@ -121,9 +145,15 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		let pointerEvents: "none" | "auto" = this.state.animating ? "none" : "auto";
 		let opacity = this.state.opacity;
 		let rotate = this.state.rotate.interpolate({ inputRange: [0, 360], outputRange: ["0deg", "360deg"] });
+		let x = [{ translateX: this.state.x }];
 
 		return (
-			<Animated.View style={[Styles.menuButton, { zIndex }, { pointerEvents }]}>
+			<Animated.View style={[
+				Styles.menuButton,
+				{ zIndex },
+				{ pointerEvents },
+				{ transform: x }
+			]}>
 				<TouchableOpacity
 					style={[transform, Styles.innerMenuButton]}
 					onPress={this.onPress}

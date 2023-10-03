@@ -1,8 +1,12 @@
 import React from "react";
-import { Animated, Easing, PanResponder, PanResponderInstance, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
+import { Animated, Dimensions, Easing, PanResponder, PanResponderInstance, Text, View } from "react-native";
 import Styles from "./Styles";
 import * as Haptics from "expo-haptics";
 import * as Brightness from "expo-brightness";
+
+/* Constants */
+const DURATION = 800;
+const DEFAULT_ = { easing: Easing.inOut(Easing.exp), useNativeDriver: true };
 
 /* Interfaces */
 interface Props {
@@ -12,6 +16,7 @@ interface Props {
 interface State {
 	scaleY: Animated.Value,
 	panY: Animated.Value,
+	x: Animated.Value,
 
 	prevOffsetY: number,
 
@@ -43,6 +48,7 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 		this.state = {
 			scaleY: new Animated.Value(0),
 			panY: new Animated.Value(0),
+			x: new Animated.Value(0),
 			prevOffsetY: 0,
 			active: false,
 		};
@@ -153,12 +159,33 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 		await Brightness.setSystemBrightnessAsync(this.userPreviousBrightness);
 	}
 
+	/** Moves away out of screen */
+	moveAway(): void {
+		Animated.timing(this.state.x, {
+			...DEFAULT_,
+			duration: DURATION,
+			toValue: Dimensions.get("window").width / 3
+		}).start();
+	}
+	setbackMoveAway(): void {
+		this.setState({ x: new Animated.Value(0) });
+	}
+
 	render() {
 		let scaleY = { transform: [{ translateY: 20 }, { scaleY: this.state.scaleY }, { translateY: -20 }] };
 		let translateY = { transform: [{ translateY: this.state.panY }] };
+		let x = [{ translateX: this.state.x }];
 
 		return (
-			<View onTouchStart={this.onTouchStart} onTouchEnd={this.onTouchEnd} {...this.panResponder.panHandlers} style={Styles.flashlightButtonContainer}>
+			<Animated.View
+				{...this.panResponder.panHandlers}
+				onTouchStart={this.onTouchStart}
+				onTouchEnd={this.onTouchEnd}
+				style={[
+					Styles.flashlightButtonContainer,
+					{ transform: x }
+				]}
+			>
 				<View style={{ transform: [{ translateY: -15 }] }}>
 					<Animated.View style={[Styles.flashlightButtonBgLine, scaleY]} />
 				</View>
@@ -166,7 +193,7 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 				<Animated.View style={[Styles.flashlightButton, translateY]}>
 					<Text style={Styles.flashlightButtonIcon}>🔦</Text>
 				</Animated.View>
-			</View>
+			</Animated.View>
 		);
 	}
 }

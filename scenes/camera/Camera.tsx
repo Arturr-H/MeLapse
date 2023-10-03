@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, LogBox, SafeAreaView, View } from "react-native";
+import { Animated, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -20,11 +20,13 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
-import { DocumentDirectoryPath, copyFile, readdir, unlink } from "react-native-fs";
 
 /* Interfaces */
 interface Props {
-	navigation: StackNavigationProp<{ Preview: { lsimage: LSImageProp }, Preferences: undefined }, "Preview", "Preferences">,
+	navigation: StackNavigationProp<{
+		Preview: { lsimage: LSImageProp },
+		Preferences: undefined
+	}, "Preview", "Preferences">,
 
 	/**
 	 * Is used to determine which intro animation to play
@@ -51,6 +53,7 @@ interface State {
 	/** Deactivate buttons when transitioning */
 	animating: boolean,
 	loadingImage: boolean,
+	showActivityIndicator: boolean,
 	debugTransformCamera: any[],
 	transformCamera: boolean,
 
@@ -74,6 +77,12 @@ class Camera extends React.PureComponent<Props, State> {
 	/** Face calibration metadata */
 	calibration: FaceData | null = null;
 
+	/** Loading image can sometimes take a while
+	 * (picture manipulator etc...) If it does, 
+	 * we display an overlay with an activityindicator */
+	stillLoadingImage: boolean = false;
+	loadingImageTimeoutCheck?: NodeJS.Timeout;
+
 	constructor(props: Props) {
 		super(props);
 
@@ -92,6 +101,7 @@ class Camera extends React.PureComponent<Props, State> {
 			animating: true,
 
 			loadingImage: false,
+			showActivityIndicator: false,
 			debugTransformCamera: [],
 			transformCamera: false,
 			anyFaceVisible: false,
@@ -120,9 +130,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Called via the export default function (navigation handler) */
 	async gainedFocus(): Promise<void> {
-		// await LSImage.resetImagePointersFile();
-		// readdir(DocumentDirectoryPath).then(e => e.forEach(a => unlink(DocumentDirectoryPath + "/" + a)));
-		// readdir(DocumentDirectoryPath).then(e => console.log(e));
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
@@ -135,14 +142,15 @@ class Camera extends React.PureComponent<Props, State> {
 		});
 
 		/* Simulator throws error bc no camera */
-		// try { this.camera.current?.resumePreview(); }
-		// catch {}
+		try { this.camera.current?.resumePreview(); }
+		catch {}
 	}
 
 	/** Animates the right intro depending on which scene we previously left */
 	animateIntro(): void {
 		this.setState({ animating: true });
 		setTimeout(() => this.setState({ animating: false }), 1000);
+		this.flashLightButton.current?.setbackMoveAway();
 
 		const backMenuButton = () => {
 			this.menuButton.current?.animateBack();
@@ -157,18 +165,40 @@ class Camera extends React.PureComponent<Props, State> {
 		if (this.props.comesFrom === "preferences") backMenuButton()
 
 		/* Camera button */
-		else backCameraButton();
+		else {
+			backCameraButton();
+			this.menuButton.current?.fadeInButton();
+		};
 	}
 
 	/* Take pic */
 	async takePic(): Promise<void> {
+		/* Animate away menu button and flashlight button */
+		this.flashLightButton.current?.moveAway();
+		this.menuButton.current?.moveAway();
+
 		this.setState({ loadingImage: true, animating: true });
 		const transform = [...this.state.transform]; // clone transform
 		const anyFaceVisible = this.state.anyFaceVisible;
 
+		this.stillLoadingImage = true;
+		this.loadingImageTimeoutCheck = setTimeout(() => {
+			if (this.stillLoadingImage) this.setState({
+				showActivityIndicator: true,
+			});
+		}, 1000);
+
+		const resetLoading = () => {
+			this.setState({
+				loadingImage: false,
+				animating: false,
+				showActivityIndicator: false,
+			});
+		}
+
 		/* Freeze camera */
-		// try { this.camera.current?.pausePreview(); }
-		// catch {}
+		try { this.camera.current?.pausePreview(); }
+		catch {}
 
 		/* Haptic */
 		Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
@@ -197,9 +227,9 @@ class Camera extends React.PureComponent<Props, State> {
 							flipped.uri,
 							transform
 						) ?? image.uri;
-					}catch {
-						console.log("[DBG] Image manipulator fail");
-						return this.setState({ loadingImage: false, animating: false });
+					}catch (e) {
+						console.log("[DBG] Image manipulator fail", e);
+						path = flipped.uri;
 					}
 				}else {
 					path = flipped.uri;
@@ -211,17 +241,19 @@ class Camera extends React.PureComponent<Props, State> {
 				/* Transition */
 				this.setState({ animating: true });
 				this.shutterButton.current?.scaleUp(() => {
-					this.setState({ loadingImage: false, animating: false });
-					this.props.navigation.navigate("Preview", { lsimage })
+					resetLoading();
+					this.props.navigation.navigate("Preview", { lsimage });
 				});
 			}else {
 				alert("Can't flip image");
+				resetLoading();
 			}
 		}
 
 		/* Could not take pic */
 		else {
 			alert("Camera is not able to take pic");
+			resetLoading();
 		}
 	}
 
@@ -276,7 +308,6 @@ class Camera extends React.PureComponent<Props, State> {
 		return (
 			<View style={Styles.container}>
 				<CalibratedOverlay calibrated={this.calibration} />
-				{/* <DebugDots ref={this.debugOutside} /> */}
 				
 				{/* Transforms image and saves it */}
 				<PictureManipulator ref={this.pictureManipulator} />
@@ -295,9 +326,7 @@ class Camera extends React.PureComponent<Props, State> {
 						tracking: true,
 					}}
 					onFacesDetected={this.onFacesDetected}
-				>
-					{/* <DebugDots ref={this.debug} /> */}
-				</ExpoCamera>}
+				/>}
 
 				{/* Flashlight */}
 				<View pointerEvents="none" style={Styles.flashRingLightContainer}>
@@ -308,7 +337,7 @@ class Camera extends React.PureComponent<Props, State> {
 				</View>
 
 				{/* Loading indicator */}
-				{this.state.loadingImage && <ProgressView />}
+				{this.state.showActivityIndicator && <ProgressView />}
 
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>

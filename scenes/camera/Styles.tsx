@@ -72,7 +72,6 @@ export default StyleSheet.create({
 		position: "absolute",
 		justifyContent: "center",
 			alignItems: "center",
-        zIndex: 10,
 		// zIndex: 21,
 		// opacity: 0
 	},
