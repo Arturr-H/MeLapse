@@ -1,5 +1,5 @@
 /* Imports */
-import React from "react";
+import React, { ReactElement } from "react";
 import { Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
@@ -7,7 +7,13 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import Floater from "../floater/Floater";
 
+/* Types */
+type SelectButtonContent = string | DoubleText;
+
 /* Interfaces */
+interface DoubleText {
+    main: string, lower: string
+}
 interface Props {
     /** `idx`: the index of the button in
      * the button array which was clicked */
@@ -18,7 +24,7 @@ interface Props {
      * 
      * buttons={["1", "2", "3"]}
      */
-    buttons: string[],
+    buttons: SelectButtonContent[],
 
     /** Index of which button is initially activated */
     initial?: number
@@ -37,6 +43,13 @@ class SelectInput extends React.PureComponent<Props, State> {
         }
     }
 
+    componentDidMount(): void {
+        this.props.buttons.forEach((e: any) => {
+            console.log(e, );
+            console.log(e, typeof e);
+        })
+    }
+
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
         if (prevProps.initial !== this.props.initial) {
             this.setState({ active: this.props.initial ?? 0 });
@@ -50,7 +63,7 @@ class SelectInput extends React.PureComponent<Props, State> {
                     {this.props.buttons.map((e, index) => 
                         <SelectButton
                             active={this.state.active === index}
-                            text={e}
+                            content={e}
                             key={"selbtn-" + index}
                             onPress={() => {
                                 this.setState({ active: index });
@@ -67,7 +80,7 @@ class SelectInput extends React.PureComponent<Props, State> {
 
 /* Button */
 function SelectButton(props: {
-    text: string,
+    content: SelectButtonContent,
     onPress: () => void,
     active: boolean
 }) {
@@ -91,11 +104,33 @@ function SelectButton(props: {
                 onPressIn={() => setHover(true)}
                 onPressOut={() => setHover(false)}
             >
-                <Text style={[
-                    Styles.buttonText,
-                    props.active && Styles.buttonTextActive,
-                    hover && Styles.buttonTextActive,
-                ]}>{props.text}</Text>
+                {typeof props.content === "string" ?
+                    <Text style={[
+                        Styles.buttonText,
+                        props.active && Styles.buttonTextActive,
+                        hover && Styles.buttonTextActive,
+                    ]}>{props.content}</Text>
+
+                    /* If input is a text with small description */
+                    : (props.content.lower !== undefined && props.content.main !== undefined) ?
+
+                    <View style={Styles.textMainLowerContainer}>
+                        {/* Main */}
+                        <Text style={[
+                            Styles.buttonText,
+                            props.active && Styles.buttonTextActive,
+                            hover && Styles.buttonTextActive,
+                        ]}>{props.content.main}</Text>
+
+                        {/* Lower */}
+                        <Text style={[
+                            Styles.buttonTextDescription,
+                            props.active && Styles.buttonTextDescriptionActive,
+                            hover && Styles.buttonTextDescriptionActive,
+                        ]}>{props.content.lower}</Text>
+                    </View>
+                    
+                : null }
             </TouchableHighlight>
         </View>
     )

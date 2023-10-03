@@ -51,4 +51,24 @@ export default StyleSheet.create({
         fontSize: 20,
         fontFamily: "manrope-black",
     },
+
+    textMainLowerContainer: {
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    buttonTextDescription: {
+        color: "#aaa",
+        fontSize: 11,
+        marginTop: -5,
+        fontFamily: "manrope-light",
+    },
+    buttonTextDescriptionActive: {
+        color: "#fff",
+        fontSize: 11,
+        marginTop: -5,
+        fontFamily: "manrope-light",
+    },
 })
