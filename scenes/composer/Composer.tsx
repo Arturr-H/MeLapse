@@ -12,8 +12,8 @@ import FramerateScroller from "./FramerateScroller";
 import ComposerConfig from "./Config";
 import { StitchOptions } from "../compileFootage/LoadingScreen";
 import { ScrollView } from "react-native-gesture-handler";
-import { Animator } from "../../components/animator/Animator";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
+import { QUALITY_OPTION_BITRATE } from "../../functional/VideoCreator";
 
 /* Interfaces */
 interface Props {
@@ -249,7 +249,11 @@ class Composer extends React.Component<Props, State> {
                             <Text style={Styles.paragraph}>Quality of the output result. Higher quality footage requires more storage.</Text>
                             <SelectInput
                                 initial={this.state.config.quality}
-                                buttons={["LOW", "MID", "HIGH"]}
+                                buttons={[
+                                    { main: "LOW", lower: `${QUALITY_OPTION_BITRATE["LOW"]} MB/s` },
+                                    { main: "MID", lower: `${QUALITY_OPTION_BITRATE["MID"]} MB/s` },
+                                    { main: "HIGH", lower: `${QUALITY_OPTION_BITRATE["HIGH"]} MB/s` },
+                                ]}
                                 onChange={ComposerConfig.setQuality}
                             />
                         </View>
