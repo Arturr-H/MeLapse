@@ -83,12 +83,13 @@ class Review extends React.PureComponent<Props, State> {
 
         if (lsimgs && lsimgs.length !== 0) {
             let images: LSImage[] = [];
+            const LEN = lsimgs.length;
 
             /** Get all images */
-            lsimgs.forEach(a => {
-                const lsimage = LSImage.fromLSImageProp(a);
+            for (let i = LEN - 1; i >= 0; i--) {
+                const lsimage = LSImage.fromLSImageProp(lsimgs[i]);
                 images.push(lsimage);
-            });
+            };
 
             this.lsImages = images;
             this.setState({ loading: false, currentImage: images[0] });
