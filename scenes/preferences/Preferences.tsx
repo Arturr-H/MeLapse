@@ -2,7 +2,7 @@
 import React, { RefObject } from "react";
 import { KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
 import Styles from "./Styles";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
@@ -11,9 +11,9 @@ import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 import { LSImage } from "../../functional/Image";
-import { stitchImages } from "../../functional/VideoCreator";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
+import * as RNFS from "react-native-fs";
 
 /* Interfaces */
 export interface Props {
@@ -125,6 +125,16 @@ class Preferences extends React.Component<Props, State> {
         });
     }
 
+    /** Delete all selfies */
+    async deleteImages(): Promise<void> {
+		await LSImage.resetImagePointersFile();
+		RNFS.readdir(RNFS.DocumentDirectoryPath).then(e =>
+            e.forEach(a =>
+                RNFS.unlink(RNFS.DocumentDirectoryPath + "/" + a)
+            )
+        );
+    }
+
 	render() {
 		return (
 			<SafeAreaView style={Styles.container}>
@@ -179,6 +189,7 @@ class Preferences extends React.Component<Props, State> {
 
                                 {/* Redo tutorial */}
                                 <View>
+                                    <Text style={Styles.header2}>🔩 Miscellaneous</Text>
                                     <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
                                     <Button
                                         color="blue"
@@ -217,6 +228,21 @@ class Preferences extends React.Component<Props, State> {
                                         active={!this.state.switching}
                                         onPress={this.resetSettings}
                                         text="Reset settings"
+                                    />
+                                </View>
+
+                                {/* Delete data */}
+                                <View>
+                                    <Text style={Styles.paragraph}>Delete all selfies you've taken (forever)</Text>
+                                    <Button
+                                        confirm={{
+                                            message: "Are you really sure you want to delete all your selfies? This process cannot be undone.",
+                                            title: "⚠️ Delete images ⚠️"
+                                        }}
+                                        color="red"
+                                        active={!this.state.switching}
+                                        onPress={this.deleteImages}
+                                        text="Delete all selfies"
                                     />
                                 </View>
                             </MultiAnimator>
