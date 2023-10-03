@@ -17,6 +17,8 @@
 - [x] Redesign menu scenes. (Preferences, composer, ...)
 - [x] Fix or remove scrolling background in `Preview.tsx`
 
+<br />
+
 - [ ] Something to tell the user to move camera closer / further away from face.
 - [ ] ***[Aaron]*** Change most paragraph texts to not blend in with background.
 
