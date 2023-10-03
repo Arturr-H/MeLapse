@@ -6,6 +6,13 @@ import { StitchOptions } from "../scenes/compileFootage/LoadingScreen";
 type StitchCallback = (uri: string) => void;
 type ProgressCallback = (progress: number) => void;
 
+/** What quality option gives us what bitrate */
+export const QUALITY_OPTION_BITRATE = {
+    "LOW": 1,
+    "MID": 6,
+    "HIGH": 64
+}
+
 /**
  * input: Takes a list of image paths which are located
  * on the users file system.
@@ -35,8 +42,13 @@ export async function stitchImages(
     const overwrite = "-y";
 
     /* Bitrate */
-    const quality_bitrate = options.quality === "low" ? 1 :
-                            options.quality === "mid" ? 6 : 64;
+    const quality_bitrate = 
+        options.quality === "low"
+            ? QUALITY_OPTION_BITRATE["LOW"]
+        : options.quality === "mid"
+            ? QUALITY_OPTION_BITRATE["MID"]
+            : QUALITY_OPTION_BITRATE["HIGH"];
+
     const bitrate_ext = options.bitrateOverride !== null
                     ? options.bitrateOverride : quality_bitrate;
     const bitrate = `-b:v ${bitrate_ext}M`;
