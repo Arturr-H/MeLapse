@@ -6,7 +6,6 @@ import Poster from "../../components/poster/Poster";
 import { BigText } from "./BigText";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import * as Haptics from "expo-haptics";
 
@@ -23,7 +22,7 @@ export interface Props {
     navigation: StackNavigationProp<{ Camera: { comesFrom: "other" } }, "Camera">,
 
     /* Navigation props */
-    lsimage: LSImageProp
+    lsimage?: LSImageProp
 }
 export interface State {
     bigTextX: A,
@@ -179,13 +178,12 @@ class Result extends React.PureComponent<Props, State> {
 
     /* Get number of pics taken and previous pic */
     async getStats(): Promise<{ length: number, previous?: LSImageProp } | null> {
-        const pics = await AsyncStorage.getItem("imagePointers");
+        const pics = await LSImage.getImagePointers();
         if (pics) {
-            const parsed = JSON.parse(pics);
-            const length = parsed.length;
+            const length = pics.length;
             return {
                 length,
-                previous: parsed[length - 2]
+                previous: pics[length - 2]
             };
         }else {
             return null
@@ -310,5 +308,5 @@ export function getTimeAgo(input: number | undefined): string {
 export default function(props: any) {
 	const navigation = useNavigation();
   
-	return <Result {...props} lsimage={props.route.params.lsimage} navigation={navigation} />;
+	return <Result {...props} lsimage={props.route.params?.lsimage} navigation={navigation} />;
 }
