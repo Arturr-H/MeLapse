@@ -113,7 +113,7 @@ export class ModalConstructor extends React.PureComponent<Props, State> {
                 style={Styles.modalContainer}
             ><View style={Styles.modalContainerWrapper}>
 
-                {this.state.modals.map((modal, modalIdx) => <Animated.View style={Styles.modal}>
+                {this.state.modals.map((modal, modalIdx) => <Animated.View key={"MODAL-idx-" + modalIdx} style={Styles.modal}>
                     {/* Header */}
                     <View style={Styles.modalHeader}>
                         <Text style={Styles.modalHeaderText}>{modal.header}</Text>
@@ -126,8 +126,9 @@ export class ModalConstructor extends React.PureComponent<Props, State> {
 
                     {/* Footer */}
                     <View style={Styles.modalFooter}>
-                        {modal.buttons.map(button =>
+                        {modal.buttons.map((button, buttonIdx) =>
                             <TouchableHighlight
+                                key={"mbut" + modalIdx + "-" + buttonIdx}
                                 underlayColor={this.colors[button.color][1]}
                                 style={[Styles.modalButton, {
                                     backgroundColor: this.colors[button.color][0],
