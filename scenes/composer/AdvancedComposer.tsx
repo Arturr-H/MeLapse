@@ -137,7 +137,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                         <ScrollGradient />
                         <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
                             <MultiAnimator ref={this.animatorComponent}>
-                                <View><Text style={Styles.header}>🚧 Advanced Preferences</Text></View>
+                                <View><Text style={Styles.header}>🚧 Advanced</Text></View>
 
                                 {/* Override bitrate */}
                                 <View>
@@ -148,7 +148,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                                         placeholder="Bitrate (M)"
                                         active
                                         keyboardType="decimal-pad"
-                                        maxChars={4}
+                                        maxChars={32}
                                         ref={this.overrideBitrateInput}
                                         initial={this.state.bitrate?.toString()}
                                         onChangeText={this.onChangeBitrate}
@@ -203,7 +203,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                     
                     {/* Confirm */}
                     <View style={{ transform: [{ translateY: -12 }] }}>
-                        <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="← Back" />
+                        <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="← Save" />
                     </View>
                 </KeyboardAvoidingView>
 			</SafeAreaView>

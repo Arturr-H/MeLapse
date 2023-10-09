@@ -14,10 +14,16 @@ import { StitchOptions } from "../compileFootage/LoadingScreen";
 import { ScrollView } from "react-native-gesture-handler";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import { QUALITY_OPTION_BITRATE } from "../../functional/VideoCreator";
+import * as Ads from "../../components/advertising/Ad";
+import { ModalConstructor } from "../../components/modal/ModalConstructor";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Preferences: undefined, LoadingScreen: StitchOptions, AdvancedComposer: undefined }, "Preferences" | "LoadingScreen" | "AdvancedComposer">,
+    navigation: StackNavigationProp<{
+        Preferences: undefined,
+        LoadingScreen: StitchOptions,
+        AdvancedComposer: undefined
+    }, "Preferences" | "LoadingScreen" | "AdvancedComposer">,
 }
 interface State {
     config: {
@@ -46,6 +52,7 @@ class Composer extends React.Component<Props, State> {
 
     /* Refs */
     animator: RefObject<MultiAnimator> = React.createRef();
+    modalConstructor: RefObject<ModalConstructor> = React.createRef();
 
     /* Other */
     framerates: number[] = [24, 30, 60];
@@ -82,7 +89,7 @@ class Composer extends React.Component<Props, State> {
     async componentDidMount(): Promise<void> {
         this.animator.current?.fadeIn(200, 50);
         await this.onFocus();
-
+        
         this.props.navigation.addListener("focus", this.onFocus);
     }
     componentWillUnmount(): void {
@@ -155,21 +162,36 @@ class Composer extends React.Component<Props, State> {
 
     /** Generate the timelapse footage */
     async loadingScreen(): Promise<void> {
-        this.animator.current?.fadeOut(200, 50, async () => {
-            this.props.navigation.navigate("LoadingScreen", {
-                fps: this.framerates[await ComposerConfig.getFramerate()],
-                quality: this.qualities[await ComposerConfig.getQuality()],
-                outputFormat: this.formats[await ComposerConfig.getFormat()],
-                bitrateOverride: await ComposerConfig.getBitrate(),
-                framerateOverride: await ComposerConfig.getFramerateOverride(),
-                widthOverride: await ComposerConfig.getWidthOverride(),
+        const launchLoadingScreen = () => {
+            this.animator.current?.fadeOut(200, 50, async () => {
+                this.props.navigation.navigate("LoadingScreen", {
+                    fps: this.framerates[await ComposerConfig.getFramerate()],
+                    quality: this.qualities[await ComposerConfig.getQuality()],
+                    outputFormat: this.formats[await ComposerConfig.getFormat()],
+                    bitrateOverride: await ComposerConfig.getBitrate(),
+                    framerateOverride: await ComposerConfig.getFramerateOverride(),
+                    widthOverride: await ComposerConfig.getWidthOverride(),
+                });
             });
-        });
+        }
+
+        /* Launch modal */
+        this.modalConstructor.current?.constructModal({
+            buttons: [
+                { text: "Render", color: "blue", onClick: launchLoadingScreen },
+                { text: "Cancel", color: "red", onClick: "close" },
+            ],
+            header: "Render video",
+            description: "Rendering your final video (which may require some time) will display an advertisement and proceed to render the video while the advertisement is playing.",
+        })
     }
 
 	render() {
 		return (
+            <React.Fragment>
+            <ModalConstructor ref={this.modalConstructor} />
 			<SafeAreaView style={[Styles.container]}>
+
                 <KeyboardAvoidingView behavior="padding" style={Styles.keyboardAvoidingView}>
                 <View style={{ width: "100%", flex: 1 }}>
                     <ScrollGradient />
@@ -195,6 +217,8 @@ class Composer extends React.Component<Props, State> {
                                 </Button>
                             </View>
                         </View>
+
+                        <Ads.Banner allocatedHeight={140} />
 
                         <View style={Styles.hr} />
 
@@ -287,6 +311,7 @@ class Composer extends React.Component<Props, State> {
                 </View>
                 </KeyboardAvoidingView>
 			</SafeAreaView>
+            </React.Fragment>
 		);
 	}
 }
