@@ -31,7 +31,7 @@ export default StyleSheet.create({
 
     modal: {
         width: "70%",
-        aspectRatio: 4/4,
+        minHeight: "20%",
 
         backgroundColor: "#fff",
         borderColor: "#ddd",
@@ -46,11 +46,10 @@ export default StyleSheet.create({
             alignItems: "center",
 
         paddingHorizontal: 20,
-        paddingTop: 40
+        paddingTop: 30
     },
     modalBody: {
         width: "100%",
-        flex: 6,
 
         display: "flex",
             alignItems: "center",
@@ -58,6 +57,7 @@ export default StyleSheet.create({
         paddingHorizontal: 20
     },
     modalFooter: {
+        marginTop: 20,
         width: "100%",
 
         display: "flex",
