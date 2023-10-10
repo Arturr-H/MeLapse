@@ -10,10 +10,13 @@ import { Animator } from "../../components/animator/Animator";
 import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
-import { LSImage } from "../../functional/Image";
+import { LSImage, saveImage } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
+import { launchImageLibraryAsync } from "expo-image-picker";
+import * as Ads from "../../components/advertising/Ad";
+import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 
 /* Interfaces */
 export interface Props {
@@ -25,8 +28,9 @@ export interface Props {
         Calibration: undefined,
         Tutorial: undefined,
         PrivacyPolicy: undefined,
+        Statistics: undefined
     }, "Camera" | "Debug" | "Composer" | "Review"
-    | "Calibration" | "Tutorial" | "PrivacyPolicy">,
+    | "Calibration" | "Tutorial" | "PrivacyPolicy" | "Statistics">,
 }
 export interface State {
     switching: boolean,
@@ -35,6 +39,7 @@ export interface State {
     transformCamera: boolean,
     timesPerDay: number,
     username: string,
+    onionSkinVisible: boolean
 }
 
 class Preferences extends React.Component<Props, State> {
@@ -52,6 +57,7 @@ class Preferences extends React.Component<Props, State> {
             saveSelfiesToCameraRoll: false,
             username: "",
             transformCamera: false,
+            onionSkinVisible: false,
         };
 
         /* Bindings */
@@ -72,6 +78,7 @@ class Preferences extends React.Component<Props, State> {
             username: await AppConfig.getUsername(),
             transformCamera: await AppConfig.getTransformCamera(),
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
+            onionSkinVisible: await OnionSkin.getOnionSkinVisibility()
         });
     }
     componentWillUnmount(): void {
@@ -108,6 +115,9 @@ class Preferences extends React.Component<Props, State> {
     )
     privacyPolicyScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("PrivacyPolicy")
+    )
+    statisticsScene = () => this.fadeOut(false, () => 
+        this.props.navigation.navigate("Statistics")
     )
 
     /** Reset all settings to default */
@@ -185,6 +195,28 @@ class Preferences extends React.Component<Props, State> {
                                     />
                                 </View>
 
+                                <Ads.Banner />
+
+                                <View style={Styles.hr} />
+
+                                {/* Onionskin */}
+                                <View>
+                                    <Text style={Styles.header2}>🧅 Onion skin</Text>
+                                    <View><Text style={Styles.paragraph}>
+                                        Display a thin layer above the camera view of a previous selfie, to help you align your face better.
+                                        To select onionskin selfie, go to review images {">"} ⚙️ {">"} Onionskin
+                                    </Text></View>
+
+                                    <SelectInput
+                                        buttons={["YES", "NO"]}
+                                        initial={this.state.onionSkinVisible ? 0 : 1}
+                                        onChange={(idx) => {
+                                            this.setState({ onionSkinVisible: idx == 0 ? true : false });
+                                            OnionSkin.setOnionSkinVisibility(idx == 0 ? true : false);
+                                        }}
+                                    />
+                                </View>
+
                                 <View style={Styles.hr} />
 
                                 {/* Redo tutorial */}
@@ -196,6 +228,17 @@ class Preferences extends React.Component<Props, State> {
                                         active={!this.state.switching}
                                         onPress={this.tutorialScene}
                                         text="Tutorial →"
+                                    />
+                                </View>
+
+                                {/* View statistics */}
+                                <View>
+                                    <Text style={Styles.paragraph}>View your statistics</Text>
+                                    <Button
+                                        color="blue"
+                                        active={!this.state.switching}
+                                        onPress={this.statisticsScene}
+                                        text="Statistics →"
                                     />
                                 </View>
 
@@ -243,6 +286,29 @@ class Preferences extends React.Component<Props, State> {
                                         active={!this.state.switching}
                                         onPress={this.deleteImages}
                                         text="Delete all selfies"
+                                    />
+                                </View>
+
+                                {/* Delete data */}
+                                <View>
+                                    <Text style={Styles.paragraph}>DEBUG IMPORT IMAGES</Text>
+                                    <Button
+                                        color="red"
+                                        active={!this.state.switching}
+                                        onPress={async () => {
+                                            const a = await launchImageLibraryAsync({
+                                                allowsMultipleSelection: true,
+                                            });
+                                            if (!a.canceled) {
+                                                a.assets.forEach((asset, i) => {
+                                                    setTimeout(() => {
+                                                        console.log("[DBG] Loading asset", asset.assetId);
+                                                        saveImage(new LSImage().withPath(asset.uri));
+                                                    }, i*200);
+                                                });
+                                            }
+                                        }}
+                                        text="[DBG] Import selfies"
                                     />
                                 </View>
                             </MultiAnimator>
