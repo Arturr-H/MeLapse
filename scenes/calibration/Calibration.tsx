@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { Animated, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Dimensions, Image, Linking, Text, TouchableOpacity, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -12,6 +12,7 @@ import { FaceDetectorClassifications, FaceDetectorLandmarks, FaceDetectorMode } 
 import { DebugDots } from "../../functional/Debug";
 import { Button } from "../../components/button/Button";
 import CalibrationData from "./CalibrationData";
+import { ModalConstructor } from "../../components/modal/ModalConstructor";
 
 /* Constants */
 const ROLL_DEG_SENSITIVITY = 5;
@@ -82,6 +83,8 @@ class Calibration extends React.PureComponent<Props, State> {
     animator: RefObject<Animator> = React.createRef();
     faceCalibration: FaceData | null = null;
 
+    modalConstructor: RefObject<ModalConstructor> = React.createRef();
+
     /** We want to show the "save" button on the
      * first go but facedetector tries to hide it */
     firstShow: boolean = false;
@@ -116,6 +119,17 @@ class Calibration extends React.PureComponent<Props, State> {
     async componentDidMount(): Promise<void> {
         const req = await Camera.requestCameraPermissionsAsync();
         this.setState({ cameraAvailable: req.status });
+
+        if (req.status === PermissionStatus.DENIED) {
+            this.modalConstructor.current?.constructModal({
+                header: "Camera",
+                description: "This app sadly won't function without a camera - enable it if you want to proceed",
+                buttons: [
+                    { text: "Okay", color: "blue", onClick: Linking.openSettings },
+                    { text: "Cancel", color: "red", onClick: () => alert("Sorry, app isn't usable without camera permissions 😔") }
+                ]
+            });
+        }
 
         const canGoBack = (await CalibrationData.getCalibration()) !== null;
         this.setState({ canGoBack });
@@ -302,6 +316,7 @@ class Calibration extends React.PureComponent<Props, State> {
 
 		return (
             <View style={Styles.mainContainer}>
+                <ModalConstructor ref={this.modalConstructor} />
                 <Animator ref={this.animator} style={Styles.container}>
                     {this.state.canGoBack && <TouchableOpacity style={Styles.cancelButton} activeOpacity={0.5} onPress={this.goBack}>
                         <Text style={Styles.cancelButtonText}>← Cancel</Text>
