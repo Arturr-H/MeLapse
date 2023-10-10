@@ -8,6 +8,7 @@ import { Button } from "../../components/button/Button";
 /* Interfaces */
 interface Props {
     deleteCurrent: () => void,
+    setOnionskin: () => void,
     saveCurrent: () => void,
 }
 interface State {
@@ -52,6 +53,13 @@ export default class ContextMenu extends React.PureComponent<Props, State> {
 
                 {this.state.contextVisible && <View style={Styles.contextBtnContainer}>
                     <Button small text="Download" active onPress={this.props.saveCurrent} />
+                    <Button
+                        color="blue"
+                        small
+                        text="onionskin"
+                        active
+                        onPress={this.props.setOnionskin}
+                    />
                     <Button
                         color="red"
                         small

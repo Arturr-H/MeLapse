@@ -12,6 +12,7 @@ import TimewarpButton from "./TimewarpButton";
 import { formatDate } from "../../functional/Date";
 import { saveToLibraryAsync } from "expo-media-library";
 import * as Haptics from "expo-haptics"
+import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 
 /** (ms) how long the user needs to hold timewarp
  * button for it to automatically switch every
@@ -63,6 +64,7 @@ class Review extends React.PureComponent<Props, State> {
         this.saveCurrentImage = this.saveCurrentImage.bind(this);
         this.updateCurrImage = this.updateCurrImage.bind(this);
         this.previousImage = this.previousImage.bind(this);
+        this.setOnionskin = this.setOnionskin.bind(this);
         this.onTouchStart = this.onTouchStart.bind(this);
         this.onTouchEnd = this.onTouchEnd.bind(this);
         this.loadImages = this.loadImages.bind(this);
@@ -184,6 +186,11 @@ class Review extends React.PureComponent<Props, State> {
 
         saveToLibraryAsync(CURRENT_IMAGE.getPath()).then(_ => alert("Image saved!"));
     }
+    async setOnionskin(): Promise<void> {
+        await OnionSkin
+            .setOnionSkinImage(this.lsImages[this.searchIndex].toLSImageProp())
+            .then(this.contextMenu.current?.close)
+    }
 
     /** Update image */
     updateCurrImage(): void {
@@ -213,6 +220,7 @@ class Review extends React.PureComponent<Props, State> {
                             ref={this.contextMenu}
                             deleteCurrent={this.deleteCurrentImage}
                             saveCurrent={this.saveCurrentImage}
+                            setOnionskin={this.setOnionskin}
                         />
                     </View>}
                 </View>
