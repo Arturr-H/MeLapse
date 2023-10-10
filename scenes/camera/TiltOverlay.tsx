@@ -57,10 +57,10 @@ export class TiltOverlay extends React.PureComponent<Props, State> {
     snapArrow(prevProps: Props): void {
         const SENSITIVITY = this.props.sensitivity;
         const SENSITIVITY_OUT = this.props.sensitivity / 2;
-        const YAW = this.props.facialFeatures!.yawAngle * 3;
+        const YAW = (this.props.facialFeatures!.yawAngle - this.props.calibration!.yawAngle) * 3;
         const PITCH = this.getPitchAngle(this.props.facialFeatures);
         
-        const PREV_YAW = prevProps.facialFeatures!.yawAngle * 3;
+        const PREV_YAW = (prevProps.facialFeatures!.yawAngle - this.props.calibration!.yawAngle) * 3;
         const PREV_PITCH = this.getPitchAngle(prevProps.facialFeatures);;
 
         const CLAMP = (n: number, sens: number) => {

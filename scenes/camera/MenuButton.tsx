@@ -13,7 +13,8 @@ interface Props {
 	}, "Preview", "Preferences">,
 	active: boolean,
 
-	onAnimating: (is: boolean) => void
+	onAnimating: (is: boolean) => void,
+	beforeNavigate?: () => void
 }
 interface State {
 	size: Animated.Value,
@@ -125,7 +126,10 @@ export class MenuButton extends React.PureComponent<Props, State> {
 					...DEFAULT_
 				}),
 				
-			]).start(this.openPreferencesScene);
+			]).start(() => {
+				this.props.beforeNavigate && this.props.beforeNavigate();
+				this.openPreferencesScene();
+			});
 		}
 	}
 

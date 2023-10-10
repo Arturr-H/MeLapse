@@ -53,6 +53,7 @@ interface State {
 	showActivityIndicator: boolean,
 	debugTransformCamera: any[],
 	transformCamera: boolean,
+	cameraActive: boolean,
 
 	/** Facial features, used for `FaceRotationView` */
 	facialFeatures: FaceData | null,
@@ -62,7 +63,7 @@ interface State {
 	flashlightOn: boolean,
 
 	/** Onion skin image (URI) */
-	onionSkinOverlay: string | null
+	onionSkinOverlay: string | null,
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -104,11 +105,13 @@ class Camera extends React.PureComponent<Props, State> {
 			debugTransformCamera: [],
 			transformCamera: false,
 			anyFaceVisible: false,
-			onionSkinOverlay: null
+			onionSkinOverlay: null,
+			cameraActive: true,
 		};
 
 		/* Bindings */
 		this.setFlashlightBrightness = this.setFlashlightBrightness.bind(this);
+		this.setCameraActive = this.setCameraActive.bind(this);
 		this.setFaceMetadata = this.setFaceMetadata.bind(this);
 		this.onFacesDetected = this.onFacesDetected.bind(this);
 		this.gainedFocus = this.gainedFocus.bind(this);
@@ -141,6 +144,7 @@ class Camera extends React.PureComponent<Props, State> {
 			anyFaceVisible: true,
 			animating: false,
 			showActivityIndicator: false,
+			cameraActive: true
 		});
 
 		/* Simulator throws error bc no camera */
@@ -245,8 +249,9 @@ class Camera extends React.PureComponent<Props, State> {
 				this.setState({ animating: true });
 				resetLoading();
 				this.shutterButton.current?.scaleUp(() => {
-					this.props.navigation.navigate("Preview", { lsimage });
 					this.setState({ animating: false });
+					this.setCameraActive(false);
+					this.props.navigation.navigate("Preview", { lsimage });
 				});
 			}else {
 				alert("Can't flip image");
@@ -259,6 +264,9 @@ class Camera extends React.PureComponent<Props, State> {
 			alert("Camera is not able to take pic");
 			resetLoading();
 		}
+	}
+	setCameraActive(active: boolean): void {
+		this.setState({ cameraActive: active });
 	}
 
 	/* On detect faces (expo-face-detector) */
@@ -280,7 +288,6 @@ class Camera extends React.PureComponent<Props, State> {
 			}
 
 		}else {
-			console.log("NO FACE");
 			/* No face visible */
 			this.setState({ anyFaceVisible: false });
 		}
@@ -321,7 +328,7 @@ class Camera extends React.PureComponent<Props, State> {
 				<OnionSkin ref={this.onionSkin} />
 
 				{/* Camera */}
-				{this.state.cameraAllowed && <ExpoCamera
+				{(this.state.cameraAllowed && this.state.cameraActive) && <ExpoCamera
 					ref={this.camera}
 					style={[Styles.container, { transform: this.state.debugTransformCamera }]}
 					type={CameraType.front}
@@ -354,6 +361,7 @@ class Camera extends React.PureComponent<Props, State> {
 						active={!(this.state.loadingImage || this.state.animating)}
 						ref={this.menuButton}
 						navigation={this.props.navigation}
+						beforeNavigate={() => this.setCameraActive(false)}
 						onAnimating={(animating) => this.setState({ animating })}
 					/>
 
