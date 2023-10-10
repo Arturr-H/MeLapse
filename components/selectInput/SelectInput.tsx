@@ -50,19 +50,21 @@ export default class SelectInput extends React.PureComponent<Props, State> {
 
     render(): React.ReactNode {
         return (
-            <View style={[Styles.selectButtonWrapper, Styles.selectInput]}>
-                {this.props.buttons.map((e, index) => 
-                    <SelectButton
-                        active={this.state.active === index}
-                        content={e}
-                        key={"selbtn-" + index}
-                        onPress={() => {
-                            this.setState({ active: index });
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            this.props.onChange && this.props.onChange(index);
-                        }}
-                    />
-                )}
+            <View style={Styles.selectInput}>
+                <View style={[Styles.selectButtonWrapper]}>
+                    {this.props.buttons.map((e, index) => 
+                        <SelectButton
+                            active={this.state.active === index}
+                            content={e}
+                            key={"selbtn-" + index}
+                            onPress={() => {
+                                this.setState({ active: index });
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                this.props.onChange && this.props.onChange(index);
+                            }}
+                        />
+                    )}
+                </View>
             </View>
         )
     }
