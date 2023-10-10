@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Image, SafeAreaView, View } from "react-native";
+import { Animated, Image, Linking, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -21,6 +21,7 @@ import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
 import { TiltOverlay } from "./TiltOverlay";
 import { OnionSkin } from "./onionSkin/OnionSkin";
+import { ModalConstructor } from "../../components/modal/ModalConstructor";
 
 /* Interfaces */
 interface Props {
@@ -75,6 +76,7 @@ class Camera extends React.PureComponent<Props, State> {
 	flashLightButton   : RefObject<FlashLightButton> = React.createRef();;
 	shutterButton      : RefObject<ShutterButton> = React.createRef();;
 	onionSkin          : RefObject<OnionSkin> = React.createRef();;
+	modal              : RefObject<ModalConstructor> = React.createRef();;
 
 	/** Face calibration metadata */
 	calibration: FaceData | null = null;
@@ -122,10 +124,6 @@ class Camera extends React.PureComponent<Props, State> {
 	async componentDidMount(): Promise<void> {
 		this.gainedFocus();
 		this.props.navigation.addListener("focus", this.gainedFocus);
-
-		/* Get camera permission */
-		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
-		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
 	}
 	async componentWillUnmount(): Promise<void> {
 		this.props.navigation.removeListener("focus", this.gainedFocus);
@@ -134,6 +132,20 @@ class Camera extends React.PureComponent<Props, State> {
 	/* Called via the export default function (navigation handler) */
 	async gainedFocus(): Promise<void> {
 		await this.onionSkin.current?.updateOnionskin();
+
+		/* Get camera permission */
+		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
+		if (true) {
+			this.modal.current?.constructModal({
+				header: "Camera",
+				description: "Camera must be enabled to have this app function",
+
+				buttons: [
+					{ text: "Okay", color: "blue", onClick: Linking.openSettings },
+				]
+			})
+		}
+		this.setState({ cameraAllowed: false });
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
@@ -179,9 +191,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Take pic */
 	async takePic(): Promise<void> {
-		/* Animate away menu button and flashlight button */
-		this.flashLightButton.current?.moveAway();
-		this.menuButton.current?.moveAway();
+		let unableToLoad: boolean = false;
 
 		this.setState({ loadingImage: true, animating: true });
 		const transform = [...this.state.transform]; // clone transform
@@ -191,7 +201,7 @@ class Camera extends React.PureComponent<Props, State> {
 			loads for more than 2000 ms */
 		this.stillLoadingImage = true;
 		this.loadingImageTimeoutCheck = setTimeout(() => {
-			if (this.stillLoadingImage) this.setState({
+			if (this.stillLoadingImage && !unableToLoad) this.setState({
 				showActivityIndicator: true,
 			});
 		}, 1000);
@@ -214,6 +224,11 @@ class Camera extends React.PureComponent<Props, State> {
 		const image = await this.camera.current?.takePictureAsync();
 
 		if (image) {
+			/* Animate away menu button and flashlight button */
+			this.flashLightButton.current?.moveAway();
+			this.menuButton.current?.moveAway();
+
+			/* Flip image */
 			let flipped = await manipulateAsync(
 				image.uri,
 				[{ flip: FlipType.Horizontal }],
@@ -263,6 +278,8 @@ class Camera extends React.PureComponent<Props, State> {
 		else {
 			alert("Camera is not able to take pic");
 			resetLoading();
+			unableToLoad = true;
+			this.setState({ animating: false, showActivityIndicator: false });
 		}
 	}
 	setCameraActive(active: boolean): void {
@@ -319,6 +336,8 @@ class Camera extends React.PureComponent<Props, State> {
 	render() {
 		return (
 			<View style={Styles.container}>
+				<ModalConstructor ref={this.modal} />
+
 				<CalibratedOverlay calibrated={this.calibration} />
 				
 				{/* Transforms image and saves it */}
