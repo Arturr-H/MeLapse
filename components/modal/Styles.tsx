@@ -14,7 +14,7 @@ export default StyleSheet.create({
         justifyContent: "center",
             alignItems: "center",
     
-        zIndex: 10
+        zIndex: 105
     },
     modalContainerWrapper: {
         width: "100%",
