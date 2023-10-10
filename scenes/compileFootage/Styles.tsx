@@ -1,8 +1,6 @@
 import { StyleSheet } from "react-native";
 import { WIDTH } from "../result/Result";
 
-const EMOJI_MOVE = WIDTH / 2.5;
-
 export default StyleSheet.create({
     container: {
         flex: 1,
@@ -18,21 +16,6 @@ export default StyleSheet.create({
     },
     innerContainer: {
         width: "100%",
-    },
-    thankYou: {
-        fontFamily: "inter-black",
-        fontSize: 40,
-        textAlign: "center"
-    },
-
-    amountOfImagesCount: {
-        fontFamily: "inter-black",
-        fontSize: 80
-    },
-    amountOfImagesText: {
-        fontSize: 24,
-        fontWeight: "400",
-        color: "#ddd"
     },
 
     loadingContainer: {
@@ -60,5 +43,5 @@ export default StyleSheet.create({
         zIndex: -1,
         right: -25,
         opacity: 0.4
-    }
+    },
 });
