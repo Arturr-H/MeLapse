@@ -87,6 +87,8 @@ class Camera extends React.PureComponent<Props, State> {
 	stillLoadingImage: boolean = false;
 	loadingImageTimeoutCheck?: NodeJS.Timeout;
 
+	hasShowedCameraAccessModal: boolean = false;
+
 	constructor(props: Props) {
 		super(props);
 
@@ -135,7 +137,9 @@ class Camera extends React.PureComponent<Props, State> {
 
 		/* Get camera permission */
 		const { status } = await ExpoCamera.requestCameraPermissionsAsync();
-		if (true) {
+		if (status === PermissionStatus.DENIED && !this.hasShowedCameraAccessModal) {
+			this.hasShowedCameraAccessModal = true;
+			
 			this.modal.current?.constructModal({
 				header: "Camera",
 				description: "Camera must be enabled to have this app function",
@@ -145,7 +149,7 @@ class Camera extends React.PureComponent<Props, State> {
 				]
 			})
 		}
-		this.setState({ cameraAllowed: false });
+		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
