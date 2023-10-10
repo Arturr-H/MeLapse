@@ -85,6 +85,7 @@ export default class Poster extends React.PureComponent<Props, State> {
 
         /* Bindings */
         this.animateIntro = this.animateIntro.bind(this);
+        this.fallDown = this.fallDown.bind(this);
         this.delete = this.delete.bind(this);
         this.rotate = this.rotate.bind(this);
         this.save = this.save.bind(this);
@@ -129,6 +130,14 @@ export default class Poster extends React.PureComponent<Props, State> {
             duration: 300,
             useNativeDriver: false,
             easing: Easing.inOut(Easing.ease),
+        }).start();
+    }
+    fallDown(): void {
+        Animated.timing(this.state.introTransform.y, {
+            toValue: HEIGHT,
+            duration: 400,
+            useNativeDriver: false,
+            easing: Easing.in(Easing.exp)
         }).start();
     }
 
