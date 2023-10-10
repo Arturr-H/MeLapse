@@ -2,7 +2,7 @@
   "expo": {
     "name": "unnamed",
     "slug": "unnamed",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
     "userInterfaceStyle": "light",
@@ -33,5 +33,18 @@
         "projectId": "f9fb43e2-8bd8-4516-aee2-58018f419ffc"
       }
     }
+  },
+  "plugins": [
+    [
+      "expo-build-properties",
+      {
+        "ios": {
+          "useFrameworks": "static"
+        }
+      }
+    ]
+  ],
+  "react-native-google-mobile-ads": {
+    "ios_app_id": "ca-app-pub-7754523043045564~1248185872"
   }
 }
