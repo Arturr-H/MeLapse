@@ -1,12 +1,11 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, SafeAreaView, View } from "react-native";
+import { Animated, Image, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
-import Floater from "../../components/floater/Floater";
 import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, manipulateAsync } from "expo-image-manipulator";
@@ -20,6 +19,8 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
+import { TiltOverlay } from "./TiltOverlay";
+import { OnionSkin } from "./onionSkin/OnionSkin";
 
 /* Interfaces */
 interface Props {
@@ -41,10 +42,6 @@ interface State {
 	/** User needs to allow app to use camera */
 	cameraAllowed: boolean,
 
-	/* Animated values */
-	yawAngle: Animated.Value,
-	rollAngle: Animated.Value,
-
 	transform: any[],
 
 	/** If there are any faces visible on screen */
@@ -63,6 +60,9 @@ interface State {
 	/** Flashlight overlay opacity */
 	flashlightOpacity: Animated.Value,
 	flashlightOn: boolean,
+
+	/** Onion skin image (URI) */
+	onionSkinOverlay: string | null
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -73,6 +73,7 @@ class Camera extends React.PureComponent<Props, State> {
 	menuButton         : RefObject<MenuButton> = React.createRef();;
 	flashLightButton   : RefObject<FlashLightButton> = React.createRef();;
 	shutterButton      : RefObject<ShutterButton> = React.createRef();;
+	onionSkin          : RefObject<OnionSkin> = React.createRef();;
 
 	/** Face calibration metadata */
 	calibration: FaceData | null = null;
@@ -90,8 +91,6 @@ class Camera extends React.PureComponent<Props, State> {
 		this.state = {
 			cameraAllowed: false,
 
-			yawAngle: new Animated.Value(0),
-			rollAngle: new Animated.Value(0),
 			flashlightOpacity: new Animated.Value(0),
 			flashlightOn: false,
 
@@ -105,6 +104,7 @@ class Camera extends React.PureComponent<Props, State> {
 			debugTransformCamera: [],
 			transformCamera: false,
 			anyFaceVisible: false,
+			onionSkinOverlay: null
 		};
 
 		/* Bindings */
@@ -130,6 +130,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Called via the export default function (navigation handler) */
 	async gainedFocus(): Promise<void> {
+		await this.onionSkin.current?.updateOnionskin();
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
@@ -139,6 +140,7 @@ class Camera extends React.PureComponent<Props, State> {
 		this.setState({
 			anyFaceVisible: true,
 			animating: false,
+			showActivityIndicator: false,
 		});
 
 		/* Simulator throws error bc no camera */
@@ -181,6 +183,8 @@ class Camera extends React.PureComponent<Props, State> {
 		const transform = [...this.state.transform]; // clone transform
 		const anyFaceVisible = this.state.anyFaceVisible;
 
+		/* We show activity indicator if image
+			loads for more than 2000 ms */
 		this.stillLoadingImage = true;
 		this.loadingImageTimeoutCheck = setTimeout(() => {
 			if (this.stillLoadingImage) this.setState({
@@ -191,7 +195,6 @@ class Camera extends React.PureComponent<Props, State> {
 		const resetLoading = () => {
 			this.setState({
 				loadingImage: false,
-				animating: false,
 				showActivityIndicator: false,
 			});
 		}
@@ -240,9 +243,10 @@ class Camera extends React.PureComponent<Props, State> {
 				
 				/* Transition */
 				this.setState({ animating: true });
+				resetLoading();
 				this.shutterButton.current?.scaleUp(() => {
-					resetLoading();
 					this.props.navigation.navigate("Preview", { lsimage });
+					this.setState({ animating: false });
 				});
 			}else {
 				alert("Can't flip image");
@@ -276,6 +280,7 @@ class Camera extends React.PureComponent<Props, State> {
 			}
 
 		}else {
+			console.log("NO FACE");
 			/* No face visible */
 			this.setState({ anyFaceVisible: false });
 		}
@@ -311,6 +316,9 @@ class Camera extends React.PureComponent<Props, State> {
 				
 				{/* Transforms image and saves it */}
 				<PictureManipulator ref={this.pictureManipulator} />
+
+				{/* Onion skin image */}
+				<OnionSkin ref={this.onionSkin} />
 
 				{/* Camera */}
 				{this.state.cameraAllowed && <ExpoCamera
@@ -350,8 +358,17 @@ class Camera extends React.PureComponent<Props, State> {
 					/>
 
 					{/* Bottom UI components */}
-					<Floater loosness={3} style={Styles.bottomBar}>
-						<View style={Styles.bottomBarTile} />
+					<View style={Styles.bottomBar}>
+						<View style={Styles.bottomBarTile}>
+							{/* Helps user know how to rotate face */}
+							<TiltOverlay
+								calibration={this.calibration}
+								sensitivity={10}
+								facialFeatures={this.state.facialFeatures}
+								anyFaceVisible={this.state.anyFaceVisible}
+							/>
+
+						</View>
 
 						{/* Middle - Shutter Button */}
 						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>
@@ -370,7 +387,7 @@ class Camera extends React.PureComponent<Props, State> {
 								setFlashlightActive={e => this.setState({ flashlightOn: e })}	
 							/>
 						</View>
-					</Floater>
+					</View>
 				</SafeAreaView>
 
 				{/* Time, battery & more */}

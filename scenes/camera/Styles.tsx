@@ -253,5 +253,19 @@ export default StyleSheet.create({
     gradientOverlay: {
         width: "100%",
         height: "100%",
+    },
+
+    tiltOverlayContainer: {
+        width: "100%",
+        height: "100%",
+        zIndex: 2,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
+    tiltOverlayArrow: {
+        width: "50%",
+        objectFit: "contain"
     }
 })
