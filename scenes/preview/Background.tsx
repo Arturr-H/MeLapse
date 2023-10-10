@@ -9,7 +9,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Animated } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptic from "expo-haptics";
-import Floater from "../../components/floater/Floater";
 import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
 import AsyncStorage from "@react-native-async-storage/async-storage";

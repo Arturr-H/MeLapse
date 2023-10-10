@@ -1,11 +1,10 @@
 /* Imports */
-import React, { ReactElement } from "react";
+import React from "react";
 import { Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
-import Floater from "../floater/Floater";
 
 /* Types */
 type SelectButtonContent = string | DoubleText;
@@ -34,20 +33,13 @@ interface State {
 }
 
 /** The input */
-class SelectInput extends React.PureComponent<Props, State> {
+export default class SelectInput extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
         this.state = {
             active: this.props.initial ?? 0
         }
-    }
-
-    componentDidMount(): void {
-        this.props.buttons.forEach((e: any) => {
-            console.log(e, );
-            console.log(e, typeof e);
-        })
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
@@ -58,21 +50,19 @@ class SelectInput extends React.PureComponent<Props, State> {
 
     render(): React.ReactNode {
         return (
-            <View style={Styles.selectInput}>
-                <Floater loosness={1} style={Styles.selectButtonWrapper}>
-                    {this.props.buttons.map((e, index) => 
-                        <SelectButton
-                            active={this.state.active === index}
-                            content={e}
-                            key={"selbtn-" + index}
-                            onPress={() => {
-                                this.setState({ active: index });
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                this.props.onChange && this.props.onChange(index);
-                            }}
-                        />
-                    )}
-                </Floater>
+            <View style={[Styles.selectButtonWrapper, Styles.selectInput]}>
+                {this.props.buttons.map((e, index) => 
+                    <SelectButton
+                        active={this.state.active === index}
+                        content={e}
+                        key={"selbtn-" + index}
+                        onPress={() => {
+                            this.setState({ active: index });
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            this.props.onChange && this.props.onChange(index);
+                        }}
+                    />
+                )}
             </View>
         )
     }
@@ -134,10 +124,4 @@ function SelectButton(props: {
             </TouchableHighlight>
         </View>
     )
-}
-
-export default function(props: Props) {
-	const navigation = useNavigation();
-  
-	return <SelectInput {...props} />;
 }

@@ -5,7 +5,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import * as Haptics from "expo-haptics";
 import { Animator } from "../../components/animator/Animator";
 import MaskedView from "@react-native-masked-view/masked-view";
-import Floater from "../../components/floater/Floater";
 import { FaceData } from "../../functional/FaceDetection";
 
 /* Types */
