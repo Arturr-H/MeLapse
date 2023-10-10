@@ -137,5 +137,78 @@ export default StyleSheet.create({
         fontSize: 45,
         color: "#eee",
         fontFamily: "inter-black",
-    }
+    },
+
+    denyStampContainer: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        pointerEvents: "none",
+
+        zIndex: 5,
+
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    deniedMarkImage: {
+        width: "60%",
+        objectFit: "contain",
+        position: "absolute",
+    },
+    deniedStampImage: {
+        width: "60%",
+        objectFit: "contain",
+        position: "absolute",
+    },
+
+    garbageFolderContainer: {
+        width: "100%",
+        height: "100%",
+        position: "absolute",
+        pointerEvents: "none",
+
+        zIndex: 5,
+
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    garbageFolder: {
+        position: "absolute",
+        bottom: -WIDTH / 3,
+        opacity: 0,
+
+        width: WIDTH,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    folderImageFrontContainer: {
+        width: "70%",
+        position: "absolute",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+    },
+    folderImageFront: {
+        width: "100%",
+        objectFit: "contain",
+        zIndex: 3
+    },
+    folderImageOverlay: {
+        width: "100%",
+        height: HEIGHT/16,
+        position: "absolute",
+        backgroundColor: "#fff",
+        zIndex: 1,
+    },
+
+    folderImageBack: {
+        zIndex: -1,
+        width: "70%",
+        objectFit: "contain",
+        position: "absolute",
+    },
 })

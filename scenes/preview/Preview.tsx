@@ -9,11 +9,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Animated } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptic from "expo-haptics";
-import Floater from "../../components/floater/Floater";
 import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Background from "./Background";
+import DenyStamp from "./DenyStamp";
+import GarbageFolder from "./GarbageFolder";
 
 /* Interfaces */
 interface Props {
@@ -35,13 +36,16 @@ interface State {
 /* Constants */
 const BUTTON_HIDE_CONFIG = { easing: Easing.in(Easing.exp), duration: 500, useNativeDriver: true };
 const BUTTON_SHOW_CONFIG = { easing: Easing.out(Easing.exp), duration: 500, useNativeDriver: true };
-const WIDTH = Dimensions.get("window").width;
-const HEIGHT = Dimensions.get("window").height;
 
 class Preview extends React.PureComponent<Props, State> {
     poster: RefObject<Poster> = React.createRef();
+    denyStamper: RefObject<DenyStamp> = React.createRef();
     background: RefObject<Background> = React.createRef();
+    posterAnimator: RefObject<Animator> = React.createRef();
 
+    garbageFolderFront: RefObject<GarbageFolder> = React.createRef();
+    garbageFolderBack: RefObject<GarbageFolder> = React.createRef();
+    
     constructor(props: Props) {
         super(props);
 
@@ -56,6 +60,7 @@ class Preview extends React.PureComponent<Props, State> {
         };
 
         /* Bindings */
+        this.fadeOutPoster = this.fadeOutPoster.bind(this);
         this.outroButtons = this.outroButtons.bind(this);
         this.introButtons = this.introButtons.bind(this);
         this.onDelete = this.onDelete.bind(this);
@@ -92,7 +97,26 @@ class Preview extends React.PureComponent<Props, State> {
         const navigate = () => this.props.navigation.navigate("Camera", { comesFrom: "other" });
         
         if (this.poster.current) {
-            this.poster.current?.delete(navigate);
+            const anim = Math.floor(Math.random() * 3);
+
+            switch (anim) {
+                case 0:
+                    this.poster.current?.delete(navigate);
+                    break;
+                
+                case 1:
+                    this.garbageFolderBack.current?.intro();
+                    this.garbageFolderFront.current?.intro(() => {
+                        this.poster.current?.fallDown();
+                    }, navigate);
+                    break;
+
+                case 2:
+                    this.denyStamper.current?.intro(this.fadeOutPoster, navigate);
+                    break;
+
+                default: break;
+            }
         }else {
             navigate();
         }
@@ -133,6 +157,9 @@ class Preview extends React.PureComponent<Props, State> {
         Animated.timing(this.state.scrapButtonScale, { ...BUTTON_HIDE_CONFIG, toValue: 0.2, delay: 100 }).start();
         Animated.timing(this.state.confirmButtonScale, { ...BUTTON_HIDE_CONFIG, toValue: 0.2, delay: 100 }).start();
     }
+    fadeOutPoster(): void {
+        this.posterAnimator.current?.fadeOut(400).start();
+    }
 
 	render() {
 		return (
@@ -140,16 +167,22 @@ class Preview extends React.PureComponent<Props, State> {
                 {/* Background */}
                 <Background ref={this.background} />
 
-                <View style={Styles.posterContainer}>
+                {/* Deny stamp remove animation */}
+                <DenyStamp ref={this.denyStamper} />
+
+                {/* Garbage folder (BACK) remove animation */}
+                <GarbageFolder ref={this.garbageFolderBack} side="back" />
+
+                <Animator ref={this.posterAnimator} style={Styles.posterContainer}>
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
-                        {this.state.lsimage && <Floater loosness={3}><Poster lsimage={this.state.lsimage} ref={this.poster} /></Floater>}
+                        {this.state.lsimage && <Poster lsimage={this.state.lsimage} ref={this.poster} />}
                     </View>
-                </View>
+                </Animator>
 
                 <View style={Styles.buttonRow}>
                     {/* Delete image */}
-                    <Floater loosness={1} style={Styles.row}>
+                    <View style={Styles.row}>
                         <TouchableOpacity
                             activeOpacity={0.8}
                             style={[Styles.deleteButton, { transform: [
@@ -163,10 +196,10 @@ class Preview extends React.PureComponent<Props, State> {
                                 : <Text style={Styles.deleteButtonText}>👎</Text>
                             }
                         </TouchableOpacity>
-                    </Floater>
+                    </View>
 
                     {/* Save image */}
-                    <Floater loosness={1} style={Styles.row}>
+                    <View style={Styles.row}>
                         <TouchableOpacity
                             activeOpacity={0.8}
                             style={[Styles.acceptButton, { transform: [
@@ -180,8 +213,11 @@ class Preview extends React.PureComponent<Props, State> {
                                 : <Text style={Styles.acceptButtonText}>SAVE →</Text>
                             }
                         </TouchableOpacity>
-                    </Floater>
+                    </View>
                 </View>
+
+                {/* Garbage folder (FRONT) remove animation */}
+                <GarbageFolder ref={this.garbageFolderFront} side="front" />
 
                 {/* Time, battery & more */}
                 <StatusBar style="dark" />
