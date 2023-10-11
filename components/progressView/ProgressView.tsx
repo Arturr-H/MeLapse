@@ -35,7 +35,8 @@ export class ProgressView extends React.PureComponent<Props, State> {
                     alignItems: "center",
 
                 position: "absolute",
-                backgroundColor: "#00000099"
+                pointerEvents: "none",
+                zIndex: 100
             }}>
                 <ActivityIndicator />
             </View>
