@@ -120,6 +120,8 @@ class Calibration extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
+        this.animator.current?.fadeIn(400).start();
+
         const req = await Camera.requestCameraPermissionsAsync();
         this.setState({ cameraAvailable: req.status });
 
@@ -138,7 +140,7 @@ class Calibration extends React.PureComponent<Props, State> {
         this.setState({ canGoBack });
 
         this.props.navigation.addListener("focus", () => {
-            this.animator.current?.fadeIn(100).start();
+            this.animator.current?.fadeIn(400).start();
         })
     }
 
@@ -320,7 +322,7 @@ class Calibration extends React.PureComponent<Props, State> {
 		return (
             <View style={Styles.mainContainer}>
                 <ModalConstructor ref={this.modalConstructor} />
-                <Animator ref={this.animator} style={Styles.container}>
+                <Animator startOpacity={0} ref={this.animator} style={Styles.container}>
                     {this.state.canGoBack && <TouchableOpacity style={Styles.cancelButton} activeOpacity={0.5} onPress={this.goBack}>
                         <Text style={Styles.cancelButtonText}>← Cancel</Text>
                     </TouchableOpacity>}
