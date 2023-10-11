@@ -30,4 +30,30 @@ export default StyleSheet.create({
         height: "50%",
     },
 
+
+    column: {
+        width: "100%",
+        height: "100%",
+
+        display: "flex",
+        flexDirection: "column",
+        paddingHorizontal: 30
+    },
+    body: {
+        width: "100%",
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+    },
+    footer: {
+        width: "100%",
+        display: "flex",
+
+        paddingBottom: 20
+    },
+    gap: {
+        display: "flex",
+        justifyContent: "center",
+        gap: 10
+    }
 })
