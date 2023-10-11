@@ -175,15 +175,27 @@ class Composer extends React.Component<Props, State> {
             });
         }
 
-        /* Launch modal */
-        this.modalConstructor.current?.constructModal({
-            buttons: [
-                { text: "Render", color: "blue", onClick: launchLoadingScreen },
-                { text: "Cancel", color: "red", onClick: "close" },
-            ],
-            header: "Render video",
-            description: "Rendering your final video (which may require some time) will display an advertisement and proceed to render the video while the advertisement is playing.",
-        })
+        /* First check if user has taken more than 5 selfies */
+        const ptrs = await LSImage.getImagePointers();
+        if (ptrs !== null && ptrs.length >= 5) {
+            /* Launch modal */
+            this.modalConstructor.current?.constructModal({
+                buttons: [
+                    { text: "Render", color: "blue", onClick: launchLoadingScreen },
+                    { text: "Cancel", color: "red", onClick: "close" },
+                ],
+                header: "Render video",
+                description: "Rendering your final video (which may require some time) will display an advertisement and proceed to render the video while the advertisement is playing.",
+            })
+        }else {
+            this.modalConstructor.current?.constructModal({
+                buttons: [
+                    { text: "Okay", color: "blue", onClick: "close" },
+                ],
+                header: "Not enough",
+                description: "Rendering your final video requires at least 5 selfies.",
+            })
+        }
     }
 
 	render() {
