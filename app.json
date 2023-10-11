@@ -42,6 +42,14 @@
           "useFrameworks": "static"
         }
       }
+    ],
+    [
+      "expo-notifications",
+      {
+        "sounds": [
+          "./local/assets/sounds/notification.wav"
+        ]
+      }
     ]
   ],
   "react-native-google-mobile-ads": {
