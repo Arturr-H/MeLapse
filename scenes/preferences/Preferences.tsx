@@ -28,9 +28,11 @@ export interface Props {
         Calibration: undefined,
         Tutorial: undefined,
         PrivacyPolicy: undefined,
-        Statistics: undefined
+        Statistics: undefined,
+        HowOften: { confirmLocation: "Preferences" | "Calibration" }
     }, "Camera" | "Debug" | "Composer" | "Review"
-    | "Calibration" | "Tutorial" | "PrivacyPolicy" | "Statistics">,
+    | "Calibration" | "Tutorial" | "PrivacyPolicy"
+    | "Statistics" | "HowOften">,
 }
 export interface State {
     switching: boolean,
@@ -39,7 +41,8 @@ export interface State {
     transformCamera: boolean,
     timesPerDay: number,
     username: string,
-    onionSkinVisible: boolean
+    onionSkinVisible: boolean,
+    deletingImages: boolean
 }
 
 class Preferences extends React.Component<Props, State> {
@@ -58,9 +61,11 @@ class Preferences extends React.Component<Props, State> {
             username: "",
             transformCamera: false,
             onionSkinVisible: false,
+            deletingImages: false,
         };
 
         /* Bindings */
+        this.deleteImages = this.deleteImages.bind(this);
         this.resetSettings = this.resetSettings.bind(this);
         
         /* Refs */
@@ -119,6 +124,9 @@ class Preferences extends React.Component<Props, State> {
     statisticsScene = () => this.fadeOut(false, () => 
         this.props.navigation.navigate("Statistics")
     )
+    howOftenScene = () => this.fadeOut(false, () => 
+        this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" })
+    )
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
@@ -137,12 +145,20 @@ class Preferences extends React.Component<Props, State> {
 
     /** Delete all selfies */
     async deleteImages(): Promise<void> {
-		await LSImage.resetImagePointersFile();
-		RNFS.readdir(RNFS.DocumentDirectoryPath).then(e =>
-            e.forEach(a =>
-                RNFS.unlink(RNFS.DocumentDirectoryPath + "/" + a)
-            )
-        );
+        this.setState({ deletingImages: true });
+        async function delete_(): Promise<void> {
+            await LSImage.resetImagePointersFile();
+            await RNFS.readdir(RNFS.DocumentDirectoryPath).then(async e =>
+                e.forEach(async a =>
+                    await RNFS.unlink(RNFS.DocumentDirectoryPath + "/" + a)
+                )
+            );
+        };
+
+        await delete_().then(_ => {
+            this.setState({ deletingImages: false });
+            alert("All selfies deleted 😣");
+        });
     }
 
 	render() {
@@ -219,6 +235,22 @@ class Preferences extends React.Component<Props, State> {
 
                                 <View style={Styles.hr} />
 
+                                {/* Notification */}
+                                <View>
+                                    <Text style={Styles.header2}>🔔 Notifications</Text>
+                                    <View><Text style={Styles.paragraph}>
+                                        Change your notification preferences. I recommend 2 notifications per day 😎
+                                    </Text></View>
+
+                                    <Button
+                                        active
+                                        onPress={this.howOftenScene}
+                                        text="Notifications →"
+                                    />
+                                </View>
+
+                                <View style={Styles.hr} />
+
                                 {/* Redo tutorial */}
                                 <View>
                                     <Text style={Styles.header2}>🔩 Miscellaneous</Text>
@@ -285,6 +317,7 @@ class Preferences extends React.Component<Props, State> {
                                         color="red"
                                         active={!this.state.switching}
                                         onPress={this.deleteImages}
+                                        loading={this.state.deletingImages}
                                         text="Delete all selfies"
                                     />
                                 </View>
