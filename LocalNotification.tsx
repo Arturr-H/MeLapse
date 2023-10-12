@@ -84,3 +84,9 @@ export async function allowsNotificationsAsync(): Promise<boolean> {
         settings.granted || settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
     );
 }
+
+/** Clear all scheduled notifications */
+export async function clearAllScheduled(): Promise<void> {
+    for (const not of await Notifications.getAllScheduledNotificationsAsync())
+        await Notifications.cancelScheduledNotificationAsync(not.identifier);
+}
