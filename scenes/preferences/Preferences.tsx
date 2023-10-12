@@ -14,7 +14,6 @@ import { LSImage, saveImage } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
-import { launchImageLibraryAsync } from "expo-image-picker";
 import * as Ads from "../../components/advertising/Ad";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 
@@ -319,29 +318,6 @@ class Preferences extends React.Component<Props, State> {
                                         onPress={this.deleteImages}
                                         loading={this.state.deletingImages}
                                         text="Delete all selfies"
-                                    />
-                                </View>
-
-                                {/* Delete data */}
-                                <View>
-                                    <Text style={Styles.paragraph}>DEBUG IMPORT IMAGES</Text>
-                                    <Button
-                                        color="red"
-                                        active={!this.state.switching}
-                                        onPress={async () => {
-                                            const a = await launchImageLibraryAsync({
-                                                allowsMultipleSelection: true,
-                                            });
-                                            if (!a.canceled) {
-                                                a.assets.forEach((asset, i) => {
-                                                    setTimeout(() => {
-                                                        console.log("[DBG] Loading asset", asset.assetId);
-                                                        saveImage(new LSImage().withPath(asset.uri));
-                                                    }, i*200);
-                                                });
-                                            }
-                                        }}
-                                        text="[DBG] Import selfies"
                                     />
                                 </View>
                             </MultiAnimator>
