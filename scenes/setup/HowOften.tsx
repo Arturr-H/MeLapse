@@ -7,7 +7,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import AppConfig from "../preferences/Config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { allowsNotificationsAsync } from "../../LocalNotification";
+import { allowsNotificationsAsync, clearAllScheduled } from "../../LocalNotification";
 import * as Notifications from "expo-notifications";
 import { Animator } from "../../components/animator/Animator";
 
@@ -74,52 +74,53 @@ export class HowOften extends React.PureComponent<Props, State> {
     }
 
     async onChange(nr: number): Promise<void> {
-        await AppConfig.setTargetTimesPerDay(nr);
-        let notifications: { hour: number, minute: number }[] = [];
-
-        if (nr === 1)
-            notifications = [ { hour: 16, minute: 0 } ];
+        clearAllScheduled().then(async () => {
+            await AppConfig.setTargetTimesPerDay(nr);
+            let notifications: { hour: number, minute: number }[] = [];
+            
+            if (nr === 1)
+                notifications = [ { hour: 16, minute: 0 } ];
         
-        else if (nr === 2)
-            notifications = [
-                { hour: 12, minute: 0 },
-                { hour: 20, minute: 0 },
-            ];
+            else if (nr === 2)
+                notifications = [
+                    { hour: 12, minute: 0 },
+                    { hour: 20, minute: 0 },
+                ];
 
-        else if (nr === 3)
-            notifications = [
-                { hour: 12, minute: 0 },
-                { hour: 16, minute: 0 },
-                { hour: 20, minute: 0 },
-            ]
+            else if (nr === 3)
+                notifications = [
+                    { hour: 12, minute: 0 },
+                    { hour: 16, minute: 0 },
+                    { hour: 20, minute: 0 },
+                ]
 
-        const now = new Date();
+            const now = new Date();
 
-        // No notis
-        notifications.forEach(({ hour, minute }) => {
-            const triggerTime = new Date();
-            triggerTime.setHours(hour);
-            triggerTime.setMinutes(minute);
-            triggerTime.setSeconds(0);
-
-            if (triggerTime < now) {
-                triggerTime.setDate(triggerTime.getDate() + 1);
-            }
-
-            Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "Selfie time 📸",
-                    body: "Make sure to find a well-lit place 💡",
-                    sound: "notification.wav",
-                },
-                trigger: {
-                    hour: triggerTime.getHours(),
-                    minute: triggerTime.getMinutes(),
-                    repeats: true,
-                },
+            // No notis
+            notifications.forEach(({ hour, minute }) => {
+                const triggerTime = new Date();
+                triggerTime.setHours(hour);
+                triggerTime.setMinutes(minute);
+                triggerTime.setSeconds(0);
+                
+                if (triggerTime < now) {
+                    triggerTime.setDate(triggerTime.getDate() + 1);
+                }
+                
+                Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "Selfie time 📸",
+                        body: "Make sure to find a well-lit place 💡",
+                        sound: "notification.wav",
+                    },
+                    trigger: {
+                        hour: triggerTime.getHours(),
+                        minute: triggerTime.getMinutes(),
+                        repeats: true,
+                    },
+                });
             });
-        });
-
+        })
     }
 
     render() {
