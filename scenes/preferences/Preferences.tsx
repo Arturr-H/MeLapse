@@ -6,11 +6,9 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import { Animator } from "../../components/animator/Animator";
 import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
-import MultiAnimator from "../../components/animator/MultiAnimator";
-import { LSImage, saveImage } from "../../functional/Image";
+import { LSImage } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
@@ -46,8 +44,6 @@ export interface State {
 
 class Preferences extends React.Component<Props, State> {
     nameInput: RefObject<TextInput>;
-    animatorComponent: RefObject<MultiAnimator>;
-    bottomNavAnimator: RefObject<Animator>;
 
     constructor(props: Props) {
         super(props);
@@ -69,14 +65,9 @@ class Preferences extends React.Component<Props, State> {
         
         /* Refs */
         this.nameInput = React.createRef();
-        this.animatorComponent = React.createRef();
-        this.bottomNavAnimator = React.createRef();
     };
 
     async componentDidMount(): Promise<void> {
-        this.fadeIn();
-        this.props.navigation.addListener("focus", this.fadeIn);
-
         this.setState({
             timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
             username: await AppConfig.getUsername(),
@@ -85,47 +76,16 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: await OnionSkin.getOnionSkinVisibility()
         });
     }
-    componentWillUnmount(): void {
-        this.props.navigation.removeListener("focus", this.fadeIn);
-    }
-    fadeIn = () => {
-        this.animatorComponent.current?.fadeOut(0, 0, () => {
-            this.animatorComponent.current?.fadeIn(200, 50);
-        });
-        this.bottomNavAnimator.current?.fadeOut(0).fadeIn(400).start();
-    }
-    fadeOut = (shouldIgnoreBottomNavAnim: boolean, callback?: () => void) => {
-        this.animatorComponent.current?.fadeOut(200, 50, callback);
-
-        if (!shouldIgnoreBottomNavAnim)
-            this.bottomNavAnimator.current?.fadeOut(400).start();
-    }
 
     /* Scene switches */
-    cameraScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("Camera", { comesFrom: "preferences" })
-    )
-    composerScene = () => this.fadeOut(true, () => 
-        this.props.navigation.navigate("Composer")
-    )
-    reviewScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("Review")
-    )
-    calibrationScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("Calibration")
-    )
-    tutorialScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("Tutorial")
-    )
-    privacyPolicyScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("PrivacyPolicy")
-    )
-    statisticsScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("Statistics")
-    )
-    howOftenScene = () => this.fadeOut(false, () => 
-        this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" })
-    )
+    cameraScene        = () => this.props.navigation.navigate("Camera", { comesFrom: "preferences" });
+    composerScene      = () => this.props.navigation.navigate("Composer");
+    reviewScene        = () => this.props.navigation.navigate("Review");
+    calibrationScene   = () => this.props.navigation.navigate("Calibration");
+    tutorialScene      = () => this.props.navigation.navigate("Tutorial");
+    privacyPolicyScene = () => this.props.navigation.navigate("PrivacyPolicy");
+    statisticsScene    = () => this.props.navigation.navigate("Statistics");
+    howOftenScene      = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" });
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
@@ -181,172 +141,170 @@ class Preferences extends React.Component<Props, State> {
 
 	render() {
 		return (
-			<SafeAreaView style={Styles.container}>
-                <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
-                    <View style={Styles.scrollViewContainer}>
+			<SafeAreaView style={[Styles.container, { overflow: "visible" }]}>
+                <KeyboardAvoidingView style={[Styles.keyboardAvoidingView, { overflow: "visible" }]} behavior="padding">
+                    <View style={[Styles.scrollViewContainer, { overflow: "visible" }]}>
                         <ScrollGradient />
-                        <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                            <MultiAnimator ref={this.animatorComponent}>
-                                <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
+                        <ScrollView contentContainerStyle={[Styles.containerInner, { overflow: "visible" }]} showsVerticalScrollIndicator={false}>
+                            <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
 
-                                {/* Goto composer scene */}
-                                <View style={Styles.row}>
-                                    <View style={Styles.tile}>
-                                        <Button flex color="green" active={!this.state.switching} onPress={this.composerScene} text="Create →" />
-                                    </View>
-                                    <View style={Styles.tile}>
-                                        <Text style={Styles.header2}>🎨 Composer</Text>
-                                        <Text style={Styles.paragraph}>Create your final timelapse-footage.</Text>
-                                    </View>
+                            {/* Goto composer scene */}
+                            <View style={Styles.row}>
+                                <View style={Styles.tile}>
+                                    <Button flex color="green" active onPress={this.composerScene} text="Create →" />
                                 </View>
-
-                                <View style={Styles.hr} />
-                                
-                                {/* Review images */}
-                                <View>
-                                    <Text style={Styles.header2}>🧹 Review images</Text>
-                                    <View><Text style={Styles.paragraph}>Review all the selfies you've taken so far. Delete, save, or keep them</Text></View>
-
-                                    <Button
-                                        color="blue"
-                                        onPress={this.reviewScene}
-                                        active
-                                        text="Review images →"
-                                    />
+                                <View style={Styles.tile}>
+                                    <Text style={Styles.header2}>🎨 Composer</Text>
+                                    <Text style={Styles.paragraph}>Create your final timelapse-footage.</Text>
                                 </View>
+                            </View>
 
-                                {/* Save image media lib */}
-                                <View>
-                                    <View><Text style={Styles.paragraph}>Automatically save each selfie to your camera roll (won't apply to previous selfies)</Text></View>
+                            <View style={Styles.hr} />
+                            
+                            {/* Review images */}
+                            <View>
+                                <Text style={Styles.header2}>🧹 Review images</Text>
+                                <View><Text style={Styles.paragraph}>Review all the selfies you've taken so far. Delete, save, or keep them</Text></View>
 
-                                    <SelectInput
-                                        buttons={["YES", "NO"]}
-                                        initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
-                                        onChange={(idx) => {
-                                            this.setState({ saveSelfiesToCameraRoll: idx == 0 ? true : false });
-                                            AppConfig.setSaveSelfiesToCameraRoll(idx == 0 ? true : false);
-                                        }}
-                                    />
-                                </View>
+                                <Button
+                                    color="blue"
+                                    onPress={this.reviewScene}
+                                    active
+                                    text="Review images →"
+                                />
+                            </View>
 
-                                <Ads.Banner />
+                            {/* Save image media lib */}
+                            <View>
+                                <View><Text style={Styles.paragraph}>Automatically save each selfie to your camera roll (won't apply to previous selfies)</Text></View>
 
-                                <View style={Styles.hr} />
+                                <SelectInput
+                                    buttons={["YES", "NO"]}
+                                    initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
+                                    onChange={(idx) => {
+                                        this.setState({ saveSelfiesToCameraRoll: idx == 0 ? true : false });
+                                        AppConfig.setSaveSelfiesToCameraRoll(idx == 0 ? true : false);
+                                    }}
+                                />
+                            </View>
 
-                                {/* Onionskin */}
-                                <View>
-                                    <Text style={Styles.header2}>🧅 Onion skin</Text>
-                                    <View><Text style={Styles.paragraph}>
-                                        Display a thin layer above the camera view of a previous selfie, to help you align your face better.
-                                        To select onionskin selfie, go to review images {">"} ⚙️ {">"} Onionskin
-                                    </Text></View>
+                            <Ads.Banner />
 
-                                    <SelectInput
-                                        buttons={["YES", "NO"]}
-                                        initial={this.state.onionSkinVisible ? 0 : 1}
-                                        onChange={(idx) => {
-                                            this.setState({ onionSkinVisible: idx == 0 ? true : false });
-                                            OnionSkin.setOnionSkinVisibility(idx == 0 ? true : false);
-                                        }}
-                                    />
-                                </View>
+                            <View style={Styles.hr} />
 
-                                <View style={Styles.hr} />
+                            {/* Onionskin */}
+                            <View>
+                                <Text style={Styles.header2}>🧅 Onion skin</Text>
+                                <View><Text style={Styles.paragraph}>
+                                    Display a thin layer above the camera view of a previous selfie, to help you align your face better.
+                                    To select onionskin selfie, go to review images {">"} ⚙️ {">"} Onionskin
+                                </Text></View>
 
-                                {/* Notification */}
-                                <View>
-                                    <Text style={Styles.header2}>🔔 Notifications</Text>
-                                    <View><Text style={Styles.paragraph}>
-                                        Change your notification preferences. I recommend 2 notifications per day 😎
-                                    </Text></View>
+                                <SelectInput
+                                    buttons={["YES", "NO"]}
+                                    initial={this.state.onionSkinVisible ? 0 : 1}
+                                    onChange={(idx) => {
+                                        this.setState({ onionSkinVisible: idx == 0 ? true : false });
+                                        OnionSkin.setOnionSkinVisibility(idx == 0 ? true : false);
+                                    }}
+                                />
+                            </View>
 
-                                    <Button
-                                        active
-                                        onPress={this.howOftenScene}
-                                        text="Notifications →"
-                                    />
-                                </View>
+                            <View style={Styles.hr} />
 
-                                <View style={Styles.hr} />
+                            {/* Notification */}
+                            <View>
+                                <Text style={Styles.header2}>🔔 Notifications</Text>
+                                <View><Text style={Styles.paragraph}>
+                                    Change your notification preferences. I recommend 2 notifications per day 😎
+                                </Text></View>
 
-                                {/* Redo tutorial */}
-                                <View>
-                                    <Text style={Styles.header2}>🔩 Miscellaneous</Text>
-                                    <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
-                                    <Button
-                                        color="blue"
-                                        active={!this.state.switching}
-                                        onPress={this.tutorialScene}
-                                        text="Tutorial →"
-                                    />
-                                </View>
+                                <Button
+                                    active
+                                    onPress={this.howOftenScene}
+                                    text="Notifications →"
+                                />
+                            </View>
 
-                                {/* View statistics */}
-                                <View>
-                                    <Text style={Styles.paragraph}>View your statistics</Text>
-                                    <Button
-                                        color="blue"
-                                        active={!this.state.switching}
-                                        onPress={this.statisticsScene}
-                                        text="Statistics →"
-                                    />
-                                </View>
+                            <View style={Styles.hr} />
 
-                                {/* "Privacy policy" */}
-                                <View>
-                                    <Text style={Styles.paragraph}>View the privacy policy</Text>
-                                    <Button
-                                        color="blue"
-                                        active={!this.state.switching}
-                                        onPress={this.privacyPolicyScene}
-                                        text="Privacy policy →"
-                                    />
-                                </View>
+                            {/* Redo tutorial */}
+                            <View>
+                                <Text style={Styles.header2}>🔩 Miscellaneous</Text>
+                                <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
+                                <Button
+                                    color="blue"
+                                    active
+                                    onPress={this.tutorialScene}
+                                    text="Tutorial →"
+                                />
+                            </View>
 
-                                <View style={Styles.hr} />
+                            {/* View statistics */}
+                            <View>
+                                <Text style={Styles.paragraph}>View your statistics</Text>
+                                <Button
+                                    color="blue"
+                                    active
+                                    onPress={this.statisticsScene}
+                                    text="Statistics →"
+                                />
+                            </View>
 
-                                {/* Redo face calibration */}
-                                <View>
-                                    <Text style={Styles.header2}>🚨 Danger zone</Text>
-                                    <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
-                                    <Button color="red" active={!this.state.switching} onPress={this.calibrationScene} text="New face calib →" />
-                                </View>
+                            {/* "Privacy policy" */}
+                            <View>
+                                <Text style={Styles.paragraph}>View the privacy policy</Text>
+                                <Button
+                                    color="blue"
+                                    active
+                                    onPress={this.privacyPolicyScene}
+                                    text="Privacy policy →"
+                                />
+                            </View>
 
-                                {/* Reset config */}
-                                <View>
-                                    <Text style={Styles.paragraph}>Reset settings to default</Text>
-                                    <Button
-                                        confirm={{ message: "Are you sure you want to reset your settings?", title: "Reset config" }}
-                                        color="red"
-                                        active={!this.state.switching}
-                                        onPress={this.resetSettings}
-                                        text="Reset settings"
-                                    />
-                                </View>
+                            <View style={Styles.hr} />
 
-                                {/* Delete data */}
-                                <View>
-                                    <Text style={Styles.paragraph}>Delete all selfies you've taken (forever)</Text>
-                                    <Button
-                                        confirm={{
-                                            message: "Are you really sure you want to delete all your selfies? This process cannot be undone.",
-                                            title: "⚠️ Delete images ⚠️"
-                                        }}
-                                        color="red"
-                                        active={!this.state.switching}
-                                        onPress={this.deleteImages}
-                                        loading={this.state.deletingImages}
-                                        text="Delete all selfies"
-                                    />
-                                </View>
-                            </MultiAnimator>
+                            {/* Redo face calibration */}
+                            <View>
+                                <Text style={Styles.header2}>🚨 Danger zone</Text>
+                                <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
+                                <Button color="red" active onPress={this.calibrationScene} text="New face calib →" />
+                            </View>
+
+                            {/* Reset config */}
+                            <View>
+                                <Text style={Styles.paragraph}>Reset settings to default</Text>
+                                <Button
+                                    confirm={{ message: "Are you sure you want to reset your settings?", title: "Reset config" }}
+                                    color="red"
+                                    active
+                                    onPress={this.resetSettings}
+                                    text="Reset settings"
+                                />
+                            </View>
+
+                            {/* Delete data */}
+                            <View>
+                                <Text style={Styles.paragraph}>Delete all selfies you've taken (forever)</Text>
+                                <Button
+                                    confirm={{
+                                        message: "Are you really sure you want to delete all your selfies? This process cannot be undone.",
+                                        title: "⚠️ Delete images ⚠️"
+                                    }}
+                                    color="red"
+                                    active
+                                    onPress={this.deleteImages}
+                                    loading={this.state.deletingImages}
+                                    text="Delete all selfies"
+                                />
+                            </View>
                         </ScrollView>
                     </View>
 
                     {/* Confirm */}
-                    <Animator startOpacity={0} ref={this.bottomNavAnimator} style={{ transform: [{ translateY: -12 }] }}>
-                        <Button color="blue" active={!this.state.switching} onPress={this.cameraScene} text="← Back" />
-                    </Animator>
+                    <View style={{ transform: [{ translateY: -12 }] }}>
+                        <Button color="blue" active onPress={this.cameraScene} text="← Back" />
+                    </View>
                 </KeyboardAvoidingView>
 
                 <StatusBar style="dark" />
