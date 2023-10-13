@@ -245,7 +245,7 @@ class Composer extends React.Component<Props, State> {
                         {/* Output type (?) */}
                         <View style={Styles.padded}>
                             <Text style={Styles.header2}>🔧 Output settings</Text>
-                            <Text style={Styles.paragraph}>Chamge the output format of your rendered footage (Default is MP4)</Text>
+                            <Text style={Styles.paragraph}>Change the output format of your rendered footage (Default is MP4)</Text>
                             <SelectInput
                                 initial={this.state.config.format}
                                 onChange={ComposerConfig.setFormat}
