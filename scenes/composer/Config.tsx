@@ -19,7 +19,7 @@ export default class ComposerConfig {
     static async setFormat(value: number) { await AsyncStorage.setItem("format", JSON.stringify(value)) }
 
     /** Output quality */
-    static async getQuality(): Promise<number> { return this.tryGet("quality", 1) } // 1 = mid quality
+    static async getQuality(): Promise<number> { return this.tryGet("quality", 2) } // 2 = high quality
     static async setQuality(value: number) { await AsyncStorage.setItem("quality", JSON.stringify(value)) }
 
     /** Output framerate.
