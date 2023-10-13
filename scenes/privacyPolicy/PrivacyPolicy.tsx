@@ -1,18 +1,18 @@
 /* Imports */
-import React, { RefObject } from "react";
-import { KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import AppConfig from "../preferences/Config";
-import MultiAnimator from "../../components/animator/MultiAnimator";
 import { StatusBar } from "expo-status-bar";
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<{ Preferences: undefined }, "Preferences">,
+    navigation: StackNavigationProp<
+        { Preferences: undefined, Welcome: undefined }
+    , "Preferences" | "Welcome">,
+    confirmLocation: "Preferences" | "Welcome"
 }
 export interface State {}
 
@@ -29,7 +29,7 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {};
-    goBack = () => this.props.navigation.navigate("Preferences");
+    goBack = () => this.props.navigation.navigate(this.props.confirmLocation);
 
 	render() {
 		return (
@@ -76,7 +76,7 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
                             I may update this Privacy Policy from time to time. I will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.
                         </Text>
 
-                        <Text style={Styles.header2}>Contact Us</Text>
+                        <Text style={Styles.header2}>Contact Me</Text>
 
                         <Text style={Styles.privacyPolicyText}>
                             If you have any questions about this Privacy Policy, please contact me at artur.hoffsummer@icloud.com
@@ -100,5 +100,5 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
 export default function(props: any) {
 	const navigation = useNavigation();
   
-	return <PrivacyPolicy {...props} navigation={navigation} />;
+	return <PrivacyPolicy {...props} confirmLocation={props.route.params.confirmLocation} navigation={navigation} />;
 }
