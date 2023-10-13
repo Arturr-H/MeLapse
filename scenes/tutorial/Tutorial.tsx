@@ -8,7 +8,9 @@ import Page1 from "./page1/Page";
 import Page2 from "./page2/Page";
 import Page3 from "./page3/Page";
 import Page4 from "./page4/Page";
+import Page5 from "./page5/Page";
 import { WIDTH } from "../result/Result";
+import { StatusBar } from "expo-status-bar";
 
 /* Interfaces */
 interface Props {
@@ -23,7 +25,7 @@ interface State {
 
 class Tutorial extends React.PureComponent<Props, State> {
     pages: JSX.Element[];
-    page4: RefObject<Page4> = React.createRef();
+    page5: RefObject<Page5> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -42,14 +44,15 @@ class Tutorial extends React.PureComponent<Props, State> {
             <Page1 key="pg1" />,
             <Page2 key="pg2" />,
             <Page3 key="pg3" />,
-            <Page4 key="pg4" ref={this.page4} navigation={this.props.navigation} />,
+            <Page4 key="pg4" />,
+            <Page5 key="pg5" ref={this.page5} navigation={this.props.navigation} />,
         ];
     };
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
         this.props.navigation.addListener("focus", () => {
-            this.page4.current?.setFocused();
+            this.page5.current?.setFocused();
         })
     };
 
@@ -90,6 +93,8 @@ class Tutorial extends React.PureComponent<Props, State> {
                         )}
                     </View>
                 </View>
+
+                <StatusBar style="dark" />
 			</SafeAreaView>
 		);
 	}
