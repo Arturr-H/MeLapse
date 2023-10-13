@@ -25,8 +25,8 @@ export interface Props {
         Review: undefined,
         Calibration: undefined,
         Tutorial: undefined,
-        PrivacyPolicy: undefined,
         Statistics: undefined,
+        PrivacyPolicy: { confirmLocation: "Preferences" },
         HowOften: { confirmLocation: "Preferences" | "Calibration" }
     }, "Camera" | "Debug" | "Composer" | "Review"
     | "Calibration" | "Tutorial" | "PrivacyPolicy"
@@ -85,7 +85,7 @@ class Preferences extends React.Component<Props, State> {
     reviewScene        = () => this.props.navigation.navigate("Review");
     calibrationScene   = () => this.props.navigation.navigate("Calibration");
     tutorialScene      = () => this.props.navigation.navigate("Tutorial");
-    privacyPolicyScene = () => this.props.navigation.navigate("PrivacyPolicy");
+    privacyPolicyScene = () => this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Preferences" });
     statisticsScene    = () => this.props.navigation.navigate("Statistics");
     howOftenScene      = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" });
 
