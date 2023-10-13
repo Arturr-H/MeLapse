@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -145,6 +145,8 @@ class Preferences extends React.Component<Props, State> {
     /** Delete all selfies */
     async deleteImages(): Promise<void> {
         this.setState({ deletingImages: true });
+
+        /* Noooooooo */
         async function delete_(): Promise<void> {
             await LSImage.resetImagePointersFile();
             await RNFS.readdir(RNFS.DocumentDirectoryPath).then(async e =>
@@ -154,10 +156,27 @@ class Preferences extends React.Component<Props, State> {
             );
         };
 
-        await delete_().then(_ => {
+        const cancel = async (): Promise<void> => {
             this.setState({ deletingImages: false });
-            alert("All selfies deleted 😣");
-        });
+            alert("Phew images saved!")
+        }
+        const confirm = async (value?: string): Promise<void> => {
+            if (value && value.toLocaleLowerCase().trim() === "yes") await delete_().then(_ => {
+                this.setState({ deletingImages: false });
+                alert("All selfies deleted 😣");
+            })
+            else cancel();
+        };
+
+        /* Prompt */
+        Alert.prompt(
+            "Really?",
+            "Are you really REALLY sure? (type \"yes\")",
+            [
+                { text: "Cancel", style: "default", onPress: cancel },
+                { text: "Submit", style: "destructive", onPress: confirm },
+            ]
+        );
     }
 
 	render() {
