@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
+const WIDTH = Dimensions.get("window").width;
 
 export default StyleSheet.create({
     container: {
@@ -11,8 +12,6 @@ export default StyleSheet.create({
     keyboardAvoidingView: {
         height: "100%",
         width: "100%",
-
-        paddingHorizontal: 30,
     },
     containerInner: {
         justifyContent: "center",
@@ -79,5 +78,13 @@ export default StyleSheet.create({
 
         marginTop: 15,
         marginBottom: 10
-    }
+    },
+
+    padded: {
+        paddingHorizontal: 30,
+    },
+    hrPadded: {
+        width: WIDTH - 30*2,
+        left: 30
+    },
 })
