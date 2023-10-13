@@ -1,7 +1,8 @@
 import React from "react";
 import { View } from "react-native";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
 import AppConfig from "../../scenes/preferences/Config";
+import { REWARDED_UNIT_ID } from "./Util";
 
 /* Interfaces */
 interface AdProps {
@@ -40,7 +41,7 @@ export function Banner(props: AdProps): JSX.Element | null {
 			height: props.allocatedHeight,
 		}}>
 			<BannerAd
-				unitId={TestIds.BANNER}
+				unitId={REWARDED_UNIT_ID}
 				size={BannerAdSize.LARGE_BANNER}
 				onAdLoaded={props.onAdLoaded}
 				onAdClosed={props.onAdClosed}
