@@ -14,7 +14,7 @@ import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
 import * as Ads from "../../components/advertising/Ad";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
-import { WIDTH } from "../result/Result";
+import { ModalConstructor } from "../../components/modal/ModalConstructor";
 
 /* Interfaces */
 export interface Props {
@@ -40,11 +40,12 @@ export interface State {
     timesPerDay: number,
     username: string,
     onionSkinVisible: boolean,
-    deletingImages: boolean
+    deletingImages: boolean,
+    personalizedAds: boolean,
 }
 
 class Preferences extends React.Component<Props, State> {
-    nameInput: RefObject<TextInput>;
+    modalConstructor: RefObject<ModalConstructor> = React.createRef();
 
     constructor(props: Props) {
         super(props);
@@ -58,14 +59,13 @@ class Preferences extends React.Component<Props, State> {
             transformCamera: false,
             onionSkinVisible: false,
             deletingImages: false,
+            personalizedAds: false,
         };
 
         /* Bindings */
-        this.deleteImages = this.deleteImages.bind(this);
+        this.warnAboutRestartingApp = this.warnAboutRestartingApp.bind(this);
         this.resetSettings = this.resetSettings.bind(this);
-        
-        /* Refs */
-        this.nameInput = React.createRef();
+        this.deleteImages = this.deleteImages.bind(this);
     };
 
     async componentDidMount(): Promise<void> {
@@ -74,7 +74,8 @@ class Preferences extends React.Component<Props, State> {
             username: await AppConfig.getUsername(),
             transformCamera: await AppConfig.getTransformCamera(),
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
-            onionSkinVisible: await OnionSkin.getOnionSkinVisibility()
+            onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
+            personalizedAds: await OnionSkin.getOnionSkinVisibility(),
         });
     }
 
@@ -140,9 +141,29 @@ class Preferences extends React.Component<Props, State> {
         );
     }
 
+    /* When settings personalized ads to enabled */
+    warnAboutRestartingApp(isPersonal: boolean): void {
+        this.modalConstructor.current?.constructModal({
+            header: "Restart app",
+            description: 
+                isPersonal
+                    ? "Restart the app to have your ads personalized (Can be done later)"
+                    : "Restart the app to fully disable personalized ads (Can be done later)",
+
+            buttons: [{
+                text: "Okay",
+                color: "blue",
+                onClick: "close"
+            }]
+        })
+    }
+
 	render() {
 		return (
+            <React.Fragment>
+            <ModalConstructor ref={this.modalConstructor} />
 			<SafeAreaView style={Styles.container}>
+
                 <KeyboardAvoidingView style={[Styles.keyboardAvoidingView, {paddingHorizontal: 0}]} behavior="padding">
                     <View style={Styles.scrollViewContainer}>
                         <ScrollGradient />
@@ -183,8 +204,9 @@ class Preferences extends React.Component<Props, State> {
                                     buttons={["YES", "NO"]}
                                     initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
                                     onChange={(idx) => {
-                                        this.setState({ saveSelfiesToCameraRoll: idx == 0 ? true : false });
-                                        AppConfig.setSaveSelfiesToCameraRoll(idx == 0 ? true : false);
+                                        const personalized = idx == 0 ? true : false;
+                                        this.setState({ saveSelfiesToCameraRoll: personalized });
+                                        AppConfig.setSaveSelfiesToCameraRoll(personalized);
                                     }}
                                 />
                             </View>
@@ -229,32 +251,42 @@ class Preferences extends React.Component<Props, State> {
 
                             <View style={[Styles.hr, Styles.hrPadded]} />
 
-                            {/* Redo tutorial */}
+                            {/* Personalized ads */}
                             <View style={Styles.padded}>
+                                <Text style={Styles.header2}>🎯 Personalized ads</Text>
+                                <View><Text style={Styles.paragraph}>
+                                    Enable personalized ads
+                                </Text></View>
+
+                                <SelectInput
+                                    buttons={["ON", "OFF"]}
+                                    initial={this.state.personalizedAds ? 0 : 1}
+                                    onChange={(idx) => {
+                                        const personalized = idx == 0 ? true : false;
+                                        this.warnAboutRestartingApp(personalized);
+                                        this.setState({ personalizedAds: personalized });
+                                        AppConfig.setPersonalizedAds(personalized);
+                                    }}
+                                />
+                            </View>
+
+                            <View style={[Styles.hr, Styles.hrPadded]} />
+
+                            {/* Redo tutorial */}
+                            <View style={[Styles.padded, { gap: 15 }]}>
                                 <Text style={Styles.header2}>🔩 Miscellaneous</Text>
-                                <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
                                 <Button
                                     color="blue"
                                     active
                                     onPress={this.tutorialScene}
                                     text="Tutorial →"
                                 />
-                            </View>
-
-                            {/* View statistics */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.paragraph}>View your statistics</Text>
                                 <Button
                                     color="blue"
                                     active
                                     onPress={this.statisticsScene}
                                     text="Statistics →"
                                 />
-                            </View>
-
-                            {/* "Privacy policy" */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.paragraph}>View the privacy policy</Text>
                                 <Button
                                     color="blue"
                                     active
@@ -310,6 +342,7 @@ class Preferences extends React.Component<Props, State> {
 
                 <StatusBar style="dark" />
 			</SafeAreaView>
+            </React.Fragment>
 		);
 	}
 }

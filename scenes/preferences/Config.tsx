@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Types */
-type StorageKey = "targetTimesPerDay" | "username" | "transformCamera" | "postProcessingTransform" | "saveSelfiesToCameraRoll";
+type StorageKey = "targetTimesPerDay" | "username" | "transformCamera" | "postProcessingTransform" | "saveSelfiesToCameraRoll" | "personalizedAds";
 
 /* Enums */
 export enum TargetTimesPerDay { Once = 0, Twice = 1, Thrice = 2, NotSet = 3 }
@@ -33,6 +33,10 @@ export default class AppConfig {
     /** Also save selfie to camera roll */
     static async getSaveSelfiesToCameraRoll(): Promise<boolean> { return this.tryGet("saveSelfiesToCameraRoll", false) }
     static async setSaveSelfiesToCameraRoll(value: boolean) { await AsyncStorage.setItem("saveSelfiesToCameraRoll", JSON.stringify(value)) }
+
+    /** Personalized ads */
+    static async getPersonalizedAds(): Promise<boolean> { return this.tryGet("personalizedAds", false) }
+    static async setPersonalizedAds(value: boolean) { await AsyncStorage.setItem("personalizedAds", JSON.stringify(value)) }
 
     private static async tryGet(key: StorageKey, default_: any): Promise<any> {
         try {
