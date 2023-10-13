@@ -52,7 +52,7 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
                         <Text style={Styles.bulletText}>• Usage Information: This app may collect information about how you use the App, such as the duration of usage, interactions with ads, and other usage data.</Text>
                         <Text style={Styles.bulletText}>• Location Information: This app does not collect precise location information, but Google AdMob may collect this information for ad personalization if you have granted the necessary permissions.</Text>
 
-                        <Text style={Styles.header2}>How We Use Information</Text>
+                        <Text style={Styles.header2}>How This App Uses Information</Text>
 
                         <Text style={Styles.privacyPolicyText}>
                             This app collects and uses this information for the sole purpose of displaying advertisements within the App. The information helps the app to provide you with relevant and engaging ads. This app does not share this information with third parties for purposes other than ad personalization.
@@ -61,7 +61,7 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
                         <Text style={Styles.header2}>Opting Out of Ad Personalization</Text>
 
                         <Text style={Styles.privacyPolicyText}>
-                            You have the option to opt out of personalized advertising within the App. To do so, please follow the instructions provided in the App's ads section in the app preferences.
+                            You have the option to opt out of personalized advertising within the App. To do so, please follow the instructions provided in the App's "personalized ads" section in the app preferences.
                         </Text>
 
                         <Text style={Styles.header2}>Data Security</Text>
@@ -83,7 +83,7 @@ class PrivacyPolicy extends React.PureComponent<Props, State> {
                         </Text>
 
                         <Text style={Styles.privacyPolicyText}>
-                            This Privacy Policy was last updated on the 11th of October 2023
+                            This Privacy Policy was last updated on the 13th of October 2023
                         </Text>
                     </ScrollView>
                 </View>
