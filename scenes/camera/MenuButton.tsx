@@ -9,8 +9,9 @@ import { WIDTH } from "../result/Result";
 interface Props {
 	navigation: StackNavigationProp<{
 		Preview: { lsimage: any },
-		Preferences: undefined
-	}, "Preview", "Preferences">,
+		Preferences: undefined,
+		Calibration: undefined
+	}, "Preview" | "Preferences" | "Calibration">,
 	active: boolean,
 
 	onAnimating: (is: boolean) => void,

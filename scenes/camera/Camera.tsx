@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Image, Linking, SafeAreaView, View } from "react-native";
+import { Animated, Linking, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -27,8 +27,9 @@ import { ModalConstructor } from "../../components/modal/ModalConstructor";
 interface Props {
 	navigation: StackNavigationProp<{
 		Preview: { lsimage: LSImageProp },
-		Preferences: undefined
-	}, "Preview", "Preferences">,
+		Preferences: undefined,
+		Calibration: undefined
+	}, "Preview", "Preferences" | "Calibration">,
 
 	/**
 	 * Is used to determine which intro animation to play
@@ -124,6 +125,11 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
+		if (!this.calibration) {
+			alert("Face calibration was not found.");
+			this.props.navigation.navigate("Calibration");
+		};
+		
 		this.gainedFocus();
 		this.props.navigation.addListener("focus", this.gainedFocus);
 	}
