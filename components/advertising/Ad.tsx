@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
+import AppConfig from "../../scenes/preferences/Config";
 
 /* Interfaces */
 interface AdProps {
@@ -20,14 +21,23 @@ interface AdProps {
  * <Banner allocatedHeight={150} />
  * ```
  */
-export function Banner(props: AdProps): JSX.Element {
+export function Banner(props: AdProps): JSX.Element | null {
+	const [personalized, setPersonalized] = React.useState<null | boolean>(null);
+	React.useEffect(() => {
+		(async () => {
+			/* If it's not set - default to false */
+			setPersonalized(await AppConfig.getPersonalizedAds() ?? false)
+		})();
+	}, []);
+
+
 	return (
-		<View style={{
+		personalized !== null ? <View style={{
 			width: "100%",
 			display: "flex",
 			justifyContent: "center",
 			alignItems: "center",
-			height: props.allocatedHeight
+			height: props.allocatedHeight,
 		}}>
 			<BannerAd
 				unitId={TestIds.BANNER}
@@ -35,9 +45,9 @@ export function Banner(props: AdProps): JSX.Element {
 				onAdLoaded={props.onAdLoaded}
 				onAdClosed={props.onAdClosed}
 				requestOptions={{
-					requestNonPersonalizedAdsOnly: true,
+					requestNonPersonalizedAdsOnly: personalized,
 				}}
 			/>
-		</View>
+		</View> : null
 	)
 }
