@@ -184,10 +184,10 @@ class Composer extends React.Component<Props, State> {
                     <ScrollView showsVerticalScrollIndicator={false}>
 
                     <View style={Styles.containerInner}>
-                        <Text style={Styles.header}>Composer 🎨</Text>
+                        <Text style={[Styles.header, Styles.padded]}>Composer 🎨</Text>
 
                         {/* Generate video */}
-                        <View style={Styles.row}>
+                        <View style={[Styles.row, Styles.padded]}>
                             <View style={Styles.tile}>
                             
                                 <Button
@@ -205,10 +205,10 @@ class Composer extends React.Component<Props, State> {
 
                         <Ads.Banner allocatedHeight={140} />
 
-                        <View style={Styles.hr} />
+                        <View style={[Styles.hr, Styles.hrPadded]} />
 
                         {/* Framerate viewer */}
-                        <View style={Styles.row}>
+                        <View style={[Styles.row, Styles.padded]}>
                             <View style={Styles.tile}>
                                 <Text style={Styles.header2}>🎞️ Framerate</Text>
                                 <Text style={Styles.paragraph}>Footage frame rate (frames per second)</Text>
@@ -240,10 +240,10 @@ class Composer extends React.Component<Props, State> {
                             </View>
                         </View>
 
-                        <View style={Styles.hr} />
+                        <View style={[Styles.hr, Styles.hrPadded]} />
 
                         {/* Output type (?) */}
-                        <View>
+                        <View style={Styles.padded}>
                             <Text style={Styles.header2}>🔧 Output settings</Text>
                             <Text style={Styles.paragraph}>Chamge the output format of your rendered footage (Default is MP4)</Text>
                             <SelectInput
@@ -254,7 +254,7 @@ class Composer extends React.Component<Props, State> {
                         </View>
 
                         {/* Quality */}
-                        <View>
+                        <View style={Styles.padded}>
                             <Text style={Styles.paragraph}>Change the quality of the rendered footage. Higher quality footage requires more storage but looks better</Text>
                             <SelectInput
                                 initial={this.state.config.quality}
@@ -267,10 +267,10 @@ class Composer extends React.Component<Props, State> {
                             />
                         </View>
 
-                        <View style={Styles.hr} />
+                        <View style={[Styles.hr, Styles.hrPadded]} />
 
                         {/* Open advanced configuration */}
-                        <View>
+                        <View style={Styles.padded}>
                             <Text style={Styles.header2}>🚧 Advanced</Text>
                             <Text style={Styles.paragraph}>Open advanced configuration for tweaking the rendering process. Not recommended as it can break the rendering process if you're not careful.</Text>
                             <Button
@@ -285,7 +285,7 @@ class Composer extends React.Component<Props, State> {
                 </View>
 
                 {/* Confirm */}
-                <View style={{ transform: [{ translateY: -12 }] }}>
+                <View style={[Styles.padded, { transform: [{ translateY: -12 }] }]}>
                     <Button
                         onPress={this.goBack}
                         active={true}

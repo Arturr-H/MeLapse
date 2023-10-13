@@ -14,6 +14,7 @@ import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
 import * as Ads from "../../components/advertising/Ad";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
+import { WIDTH } from "../result/Result";
 
 /* Interfaces */
 export interface Props {
@@ -141,15 +142,15 @@ class Preferences extends React.Component<Props, State> {
 
 	render() {
 		return (
-			<SafeAreaView style={[Styles.container, { overflow: "visible" }]}>
-                <KeyboardAvoidingView style={[Styles.keyboardAvoidingView, { overflow: "visible" }]} behavior="padding">
-                    <View style={[Styles.scrollViewContainer, { overflow: "visible" }]}>
+			<SafeAreaView style={Styles.container}>
+                <KeyboardAvoidingView style={[Styles.keyboardAvoidingView, {paddingHorizontal: 0}]} behavior="padding">
+                    <View style={Styles.scrollViewContainer}>
                         <ScrollGradient />
-                        <ScrollView contentContainerStyle={[Styles.containerInner, { overflow: "visible" }]} showsVerticalScrollIndicator={false}>
-                            <View><Text style={Styles.header}>Preferences ⚙️</Text></View>
+                        <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
+                            <View style={Styles.padded}><Text style={Styles.header}>Preferences ⚙️</Text></View>
 
                             {/* Goto composer scene */}
-                            <View style={Styles.row}>
+                            <View style={[Styles.row, Styles.padded]}>
                                 <View style={Styles.tile}>
                                     <Button flex color="green" active onPress={this.composerScene} text="Create →" />
                                 </View>
@@ -159,10 +160,10 @@ class Preferences extends React.Component<Props, State> {
                                 </View>
                             </View>
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
                             
                             {/* Review images */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🧹 Review images</Text>
                                 <View><Text style={Styles.paragraph}>Review all the selfies you've taken so far. Delete, save, or keep them</Text></View>
 
@@ -175,7 +176,7 @@ class Preferences extends React.Component<Props, State> {
                             </View>
 
                             {/* Save image media lib */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <View><Text style={Styles.paragraph}>Automatically save each selfie to your camera roll (won't apply to previous selfies)</Text></View>
 
                                 <SelectInput
@@ -190,10 +191,10 @@ class Preferences extends React.Component<Props, State> {
 
                             <Ads.Banner />
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
 
                             {/* Onionskin */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🧅 Onion skin</Text>
                                 <View><Text style={Styles.paragraph}>
                                     Display a thin layer above the camera view of a previous selfie, to help you align your face better.
@@ -210,10 +211,10 @@ class Preferences extends React.Component<Props, State> {
                                 />
                             </View>
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
 
                             {/* Notification */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🔔 Notifications</Text>
                                 <View><Text style={Styles.paragraph}>
                                     Change your notification preferences. I recommend 2 notifications per day 😎
@@ -226,10 +227,10 @@ class Preferences extends React.Component<Props, State> {
                                 />
                             </View>
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
 
                             {/* Redo tutorial */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🔩 Miscellaneous</Text>
                                 <Text style={Styles.paragraph}>View the tutorial (inlcudes tips for taking better selfies)</Text>
                                 <Button
@@ -241,7 +242,7 @@ class Preferences extends React.Component<Props, State> {
                             </View>
 
                             {/* View statistics */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.paragraph}>View your statistics</Text>
                                 <Button
                                     color="blue"
@@ -252,7 +253,7 @@ class Preferences extends React.Component<Props, State> {
                             </View>
 
                             {/* "Privacy policy" */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.paragraph}>View the privacy policy</Text>
                                 <Button
                                     color="blue"
@@ -262,17 +263,17 @@ class Preferences extends React.Component<Props, State> {
                                 />
                             </View>
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
 
                             {/* Redo face calibration */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🚨 Danger zone</Text>
                                 <View><Text style={Styles.paragraph}>Redo your face calibration (not recommended)</Text></View>
                                 <Button color="red" active onPress={this.calibrationScene} text="New face calib →" />
                             </View>
 
                             {/* Reset config */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.paragraph}>Reset settings to default</Text>
                                 <Button
                                     confirm={{ message: "Are you sure you want to reset your settings?", title: "Reset config" }}
@@ -284,7 +285,7 @@ class Preferences extends React.Component<Props, State> {
                             </View>
 
                             {/* Delete data */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.paragraph}>Delete all selfies you've taken (forever)</Text>
                                 <Button
                                     confirm={{
@@ -302,7 +303,7 @@ class Preferences extends React.Component<Props, State> {
                     </View>
 
                     {/* Confirm */}
-                    <View style={{ transform: [{ translateY: -12 }] }}>
+                    <View style={[Styles.padded, { transform: [{ translateY: -12 }] }]}>
                         <Button color="blue" active onPress={this.cameraScene} text="← Back" />
                     </View>
                 </KeyboardAvoidingView>

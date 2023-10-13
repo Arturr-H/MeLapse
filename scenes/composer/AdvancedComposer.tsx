@@ -117,10 +117,10 @@ class AdvancesComposer extends React.Component<Props, State> {
                     <View style={{ width: "100%", flex: 1 }}>
                         <ScrollGradient />
                         <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                            <View><Text style={Styles.header}>🚧 Advanced</Text></View>
+                            <View style={Styles.padded}><Text style={Styles.header}>🚧 Advanced</Text></View>
 
                             {/* Override bitrate */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🎛️ Override bitrate</Text>
                                 <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
 
@@ -136,7 +136,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                             </View>
 
                             {/* Override bitrate */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>📐 Override output size</Text>
                                 <View><Text style={Styles.paragraph}>Change width of image (height will scale proportionally keeping aspect ratio)</Text></View>
 
@@ -153,7 +153,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                             </View>
 
                             {/* Override FPS */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>⏲️ Override framerate</Text>
                                 <View><Text style={Styles.paragraph}>Set frames per second from anywhere between 1 - 120</Text></View>
 
@@ -169,10 +169,10 @@ class AdvancesComposer extends React.Component<Props, State> {
                                 />
                             </View>
 
-                            <View style={Styles.hr} />
+                            <View style={[Styles.hr, Styles.hrPadded]} />
 
                             {/* Reset config */}
-                            <View>
+                            <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🚨 Danger zone</Text>
                                 <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
                                 <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
@@ -181,7 +181,7 @@ class AdvancesComposer extends React.Component<Props, State> {
                     </View>
                     
                     {/* Confirm */}
-                    <View style={{ transform: [{ translateY: -12 }] }}>
+                    <View style={[Styles.padded, { transform: [{ translateY: -12 }] }]}>
                         <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="← Save" />
                     </View>
                 </KeyboardAvoidingView>

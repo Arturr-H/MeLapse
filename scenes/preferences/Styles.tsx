@@ -1,9 +1,5 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import MenuBundle from "../../styleBundles/MenuBundle";
-
-/* Constants */
-const WIDTH = Dimensions.get("window").width;
-const HEIGHT = Dimensions.get("window").height;
 
 export default StyleSheet.create({
     ...MenuBundle,
@@ -18,6 +14,7 @@ export default StyleSheet.create({
         fontSize: 20,
         fontFamily: "inter-black",
     },
+
 
     scrollViewContainer: {
         width: "100%",
