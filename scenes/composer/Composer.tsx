@@ -6,7 +6,6 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Button } from "../../components/button/Button";
 import SelectInput from "../../components/selectInput/SelectInput";
-import MultiAnimator from "../../components/animator/MultiAnimator";
 import { LSImage } from "../../functional/Image";
 import FramerateScroller from "./FramerateScroller";
 import ComposerConfig from "./Config";
@@ -51,7 +50,6 @@ interface State {
 class Composer extends React.Component<Props, State> {
 
     /* Refs */
-    animator: RefObject<MultiAnimator> = React.createRef();
     modalConstructor: RefObject<ModalConstructor> = React.createRef();
 
     /* Other */
@@ -81,24 +79,11 @@ class Composer extends React.Component<Props, State> {
         this.onChangeFramerate = this.onChangeFramerate.bind(this);
         this.loadingScreen = this.loadingScreen.bind(this);
         this.onFocus = this.onFocus.bind(this);
-        this.fadeIn = this.fadeIn.bind(this);
         this.goBack = this.goBack.bind(this);
     };
     
-    /* Lifetime */
-    async componentDidMount(): Promise<void> {
-        this.animator.current?.fadeIn(200, 50);
-        await this.onFocus();
-        
-        this.props.navigation.addListener("focus", this.onFocus);
-    }
-    componentWillUnmount(): void {
-        this.props.navigation.removeListener("focus", this.onFocus);
-    }
     async onFocus(): Promise<void> {
-        console.log("FOCUS");
         this.updateFramerateOverwritten();
-        this.fadeIn();
         const [format, quality, framerate] = [
             await ComposerConfig.getFormat(),
             await ComposerConfig.getQuality(),
@@ -120,23 +105,14 @@ class Composer extends React.Component<Props, State> {
         })
     }
 
-    /** Fades in scene (duh) */
-    fadeIn(): void {
-        this.animator.current?.fadeIn(200, 50);
-    }
-    
     /** Goes back to preferences scene */
     goBack(): void {
-        this.animator.current?.fadeOut(200, 50, () => {
-            this.props.navigation.navigate("Preferences");
-        });
+        this.props.navigation.navigate("Preferences");
     }
 
     /** Yup */
     openAdvancedSettings(): void {
-        this.animator.current?.fadeOut(200, 50, () => {
-            this.props.navigation.navigate("AdvancedComposer");
-        });
+        this.props.navigation.navigate("AdvancedComposer");
     }
 
     /** When user switches framerate */
@@ -162,16 +138,14 @@ class Composer extends React.Component<Props, State> {
 
     /** Generate the timelapse footage */
     async loadingScreen(): Promise<void> {
-        const launchLoadingScreen = () => {
-            this.animator.current?.fadeOut(200, 50, async () => {
-                this.props.navigation.navigate("LoadingScreen", {
-                    fps: this.framerates[await ComposerConfig.getFramerate()],
-                    quality: this.qualities[await ComposerConfig.getQuality()],
-                    outputFormat: this.formats[await ComposerConfig.getFormat()],
-                    bitrateOverride: await ComposerConfig.getBitrate(),
-                    framerateOverride: await ComposerConfig.getFramerateOverride(),
-                    widthOverride: await ComposerConfig.getWidthOverride(),
-                });
+        const launchLoadingScreen = async () => {
+            this.props.navigation.navigate("LoadingScreen", {
+                fps: this.framerates[await ComposerConfig.getFramerate()],
+                quality: this.qualities[await ComposerConfig.getQuality()],
+                outputFormat: this.formats[await ComposerConfig.getFormat()],
+                bitrateOverride: await ComposerConfig.getBitrate(),
+                framerateOverride: await ComposerConfig.getFramerateOverride(),
+                widthOverride: await ComposerConfig.getWidthOverride(),
             });
         }
 
@@ -210,7 +184,6 @@ class Composer extends React.Component<Props, State> {
                     <ScrollView showsVerticalScrollIndicator={false}>
 
                     <View style={Styles.containerInner}>
-                        <MultiAnimator ref={this.animator}>
                         <Text style={Styles.header}>Composer 🎨</Text>
 
                         {/* Generate video */}
@@ -272,7 +245,7 @@ class Composer extends React.Component<Props, State> {
                         {/* Output type (?) */}
                         <View>
                             <Text style={Styles.header2}>🔧 Output settings</Text>
-                            <Text style={Styles.paragraph}>What format should the resulting video be saved as? (Default is MP4)</Text>
+                            <Text style={Styles.paragraph}>Chamge the output format of your rendered footage (Default is MP4)</Text>
                             <SelectInput
                                 initial={this.state.config.format}
                                 onChange={ComposerConfig.setFormat}
@@ -282,7 +255,7 @@ class Composer extends React.Component<Props, State> {
 
                         {/* Quality */}
                         <View>
-                            <Text style={Styles.paragraph}>Quality of the output result. Higher quality footage requires more storage.</Text>
+                            <Text style={Styles.paragraph}>Change the quality of the rendered footage. Higher quality footage requires more storage but looks better</Text>
                             <SelectInput
                                 initial={this.state.config.quality}
                                 buttons={[
@@ -299,7 +272,7 @@ class Composer extends React.Component<Props, State> {
                         {/* Open advanced configuration */}
                         <View>
                             <Text style={Styles.header2}>🚧 Advanced</Text>
-                            <Text style={Styles.paragraph}>Opens advanced configuration for generating final footage. Not recommended as it can break rendering process if not careful.</Text>
+                            <Text style={Styles.paragraph}>Open advanced configuration for tweaking the rendering process. Not recommended as it can break the rendering process if you're not careful.</Text>
                             <Button
                                 color={"blue"}
                                 active
@@ -307,7 +280,6 @@ class Composer extends React.Component<Props, State> {
                                 text="Advanced settings →"
                             />
                         </View>
-                        </MultiAnimator>
                     </View>
                     </ScrollView>
                 </View>

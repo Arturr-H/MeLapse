@@ -6,9 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import { Animator } from "../../components/animator/Animator";
 import Config from "./Config";
-import MultiAnimator from "../../components/animator/MultiAnimator";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 
 /* Interfaces */
@@ -25,7 +23,6 @@ export interface State {
 }
 
 class AdvancesComposer extends React.Component<Props, State> {
-    animatorComponent: RefObject<MultiAnimator> = React.createRef();
     overrideBitrateInput: RefObject<TextInput> = React.createRef();
     widthOverride: RefObject<TextInput> = React.createRef();
     framerateOverride: RefObject<TextInput> = React.createRef();
@@ -49,32 +46,16 @@ class AdvancesComposer extends React.Component<Props, State> {
     };
 
     async componentDidMount(): Promise<void> {
-        this.fadeIn();
-        this.props.navigation.addListener("focus", this.fadeIn);
-
         this.setState({
             bitrate: await Config.getBitrate() ?? undefined,
             widthOverride: await Config.getWidthOverride() ?? undefined,
             framerateOverride: await Config.getFramerateOverride() ?? undefined,
         })
     }
-    componentWillUnmount(): void {
-        this.props.navigation.removeListener("focus", this.fadeIn);
-    }
-    fadeIn = () => {
-        this.animatorComponent.current?.fadeOut(0, 0, () => {
-            this.animatorComponent.current?.fadeIn(200, 50);
-        });
-    }
-    fadeOut = (callback?: () => void) => {
-        this.animatorComponent.current?.fadeOut(200, 50, callback);
-    }
 
     /* Scene switches */
     async goBack(): Promise<void> {
-        this.fadeOut(() => 
-            this.props.navigation.navigate("Composer")
-        );
+        this.props.navigation.navigate("Composer")
     }
 
     /** Bitrate override */
@@ -136,68 +117,66 @@ class AdvancesComposer extends React.Component<Props, State> {
                     <View style={{ width: "100%", flex: 1 }}>
                         <ScrollGradient />
                         <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                            <MultiAnimator ref={this.animatorComponent}>
-                                <View><Text style={Styles.header}>🚧 Advanced</Text></View>
+                            <View><Text style={Styles.header}>🚧 Advanced</Text></View>
 
-                                {/* Override bitrate */}
-                                <View>
-                                    <Text style={Styles.header2}>🎛️ Override bitrate</Text>
-                                    <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
+                            {/* Override bitrate */}
+                            <View>
+                                <Text style={Styles.header2}>🎛️ Override bitrate</Text>
+                                <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
 
-                                    <TextInput
-                                        placeholder="Bitrate (M)"
-                                        active
-                                        keyboardType="decimal-pad"
-                                        maxChars={32}
-                                        ref={this.overrideBitrateInput}
-                                        initial={this.state.bitrate?.toString()}
-                                        onChangeText={this.onChangeBitrate}
-                                    />
-                                </View>
+                                <TextInput
+                                    placeholder="Bitrate (M)"
+                                    active
+                                    keyboardType="decimal-pad"
+                                    maxChars={32}
+                                    ref={this.overrideBitrateInput}
+                                    initial={this.state.bitrate?.toString()}
+                                    onChangeText={this.onChangeBitrate}
+                                />
+                            </View>
 
-                                {/* Override bitrate */}
-                                <View>
-                                    <Text style={Styles.header2}>📐 Override output size</Text>
-                                    <View><Text style={Styles.paragraph}>Change width of image (height will scale proportionally keeping aspect ratio)</Text></View>
+                            {/* Override bitrate */}
+                            <View>
+                                <Text style={Styles.header2}>📐 Override output size</Text>
+                                <View><Text style={Styles.paragraph}>Change width of image (height will scale proportionally keeping aspect ratio)</Text></View>
 
-                                    <TextInput
-                                        placeholder="Width (px)"
-                                        active
-                                        flex
-                                        keyboardType="number-pad"
-                                        maxChars={4}
-                                        ref={this.widthOverride}
-                                        initial={this.state.widthOverride?.toString()}
-                                        onChangeText={(e) => this.onChangeWidthOverride(e)}
-                                    />
-                                </View>
+                                <TextInput
+                                    placeholder="Width (px)"
+                                    active
+                                    flex
+                                    keyboardType="number-pad"
+                                    maxChars={4}
+                                    ref={this.widthOverride}
+                                    initial={this.state.widthOverride?.toString()}
+                                    onChangeText={(e) => this.onChangeWidthOverride(e)}
+                                />
+                            </View>
 
-                                {/* Override FPS */}
-                                <View>
-                                    <Text style={Styles.header2}>⏲️ Override framerate</Text>
-                                    <View><Text style={Styles.paragraph}>Set frames per second from anywhere between 1 - 120</Text></View>
+                            {/* Override FPS */}
+                            <View>
+                                <Text style={Styles.header2}>⏲️ Override framerate</Text>
+                                <View><Text style={Styles.paragraph}>Set frames per second from anywhere between 1 - 120</Text></View>
 
-                                    <TextInput
-                                        placeholder="Framerate"
-                                        active
-                                        flex
-                                        keyboardType="number-pad"
-                                        maxChars={3}
-                                        ref={this.framerateOverride}
-                                        initial={this.state.framerateOverride?.toString()}
-                                        onChangeText={(e) => this.onChangeFramerateOverride(e)}
-                                    />
-                                </View>
+                                <TextInput
+                                    placeholder="Framerate"
+                                    active
+                                    flex
+                                    keyboardType="number-pad"
+                                    maxChars={3}
+                                    ref={this.framerateOverride}
+                                    initial={this.state.framerateOverride?.toString()}
+                                    onChangeText={(e) => this.onChangeFramerateOverride(e)}
+                                />
+                            </View>
 
-                                <View style={Styles.hr} />
+                            <View style={Styles.hr} />
 
-                                {/* Reset config */}
-                                <View>
-                                    <Text style={Styles.header2}>🚨 Danger zone</Text>
-                                    <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
-                                    <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
-                                </View>
-                            </MultiAnimator>
+                            {/* Reset config */}
+                            <View>
+                                <Text style={Styles.header2}>🚨 Danger zone</Text>
+                                <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
+                                <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
+                            </View>
                         </ScrollView>
                     </View>
                     
