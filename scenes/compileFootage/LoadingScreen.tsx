@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { Animated, Easing, SafeAreaView, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Easing, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -12,10 +12,11 @@ import { StatusBar } from "expo-status-bar";
 import { ProgressBar } from "../../components/progressBar/ProgressBar";
 import ButtonStyles from "../../components/button/Styles";
 import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
+import AppConfig from "../preferences/Config";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Composer: undefined, Camera: { comesFrom: "other" } }, "Composer" | "Camera">,
+    navigation: StackNavigationProp<{ Composer: undefined }, "Composer">,
 
     params: StitchOptions
 }
@@ -71,6 +72,7 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Load reward ad, and try render */
     async loadAd(): Promise<void> {
+        const personalized = await AppConfig.getPersonalizedAds() ?? false;
         let hasGenerated = false;
 
         /* If the ad hasn't loaded after 2 seconds, we start
@@ -86,7 +88,7 @@ class LoadingScreen extends React.Component<Props, State> {
         new Promise<void>((resolve, _) => {
             console.log("[DBG] Trying to load reward ad");
             const rew = RewardedAd.createForAdRequest(TestIds.REWARDED, {
-                requestNonPersonalizedAdsOnly: true,
+                requestNonPersonalizedAdsOnly: personalized
             });
 
             /* Show and resolve */
@@ -98,7 +100,7 @@ class LoadingScreen extends React.Component<Props, State> {
                 resolve();
             });
 
-            // rew.load();
+            rew.load();
         })
 
         /* On ad load success */
@@ -129,16 +131,10 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Can cancel the ffmpeg gif stitching process
      * and switches back scene */
-    goBack(shouldCancel: boolean, to: "Camera" | "Composer"): void {
+    goBack(shouldCancel: boolean): void {
         this.shouldCancel = shouldCancel;
 
-        console.log(to);
-        let nav: () => void;
-        if (to === "Camera") {
-            nav = () => this.props.navigation.navigate(to, { comesFrom: "other" });
-        } else {
-            nav = () => this.props.navigation.navigate(to);
-        };
+        const nav = () => this.props.navigation.navigate("Composer");
 
         if (shouldCancel === true)
             FFmpegKit.cancel().then(nav);
@@ -156,6 +152,9 @@ class LoadingScreen extends React.Component<Props, State> {
             <SafeAreaView style={Styles.container}>
                 <View style={Styles.padding}>
                     <View style={Styles.innerContainer}>
+                        {this.state.loading ? <View>
+                            <Text style={[Styles.loadingText, { textAlign: "center" }]}>Footage is being rendered - don't leave this application</Text>
+                        </View> : null}
                     </View>
 
                     <View style={Styles.loadingContainer}>
@@ -167,7 +166,7 @@ class LoadingScreen extends React.Component<Props, State> {
                                     active={true}
                                     color="blue"
                                     style={{ overflow: "hidden" }}
-                                    onPress={() => this.goBack(true, "Camera")}
+                                    onPress={() => this.goBack(true)}
                                 >
                                     <Text style={ButtonStyles.buttonText}>Cancel</Text>
                                     <Animated.Text style={[ButtonStyles.buttonText, Styles.disk, diskRotation]}>📀</Animated.Text>
@@ -176,8 +175,8 @@ class LoadingScreen extends React.Component<Props, State> {
                         )
                             : (
                                 <View style={{ flexDirection: "column", gap: 10, width: "100%" }}>
-                                    <Text style={Styles.loadingText}>Done Generating 🎉</Text>
-                                    <Button flex active={true} color="blue" onPress={() => this.goBack(false, "Camera")} text="Okay" />
+                                    <Text style={Styles.loadingText}>Footage saved to camera roll  🎉</Text>
+                                    <Button flex active={true} color="blue" onPress={() => this.goBack(false)} text="← Back" />
                                 </View>
                             )}
                     </View>

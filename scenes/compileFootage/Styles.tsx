@@ -30,9 +30,10 @@ export default StyleSheet.create({
         gap: 10,
     },
     loadingText: {
-        fontSize: 24,
-        color: "#ddd",
-        fontWeight: "500"
+        fontSize: 18,
+        color: "#ccc",
+        fontWeight: "500",
+        fontFamily: "manrope-light"
     },
 
     disk: {
