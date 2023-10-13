@@ -9,7 +9,6 @@ import AppConfig from "../preferences/Config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { allowsNotificationsAsync, clearAllScheduled } from "../../LocalNotification";
 import * as Notifications from "expo-notifications";
-import { Animator } from "../../components/animator/Animator";
 
 /* Interfaces */
 export interface Props {
@@ -22,8 +21,6 @@ export interface State {
 }
 
 export class HowOften extends React.PureComponent<Props, State> {
-    animator: RefObject<Animator> = React.createRef();
-
     constructor(props: Props) {
         super(props);
 
@@ -40,8 +37,6 @@ export class HowOften extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
-        this.animator.current?.fadeIn(400).start();
-
         /* If notis are enabled */
         const notisEnabled = await allowsNotificationsAsync();
         this.setState({
@@ -54,13 +49,11 @@ export class HowOften extends React.PureComponent<Props, State> {
         await AsyncStorage.setItem("setupComplete", "true");
         const location = this.props.confirmLocation;
 
-        this.animator.current?.fadeOut(400).start(() => {
-            if (location === "Calibration" || location === "Preferences") {
-                this.props.navigation.navigate(location);
-            }else {
-                this.props.navigation.navigate("Calibration");
-            }
-        });
+        if (location === "Calibration" || location === "Preferences") {
+            this.props.navigation.navigate(location);
+        }else {
+            this.props.navigation.navigate("Calibration");
+        }
     }
 
     async tryEnableNotifications(): Promise<void> {
@@ -126,7 +119,7 @@ export class HowOften extends React.PureComponent<Props, State> {
     render() {
         return (
             <SafeAreaView style={Styles.container}>
-                <Animator startOpacity={0} ref={this.animator} style={Styles.column}>
+                <View style={Styles.column}>
                     <View style={Styles.body}>
                         <Text style={Styles.header}>Goal per day 🎯</Text>
                         <Text style={Styles.paragraph}>
@@ -158,7 +151,7 @@ export class HowOften extends React.PureComponent<Props, State> {
                     <View style={Styles.footer}>
                         <Button active onPress={this.onConfirm} text="Confirm" />
                     </View>
-                </Animator>
+                </View>
             </SafeAreaView>
         );
     }
