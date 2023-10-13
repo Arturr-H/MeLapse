@@ -6,13 +6,16 @@ import { Animator } from "../animator/Animator";
 /* Interfaces */
 interface ModalProps {
     /** Buttons at the footer of the modal */
-    buttons: ModalButton[],
+    buttons?: ModalButton[],
 
     /** Header (title) */
-    header: string,
+    header?: string,
 
     /** Modal description */
-    description: string,
+    description?: string,
+
+    /** Modal body content (JSX) */
+    body?: JSX.Element
 }
 interface ModalButton {
     /** Color of the button */
@@ -22,7 +25,10 @@ interface ModalButton {
     text: string,
 
     /** Function ("close", or () => void) */
-    onClick: "close" | (() => void)
+    onClick: "close" | (() => void),
+
+    /** Only border no background (indicates not usually clicked) */
+    hollow?: boolean
 }
 interface Props { }
 interface State {
@@ -119,26 +125,30 @@ export class ModalConstructor extends React.PureComponent<Props, State> {
                         <Text style={Styles.modalHeaderText}>{modal.header}</Text>
                     </View>
 
-                    {/* Body */}
+                    {/* Description */}
                     <View style={Styles.modalBody}>
-                        <Text style={Styles.modalDescritionText}>{modal.description}</Text>
+                        {modal.description && <Text style={Styles.modalDescritionText}>{modal.description}</Text>}
+                        {modal.body}
                     </View>
 
                     {/* Footer */}
                     <View style={Styles.modalFooter}>
-                        {modal.buttons.map((button, buttonIdx) =>
+                        {(modal.buttons ?? []).map((button, buttonIdx) =>
                             <TouchableHighlight
                                 key={"mbut" + modalIdx + "-" + buttonIdx}
                                 underlayColor={this.colors[button.color][1]}
                                 style={[Styles.modalButton, {
-                                    backgroundColor: this.colors[button.color][0],
+                                    backgroundColor: button.hollow === true ? "none" : this.colors[button.color][0],
                                     borderColor: this.colors[button.color][1]
                                 }]}
                                 onPress={button.onClick === "close"
                                     ? () => this.closeModal(modalIdx)
                                     : () => this.onClick(modalIdx, button.onClick as () => void)}
                             >
-                                <Text style={Styles.modalButtonText}>{button.text}</Text>
+                                <Text style={[
+                                    Styles.modalButtonText,
+                                    { color: button.hollow === true ? this.colors[button.color][0] : "#fff" }
+                                ]}>{button.text}</Text>
                             </TouchableHighlight>
                         )}
                     </View>
