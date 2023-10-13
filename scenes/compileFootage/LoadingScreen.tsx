@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { ActivityIndicator, Animated, Easing, SafeAreaView, Text, View } from "react-native";
+import { Animated, Easing, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -11,8 +11,9 @@ import { Button } from "../../components/button/Button";
 import { StatusBar } from "expo-status-bar";
 import { ProgressBar } from "../../components/progressBar/ProgressBar";
 import ButtonStyles from "../../components/button/Styles";
-import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
+import { RewardedAd, RewardedAdEventType } from "react-native-google-mobile-ads";
 import AppConfig from "../preferences/Config";
+import { REWARDED_UNIT_ID } from "../../components/advertising/Util";
 
 /* Interfaces */
 interface Props {
@@ -86,14 +87,12 @@ class LoadingScreen extends React.Component<Props, State> {
 
         /* Try load */
         new Promise<void>((resolve, _) => {
-            console.log("[DBG] Trying to load reward ad");
-            const rew = RewardedAd.createForAdRequest(TestIds.REWARDED, {
+            const rew = RewardedAd.createForAdRequest(REWARDED_UNIT_ID, {
                 requestNonPersonalizedAdsOnly: personalized
             });
 
             /* Show and resolve */
             rew.addAdEventListener(RewardedAdEventType.LOADED, () => {
-                console.log("[DBG] Reward ad loaded");
                 clearTimeout(loadTimeout);
                 rew.show();
                 rew.removeAllListeners();
@@ -114,7 +113,6 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Generate the timmelapse footage */
     async _generateVideo(): Promise<void> {
-        console.log("[DBG] Generating video");
         try {
             await generateVideo(async () => {
                 this.setState({ loading: false });
