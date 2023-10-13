@@ -35,7 +35,7 @@ export default class AppConfig {
     static async setSaveSelfiesToCameraRoll(value: boolean) { await AsyncStorage.setItem("saveSelfiesToCameraRoll", JSON.stringify(value)) }
 
     /** Personalized ads */
-    static async getPersonalizedAds(): Promise<boolean> { return this.tryGet("personalizedAds", false) }
+    static async getPersonalizedAds(): Promise<boolean> { return this.tryGet("personalizedAds", true) }
     static async setPersonalizedAds(value: boolean) { await AsyncStorage.setItem("personalizedAds", JSON.stringify(value)) }
 
     private static async tryGet(key: StorageKey, default_: any): Promise<any> {
