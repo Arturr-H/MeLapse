@@ -11,9 +11,11 @@ import { Button } from "../../components/button/Button";
 import { StatusBar } from "expo-status-bar";
 import { ProgressBar } from "../../components/progressBar/ProgressBar";
 import ButtonStyles from "../../components/button/Styles";
-import { RewardedAd, RewardedAdEventType } from "react-native-google-mobile-ads";
+import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
 import AppConfig from "../preferences/Config";
-import { REWARDED_UNIT_ID } from "../../components/advertising/Util";
+
+/* @ts-ignore */
+import { REWARDED } from "@env"
 
 /* Interfaces */
 interface Props {
@@ -73,6 +75,12 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Load reward ad, and try render */
     async loadAd(): Promise<void> {
+        let isProduction = process.env.EXPO_PUBLIC_PRODUCTION_ADS;
+        let bannerID: string;
+
+        if (isProduction === "true") { bannerID = REWARDED; }
+        else { bannerID = TestIds.REWARDED; }
+
         const personalized = await AppConfig.getPersonalizedAds() ?? false;
         let hasGenerated = false;
 
@@ -87,7 +95,7 @@ class LoadingScreen extends React.Component<Props, State> {
 
         /* Try load */
         new Promise<void>((resolve, _) => {
-            const rew = RewardedAd.createForAdRequest(REWARDED_UNIT_ID, {
+            const rew = RewardedAd.createForAdRequest(bannerID, {
                 requestNonPersonalizedAdsOnly: personalized
             });
 
@@ -98,6 +106,7 @@ class LoadingScreen extends React.Component<Props, State> {
                 rew.removeAllListeners();
                 resolve();
             });
+
 
             rew.load();
         })
