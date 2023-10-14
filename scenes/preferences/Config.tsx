@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 type StorageKey = "targetTimesPerDay" | "username" | "transformCamera" | "postProcessingTransform" | "saveSelfiesToCameraRoll" | "personalizedAds";
 
 /* Enums */
-export enum TargetTimesPerDay { Once = 0, Twice = 1, Thrice = 2, NotSet = 3 }
+export enum TargetTimesPerDay { None = 0, Once = 1, Twice = 2, Thrice = 3 }
 
 /**
  * This is all the app's configuration which the user
@@ -23,7 +23,7 @@ export default class AppConfig {
     static async setUsername(value: string) { await AsyncStorage.setItem("username", JSON.stringify(value)) }
 
     /** How many (target) times per day to take selfie */
-    static async getTargetTimesPerDay(): Promise<TargetTimesPerDay> { return await this.tryGet("targetTimesPerDay", TargetTimesPerDay.NotSet) as TargetTimesPerDay }
+    static async getTargetTimesPerDay(): Promise<TargetTimesPerDay> { return await this.tryGet("targetTimesPerDay", TargetTimesPerDay.None) as TargetTimesPerDay }
     static async setTargetTimesPerDay(value: number) { await AsyncStorage.setItem("targetTimesPerDay", JSON.stringify(value)) }
     
     /** Transform camera in camera scene */
