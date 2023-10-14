@@ -106,5 +106,26 @@ export default StyleSheet.create({
         height: HEIGHT,
         position: "absolute",
         backgroundColor: "#00000088",
+    },
+
+    modalDeleteButton: {
+        position: "absolute",
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: "#ddd",
+        zIndex: 144,
+
+        left: 8,
+        top: 8,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    modalDeleteButtonText: {
+        color: "black",
+        fontSize: 7,
+        fontFamily: "manrope-black"
     }
 })

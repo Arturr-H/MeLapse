@@ -109,17 +109,20 @@ export class ModalConstructor extends React.PureComponent<Props, State> {
 		return (
             <View style={[Styles.container, pointerEvents]}>
 
-                <Animated.View style={[
-                    Styles.modalBackground,
-                    bgOpacity
-                ]} />
+            <Animated.View style={[
+                Styles.modalBackground,
+                bgOpacity
+            ]} />
+            <View style={Styles.modalContainerWrapper}>
 
-            <TouchableWithoutFeedback
-                onPress={() => this.closeModal(this.state.modals.length - 1)}
-                style={Styles.modalContainer}
-            ><View style={Styles.modalContainerWrapper}>
+                {this.state.modals.map((modal, modalIdx) => <View key={"MODAL-idx-" + modalIdx} style={Styles.modal}>
+                    {/* DElete button */}
+                    <TouchableOpacity
+                        onPress={() => this.closeModal(this.state.modals.length - 1)}
+                        style={Styles.modalDeleteButton}
+                        activeOpacity={1}
+                    ><Text style={Styles.modalDeleteButtonText}>❌</Text></TouchableOpacity>
 
-                {this.state.modals.map((modal, modalIdx) => <Animated.View key={"MODAL-idx-" + modalIdx} style={Styles.modal}>
                     {/* Header */}
                     <View style={Styles.modalHeader}>
                         <Text style={Styles.modalHeaderText}>{modal.header}</Text>
@@ -152,8 +155,8 @@ export class ModalConstructor extends React.PureComponent<Props, State> {
                             </TouchableHighlight>
                         )}
                     </View>
-                </Animated.View>)}
-            </View></TouchableWithoutFeedback>
+                </View>)}
+            </View>
             </View>
         );
 	}
