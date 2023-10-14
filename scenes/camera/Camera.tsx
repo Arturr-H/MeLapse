@@ -43,7 +43,6 @@ interface Props {
 interface State {
 	/** User needs to allow app to use camera */
 	cameraAllowed: boolean,
-
 	transform: any[],
 
 	/** If there are any faces visible on screen */
@@ -53,7 +52,6 @@ interface State {
 	animating: boolean,
 	loadingImage: boolean,
 	showActivityIndicator: boolean,
-	debugTransformCamera: any[],
 	transformCamera: boolean,
 	cameraActive: boolean,
 
@@ -107,7 +105,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 			loadingImage: false,
 			showActivityIndicator: false,
-			debugTransformCamera: [],
 			transformCamera: false,
 			anyFaceVisible: false,
 			onionSkinOverlay: null,
@@ -129,7 +126,6 @@ class Camera extends React.PureComponent<Props, State> {
 			alert("Face calibration was not found.");
 			this.props.navigation.navigate("Calibration");
 		};
-		
 		this.gainedFocus();
 		this.props.navigation.addListener("focus", this.gainedFocus);
 	}
@@ -310,7 +306,6 @@ class Camera extends React.PureComponent<Props, State> {
 				this.setState({
 					transform,
 					facialFeatures: ffeatures,
-					debugTransformCamera: this.state.transformCamera ? transform : [],
 				});
 			}
 
@@ -359,7 +354,7 @@ class Camera extends React.PureComponent<Props, State> {
 				{/* Camera */}
 				{(this.state.cameraAllowed && this.state.cameraActive) && <ExpoCamera
 					ref={this.camera}
-					style={[Styles.container, { transform: this.state.debugTransformCamera }]}
+					style={Styles.container}
 					type={CameraType.front}
 					flashMode={this.state.flashlightOn ? FlashMode.on : FlashMode.off}
 					faceDetectorSettings={{
