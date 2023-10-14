@@ -10,7 +10,6 @@ import * as FaceDetector from "expo-face-detector";
 import { LSImage, LSImageProp } from "../../functional/Image";
 import { FlipType, manipulateAsync } from "expo-image-manipulator";
 import { FaceData, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
-import { DebugDots } from "../../functional/Debug";
 import { PictureManipulator } from "./PictureManipulator";
 import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
@@ -69,8 +68,6 @@ interface State {
 class Camera extends React.PureComponent<Props, State> {
 	pictureManipulator : RefObject<PictureManipulator> = React.createRef();;
 	camera             : RefObject<ExpoCamera> = React.createRef();;
-	debug              : RefObject<DebugDots> = React.createRef();;
-	debugOutside       : RefObject<DebugDots> = React.createRef();;
 	menuButton         : RefObject<MenuButton> = React.createRef();;
 	flashLightButton   : RefObject<FlashLightButton> = React.createRef();;
 	shutterButton      : RefObject<ShutterButton> = React.createRef();;
