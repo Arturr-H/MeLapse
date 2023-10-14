@@ -4,12 +4,11 @@ import { Animated, Dimensions, Image, Linking, Text, TouchableOpacity, View } fr
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Camera, CameraType, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera";
+import { Camera, CameraType, FaceDetectionResult, PermissionStatus } from "expo-camera";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { Animator } from "../../components/animator/Animator";
 import { FaceData, getFaceFeatures, getTransforms } from "../../functional/FaceDetection";
 import { FaceDetectorClassifications, FaceDetectorLandmarks, FaceDetectorMode } from "expo-face-detector";
-import { DebugDots } from "../../functional/Debug";
 import { Button } from "../../components/button/Button";
 import CalibrationData from "./CalibrationData";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
