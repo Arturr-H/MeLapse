@@ -8,13 +8,14 @@ import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
 import SelectInput from "../../components/selectInput/SelectInput";
 import AppConfig, { TargetTimesPerDay } from "./Config";
-import { LSImage } from "../../functional/Image";
+import { LSImage, saveImage } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import * as RNFS from "react-native-fs";
 import * as Ads from "../../components/advertising/Ad";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
+import { MediaTypeOptions, launchImageLibraryAsync } from "expo-image-picker";
 
 /* Interfaces */
 export interface Props {
@@ -64,6 +65,7 @@ class Preferences extends React.Component<Props, State> {
 
         /* Bindings */
         this.warnAboutRestartingApp = this.warnAboutRestartingApp.bind(this);
+        this.importSelfies = this.importSelfies.bind(this);
         this.resetSettings = this.resetSettings.bind(this);
         this.deleteImages = this.deleteImages.bind(this);
     };
@@ -91,7 +93,7 @@ class Preferences extends React.Component<Props, State> {
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
-        await AppConfig.setTargetTimesPerDay(TargetTimesPerDay.NotSet);
+        await AppConfig.setTargetTimesPerDay(TargetTimesPerDay.None);
         await AppConfig.setUsername("User");
         await AppConfig.setTransformCamera(false);
         await AppConfig.setSaveSelfiesToCameraRoll(false);
@@ -155,6 +157,24 @@ class Preferences extends React.Component<Props, State> {
                 color: "blue",
                 onClick: "close"
             }]
+        })
+    }
+
+    /** Opens user media lib to select selfies to import */
+    async importSelfies(): Promise<void> {
+        await launchImageLibraryAsync({
+            mediaTypes: MediaTypeOptions.Images,
+            allowsMultipleSelection: true
+        }).then(result => {
+            if (!result.canceled) {
+                result.assets.forEach((asset, idx) => {
+                    setTimeout(() => {
+                        saveImage(new LSImage().withPath(asset.uri));
+                    }, 40*idx);
+                })
+            }
+        }).finally(() => {
+            alert("Selfies imported!")
         })
     }
 
@@ -286,6 +306,12 @@ class Preferences extends React.Component<Props, State> {
                                     active
                                     onPress={this.statisticsScene}
                                     text="Statistics →"
+                                />
+                                <Button
+                                    color="blue"
+                                    active
+                                    onPress={this.importSelfies}
+                                    text="Import selfies"
                                 />
                                 <Button
                                     color="blue"
