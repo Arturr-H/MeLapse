@@ -37,9 +37,6 @@ export interface State {
     switching: boolean,
 
     saveSelfiesToCameraRoll: boolean,
-    transformCamera: boolean,
-    timesPerDay: number,
-    username: string,
     onionSkinVisible: boolean,
     deletingImages: boolean,
     personalizedAds: boolean,
@@ -54,10 +51,7 @@ class Preferences extends React.Component<Props, State> {
         /* State */
         this.state = {
             switching: false,
-            timesPerDay: TargetTimesPerDay.Twice,
             saveSelfiesToCameraRoll: false,
-            username: "",
-            transformCamera: false,
             onionSkinVisible: false,
             deletingImages: false,
             personalizedAds: false,
@@ -72,9 +66,6 @@ class Preferences extends React.Component<Props, State> {
 
     async componentDidMount(): Promise<void> {
         this.setState({
-            timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
-            username: await AppConfig.getUsername(),
-            transformCamera: await AppConfig.getTransformCamera(),
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
             onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
             personalizedAds: await OnionSkin.getOnionSkinVisibility(),
@@ -93,16 +84,12 @@ class Preferences extends React.Component<Props, State> {
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
-        await AppConfig.setTargetTimesPerDay(TargetTimesPerDay.None);
-        await AppConfig.setUsername("User");
-        await AppConfig.setTransformCamera(false);
         await AppConfig.setSaveSelfiesToCameraRoll(false);
+        await OnionSkin.setOnionSkinVisibility(false);
 
         this.setState({
-            timesPerDay: await AppConfig.getTargetTimesPerDay() as number,
-            username: await AppConfig.getUsername(),
-            transformCamera: await AppConfig.getTransformCamera(),
-            saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
+            onionSkinVisible: false,
+            saveSelfiesToCameraRoll: false,
         });
     }
 
@@ -224,9 +211,8 @@ class Preferences extends React.Component<Props, State> {
                                     buttons={["YES", "NO"]}
                                     initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
                                     onChange={(idx) => {
-                                        const personalized = idx == 0 ? true : false;
-                                        this.setState({ saveSelfiesToCameraRoll: personalized });
-                                        AppConfig.setSaveSelfiesToCameraRoll(personalized);
+                                        this.setState({ saveSelfiesToCameraRoll: idx == 0 ? true : false });
+                                        AppConfig.setSaveSelfiesToCameraRoll(idx == 0 ? true : false);
                                     }}
                                 />
                             </View>
