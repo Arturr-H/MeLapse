@@ -1,8 +1,10 @@
 import React from "react";
 import { View } from "react-native";
-import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
 import AppConfig from "../../scenes/preferences/Config";
-import { REWARDED_UNIT_ID } from "./Util";
+
+/* @ts-ignore */
+import { BANNER } from "@env";
 
 /* Interfaces */
 interface AdProps {
@@ -24,16 +26,25 @@ interface AdProps {
  */
 export function Banner(props: AdProps): JSX.Element | null {
 	const [personalized, setPersonalized] = React.useState<null | boolean>(null);
+	const [bannerID, setBannerID] = React.useState<null | string>(null);
+
 	React.useEffect(() => {
 		(async () => {
+			let isProduction = process.env.EXPO_PUBLIC_PRODUCTION_ADS;
+			let bannerID: string;
+
+			if (isProduction === "true") { bannerID = BANNER; }
+			else { bannerID = TestIds.BANNER; }
+
 			/* If it's not set - default to false */
 			setPersonalized(await AppConfig.getPersonalizedAds() ?? false)
+			setBannerID(bannerID);
 		})();
 	}, []);
 
 
 	return (
-		personalized !== null ? <View style={{
+		(personalized !== null && bannerID !== null) ? <View style={{
 			width: "100%",
 			display: "flex",
 			justifyContent: "center",
@@ -41,7 +52,7 @@ export function Banner(props: AdProps): JSX.Element | null {
 			height: props.allocatedHeight,
 		}}>
 			<BannerAd
-				unitId={REWARDED_UNIT_ID}
+				unitId={bannerID}
 				size={BannerAdSize.LARGE_BANNER}
 				onAdLoaded={props.onAdLoaded}
 				onAdClosed={props.onAdClosed}
