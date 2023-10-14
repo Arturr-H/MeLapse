@@ -1,15 +1,15 @@
 /* Imports */
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { ActivityIndicator, Dimensions, Easing, Image, ImageSourcePropType, SafeAreaView, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { ActivityIndicator, Easing, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import Poster from "../../components/poster/Poster";
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Animated } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Haptic from "expo-haptics";
-import { LSImage, LSImageProp, saveImage } from "../../functional/Image";
+import { LSImage, LSImageProp } from "../../functional/Image";
 import { Animator } from "../../components/animator/Animator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Background from "./Background";
@@ -126,8 +126,11 @@ class Preview extends React.PureComponent<Props, State> {
             this.setState({ deactivateButtons: true });
 
             /* Save the image to fs */
-            await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
-
+            try {
+                await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
+            }
+            catch {}
+            
             /* Animations */
             Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
             this.background.current?.fadeOut();
