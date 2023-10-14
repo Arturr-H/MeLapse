@@ -61,7 +61,7 @@ export class LSImage {
 	async saveAsync(callback?: () => void): Promise<void> {
 		/* Save image to user media library if that setting is on */
 		if (await AppConfig.getSaveSelfiesToCameraRoll()) {
-			await MediaLibrary.saveToLibraryAsync(this.getPath());
+			await MediaLibrary.saveToLibraryAsync(this.getRawPath());
 		}
 
 		/* Save in fs */
