@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "unnamed",
-    "slug": "unnamed",
+    "name": "MeLapse",
+    "slug": "MeLapse",
     "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
@@ -17,13 +17,14 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.arre.unnamed"
+      "bundleIdentifier": "red.artur.melapse"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/brand/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "red.artur.melapse"
     },
     "web": {
       "favicon": "./assets/brand/favicon.png"
