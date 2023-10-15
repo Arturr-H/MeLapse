@@ -13,6 +13,7 @@
 - [x] Faster animations - make it look more snappy
 - [x] Redesign menu scenes. (Preferences, composer, ...)
 - [x] Fix or remove scrolling background in `Preview.tsx`
+- [x] Add to `Tutorial` scene what the `TiltOverlay` does.
 
 ### Functionality
 - [x] Fix alignings via view shot
@@ -53,6 +54,7 @@
 - [x] Camera is still detecting faces for some reason when not active.
 - [x] Fix "edgecase" where user doesn't allow camera access (`Calibration` and `Camera` scene)
 - [x] Make so that user needs atleast 5 images to generate footage.
+- [x] Fix notification bug where if you press select amount of times per day multiple times it sends notifications said times per occurance.
 
 ### Optimisation & Cleanup
 - [x] Fix so that setup scenes use `MultiAnimator` instead of `Animator`s
@@ -77,18 +79,31 @@
 - [x] ***[Aaron]*** Difficult to know where to place face. Images don't really align that well.
 
 ### Before release
-- [ ] Come up with app name
-- [ ] Cleanup unused assets / imports
+- [x] Come up with app name
+- [x] Cleanup unused assets / imports
 - [x] Don't allow ipad installs because I'm lazy redoing all of the UI.
 - [x] Ads
 - [x] Redo logo and app icon
 - [x] Fix splash screen
-- [ ] Remove debug components like button to import selfies and `DebugDots`
+- [x] Enable ads (enable production ads in .env)
+- [x] Remove debug components like button to import selfies and `DebugDots`
 
 ### Other
 - [x] Create readme
+- [x] Rendering footage should return to composer scene not camera scene
+- [x] Default quality should be high
+- [x] Improve grammar and spelling in preferences and composer scene.
+- [x] Fix ads being cutoff on smaller devices (IMPORTANT)
+- [x] Fix selecting ads which are targetted or not
+- [x] Implement after welcome scene to ask about privacy policy and more
+- [x] Fix calibration scene being able to be skipped (warn in camera scene)
+
+## Before build
+* Set `EXPO_PUBLIC_PRODUCTION_ADS` to true
+* Set `initialRoute` in `App.tsx`
 
 # Future things to implement
+- [ ] Fix quality steps. From 1, to 6, to 64 is dumb
 - [ ] ***[Marco]*** Have a backend server to share images with friends to see their latest images taken.
 - [ ] ***[Marco]*** Have diffrent types of scrapping animations
   - burning paper
