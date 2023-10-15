@@ -2,7 +2,7 @@
   "expo": {
     "name": "MeLapse",
     "slug": "MeLapse",
-    "version": "1.0.5",
+    "version": "1.0.72",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
     "userInterfaceStyle": "light",
@@ -17,23 +17,24 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "red.artur.melapse"
+      "bundleIdentifier": "com.arre.unnamed"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/brand/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "red.artur.melapse"
+      "package": "com.arre.unnamed"
     },
     "web": {
       "favicon": "./assets/brand/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "f9fb43e2-8bd8-4516-aee2-58018f419ffc"
+        "projectId": "c3855f27-1fb2-4e64-82e6-21144d2879da"
       }
-    }
+    },
+    "owner": "arre"
   },
   "plugins": [
     [
