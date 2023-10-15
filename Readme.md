@@ -23,3 +23,8 @@ I've really not decided yet wether I'd want to publish this app or not, but this
 
 ![Screenshot 1](./.github/screenshots/preview.PNG) | ![Screenshot 2](./.github/screenshots/camera.PNG) | ![Screenshot 3](./.github/screenshots/preferences.PNG)
 :-------------------------:|:-------------------------:|:-------------------------:
+
+## Appstore screenshots 🌄
+
+![Screenshot 1](./.github/screenshots/appstoreScreenshots/CaptureDaily6.5".jpg) | ![Screenshot 2](./.github/screenshots/appstoreScreenshots/DoesThisOneLookGood6.5".jpg) | ![Screenshot 3](./.github/screenshots/appstoreScreenshots/RenderTimelapse6.5".jpg)
+:-------------------------:|:-------------------------:|:-------------------------:
