@@ -1,5 +1,5 @@
 import React, { RefObject } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { Linking, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { Button } from "../../components/button/Button";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -26,7 +26,10 @@ export class Welcome extends React.PureComponent<Props, {}> {
     };
 
     async onConfirm(): Promise<void> {
-        const read = () => this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Welcome" });
+        const read = () => {
+            // this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Welcome" })
+            Linking.openURL("https://arturr-h.github.io/MeLapse-Pages/index.html");
+        };
         const confirm = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Calibration" });
 
         this.modalConstructor.current?.constructModal({

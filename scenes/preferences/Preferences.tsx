@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { Alert, KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Linking, SafeAreaView, ScrollView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -78,9 +78,12 @@ class Preferences extends React.Component<Props, State> {
     reviewScene        = () => this.props.navigation.navigate("Review");
     calibrationScene   = () => this.props.navigation.navigate("Calibration");
     tutorialScene      = () => this.props.navigation.navigate("Tutorial");
-    privacyPolicyScene = () => this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Preferences" });
     statisticsScene    = () => this.props.navigation.navigate("Statistics");
     howOftenScene      = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" });
+    privacyPolicyScene = () => {
+        Linking.openURL("https://arturr-h.github.io/MeLapse-Pages/index.html");
+        // this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Preferences" });
+    }
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
