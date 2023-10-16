@@ -4,10 +4,9 @@ import { Alert, KeyboardAvoidingView, Linking, SafeAreaView, ScrollView, Text, V
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
 import SelectInput from "../../components/selectInput/SelectInput";
-import AppConfig, { TargetTimesPerDay } from "./Config";
+import AppConfig from "./Config";
 import { LSImage, saveImage } from "../../functional/Image";
 import { StatusBar } from "expo-status-bar";
 import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
@@ -27,11 +26,12 @@ export interface Props {
         Calibration: undefined,
         Tutorial: undefined,
         Statistics: undefined,
+        ThankYou: undefined,
         PrivacyPolicy: { confirmLocation: "Preferences" },
         HowOften: { confirmLocation: "Preferences" | "Calibration" }
     }, "Camera" | "Debug" | "Composer" | "Review"
     | "Calibration" | "Tutorial" | "PrivacyPolicy"
-    | "Statistics" | "HowOften">,
+    | "Statistics" | "HowOften" | "ThankYou">,
 }
 export interface State {
     switching: boolean,
@@ -80,6 +80,7 @@ class Preferences extends React.Component<Props, State> {
     tutorialScene      = () => this.props.navigation.navigate("Tutorial");
     statisticsScene    = () => this.props.navigation.navigate("Statistics");
     howOftenScene      = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" });
+    thankYouScene      = () => this.props.navigation.navigate("ThankYou");
     privacyPolicyScene = () => {
         Linking.openURL("https://arturr-h.github.io/MeLapse-Pages/index.html");
         // this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Preferences" });
@@ -307,6 +308,12 @@ class Preferences extends React.Component<Props, State> {
                                     active
                                     onPress={this.privacyPolicyScene}
                                     text="Privacy policy →"
+                                />
+                                <Button
+                                    color="blue"
+                                    active
+                                    onPress={this.thankYouScene}
+                                    text="Credits →"
                                 />
                             </View>
 
