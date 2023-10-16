@@ -68,7 +68,7 @@ class Preferences extends React.Component<Props, State> {
         this.setState({
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
             onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
-            personalizedAds: await OnionSkin.getOnionSkinVisibility(),
+            personalizedAds: await AppConfig.getPersonalizedAds(),
         });
     }
 
