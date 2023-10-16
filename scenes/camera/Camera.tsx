@@ -390,12 +390,12 @@ class Camera extends React.PureComponent<Props, State> {
 					<View style={Styles.bottomBar}>
 						<View style={Styles.bottomBarTile}>
 							{/* Helps user know how to rotate face */}
-							<TiltOverlay
+							{/* <TiltOverlay
 								calibration={this.calibration}
 								sensitivity={10}
 								facialFeatures={this.state.facialFeatures}
 								anyFaceVisible={this.state.anyFaceVisible}
-							/>
+							/> */}
 
 						</View>
 
