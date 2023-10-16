@@ -61,8 +61,9 @@ const App = () => {
 
 		/* First screen */
 		AsyncStorage.getItem("setupComplete").then((value) => {
+			ExpoSplashScreen.hideAsync();
+
 			if (value === "true") {
-				ExpoSplashScreen.hideAsync();
 			  	setInitialRoute("Camera");
 			}
 		});
