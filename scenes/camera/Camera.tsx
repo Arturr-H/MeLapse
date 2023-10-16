@@ -119,7 +119,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
-		if (!this.calibration) {
+		if (await CalibrationData.getCalibration() === null) {
 			alert("Face calibration was not found.");
 			this.props.navigation.navigate("Calibration");
 		};
