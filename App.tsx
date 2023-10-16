@@ -4,8 +4,6 @@ import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/
 
 /* Resources */
 import { useFonts } from "expo-font";
-import { Asset } from "expo-asset";
-import { Image } from "react-native";
 import * as ExpoSplashScreen from "expo-splash-screen";
 
 /* Scene imports */
@@ -32,6 +30,7 @@ enableScreens();
 /* Notifications */
 import * as Notifications from "expo-notifications";
 import { useLocalNotification } from "./LocalNotification";
+import ThankYou from "./scenes/thankYou/ThankYou";
 Notifications.setNotificationHandler({
 	handleNotification: async () => ({
 		shouldShowAlert: true,
@@ -105,6 +104,7 @@ const App = () => {
 
 				{/* Privacy policy */}
 				<Stack.Screen options={commonConfig} name="PrivacyPolicy" component={PrivacyPolicy} initialParams={{ confirmLocation: "Welcome" }} />
+				<Stack.Screen options={commonConfig} name="ThankYou" component={ThankYou} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
