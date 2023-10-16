@@ -44,7 +44,7 @@ class Tutorial extends React.PureComponent<Props, State> {
             <Page1 key="pg1" />,
             <Page2 key="pg2" />,
             <Page3 key="pg3" />,
-            <Page4 key="pg4" />,
+            // <Page4 key="pg4" />,
             <Page5 key="pg5" ref={this.page5} navigation={this.props.navigation} />,
         ];
     };
