@@ -69,7 +69,7 @@ class Composer extends React.Component<Props, State> {
                 framerate: 1
             },
 
-            duration: 5,
+            duration: 0,
             framerateIsOverwritten: [false, 0],
         };
 
@@ -82,6 +82,7 @@ class Composer extends React.Component<Props, State> {
         this.goBack = this.goBack.bind(this);
     };
     
+    componentDidMount = this.onFocus;
     async onFocus(): Promise<void> {
         this.updateFramerateOverwritten();
         const [format, quality, framerate] = [
