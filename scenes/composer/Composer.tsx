@@ -15,6 +15,12 @@ import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
 import { QUALITY_OPTION_BITRATE } from "../../functional/VideoCreator";
 import * as Ads from "../../components/advertising/Ad";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
+import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
+import AppConfig from "../preferences/Config";
+
+/* @ts-ignore */
+import { REWARDED } from "@env"
+import { env } from "../../env.pubilc";
 
 /* Interfaces */
 interface Props {
@@ -44,7 +50,10 @@ interface State {
      * value determines wheter if it's overwritten
      * or not second is the fps why do I write this
      * no one including me will ever read this */
-    framerateIsOverwritten: [boolean, number]
+    framerateIsOverwritten: [boolean, number],
+
+    /** Rewarded ad for loading scene */
+    rewardedAd?: Promise<RewardedAd>
 }
 
 class Composer extends React.Component<Props, State> {
@@ -66,7 +75,7 @@ class Composer extends React.Component<Props, State> {
             config: {
                 format: 1,
                 quality: 1,
-                framerate: 1
+                framerate: 1,
             },
 
             duration: 0,
@@ -78,11 +87,15 @@ class Composer extends React.Component<Props, State> {
         this.openAdvancedSettings = this.openAdvancedSettings.bind(this);
         this.onChangeFramerate = this.onChangeFramerate.bind(this);
         this.loadingScreen = this.loadingScreen.bind(this);
+        this.loadRewarded = this.loadRewarded.bind(this);
         this.onFocus = this.onFocus.bind(this);
         this.goBack = this.goBack.bind(this);
     };
     
-    componentDidMount = this.onFocus;
+    async componentDidMount(): Promise<void> {
+        this.onFocus();
+        this.setState({ rewardedAd: this.loadRewarded() });
+    };
     async onFocus(): Promise<void> {
         this.updateFramerateOverwritten();
         const [format, quality, framerate] = [
@@ -103,6 +116,34 @@ class Composer extends React.Component<Props, State> {
         const fover = await ComposerConfig.getFramerateOverride();
         this.setState({
             framerateIsOverwritten: [fover !== null, fover ?? 0]
+        })
+    }
+
+    /** Loads the rewarded ads for `LoadingScreen` */
+    async loadRewarded(): Promise<RewardedAd> {
+        let isProduction = env.PRODUCTION_ADS;
+        let bannerID: string;
+        
+        if (isProduction === true) { bannerID = REWARDED; }
+        else { bannerID = TestIds.REWARDED; }
+
+        const personalized = await AppConfig.getPersonalizedAds() ?? false;
+
+        /* Try load */
+        return new Promise<RewardedAd>((resolve, _) => {
+            console.log("[Dbg] Loading rewarded ad");
+            const rew = RewardedAd.createForAdRequest(bannerID, {
+                requestNonPersonalizedAdsOnly: personalized,
+            });
+
+            /* resolve */
+            rew.addAdEventListener(RewardedAdEventType.LOADED, () => {
+                console.log("[Dbg] Rewarded ad loaded");
+                rew.removeAllListeners();
+                resolve(rew);
+            });
+
+            rew.load();
         })
     }
 
@@ -147,6 +188,8 @@ class Composer extends React.Component<Props, State> {
                 bitrateOverride: await ComposerConfig.getBitrate(),
                 framerateOverride: await ComposerConfig.getFramerateOverride(),
                 widthOverride: await ComposerConfig.getWidthOverride(),
+
+                rewardedAd: this.state.rewardedAd
             });
         }
 

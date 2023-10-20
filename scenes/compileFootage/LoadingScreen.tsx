@@ -36,6 +36,8 @@ export interface StitchOptions {
 
     widthOverride: number | null,
     framerateOverride: number | null,
+
+    rewardedAd?: Promise<RewardedAd>
 }
 
 class LoadingScreen extends React.Component<Props, State> {
@@ -76,49 +78,24 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Load reward ad, and try render */
     async loadAd(): Promise<void> {
-        let isProduction = env.PRODUCTION_ADS;
-        let bannerID: string;
-        
-        if (isProduction === true) { bannerID = REWARDED; }
-        else { bannerID = TestIds.REWARDED; }
-
-        const personalized = await AppConfig.getPersonalizedAds() ?? false;
+        const ad = this.props.params.rewardedAd;
+        if (!ad) return;
         let hasGenerated = false;
+
+        /** Shows ad (tries to) and generates video */
+        const generateAndShow = () => {
+            if (!hasGenerated) {
+                clearTimeout(loadTimeout);
+                hasGenerated = true;
+                ad.then(e => e.show());
+                this._generateVideo();
+            };
+        }
 
         /* If the ad hasn't loaded after 2 seconds, we start
             to render anyways. Ad can come after it or not */
-        const loadTimeout: NodeJS.Timeout = setTimeout(() => {
-            if (!hasGenerated) {
-                hasGenerated = true;
-                this._generateVideo();
-            }
-        }, 2000);
-
-        /* Try load */
-        new Promise<void>((resolve, _) => {
-            const rew = RewardedAd.createForAdRequest(bannerID, {
-                requestNonPersonalizedAdsOnly: personalized
-            });
-
-            /* Show and resolve */
-            rew.addAdEventListener(RewardedAdEventType.LOADED, () => {
-                clearTimeout(loadTimeout);
-                rew.show();
-                rew.removeAllListeners();
-                resolve();
-            });
-
-
-            rew.load();
-        })
-
-        /* On ad load success */
-        .then(_ => {
-            if (!hasGenerated) {
-                hasGenerated = true;
-                this._generateVideo();
-            };
-        });
+        const loadTimeout: NodeJS.Timeout = setTimeout(generateAndShow, 2000);
+        await ad.then(generateAndShow);
     }
 
     /** Generate the timmelapse footage */
