@@ -16,6 +16,7 @@ import AppConfig from "../preferences/Config";
 
 /* @ts-ignore */
 import { REWARDED } from "@env"
+import { env } from "../../env.pubilc";
 
 /* Interfaces */
 interface Props {
@@ -75,10 +76,10 @@ class LoadingScreen extends React.Component<Props, State> {
 
     /** Load reward ad, and try render */
     async loadAd(): Promise<void> {
-        let isProduction = process.env.EXPO_PUBLIC_PRODUCTION_ADS;
+        let isProduction = env.PRODUCTION_ADS;
         let bannerID: string;
-
-        if (isProduction === "true") { bannerID = REWARDED; }
+        
+        if (isProduction === true) { bannerID = REWARDED; }
         else { bannerID = TestIds.REWARDED; }
 
         const personalized = await AppConfig.getPersonalizedAds() ?? false;
