@@ -1,3 +1,3 @@
 export const env = {
-    PRODUCTION_ADS: false
+    PRODUCTION_ADS: true
 }
