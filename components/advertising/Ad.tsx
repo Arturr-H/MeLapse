@@ -5,6 +5,7 @@ import AppConfig from "../../scenes/preferences/Config";
 
 /* @ts-ignore */
 import { BANNER } from "@env";
+import { env } from "../../env.pubilc";
 
 /* Interfaces */
 interface AdProps {
@@ -30,10 +31,10 @@ export function Banner(props: AdProps): JSX.Element | null {
 
 	React.useEffect(() => {
 		(async () => {
-			let isProduction = process.env.EXPO_PUBLIC_PRODUCTION_ADS;
-			let bannerID: string;
+			let isProduction = env.PRODUCTION_ADS;
 
-			if (isProduction === "true") { bannerID = BANNER; }
+			let bannerID: string;
+			if (isProduction === true) { bannerID = BANNER; }
 			else { bannerID = TestIds.BANNER; }
 
 			/* If it's not set - default to false */
