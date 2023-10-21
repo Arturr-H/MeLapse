@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
@@ -39,7 +40,7 @@ export default StyleSheet.create({
             alignItems: "center"
     },
     charLenText: {
-        color: "rgb(255, 69, 58)",
+        color: Colors.red.default,
         textAlign: "right",
     }
 })

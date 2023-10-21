@@ -15,6 +15,13 @@ import * as Ads from "../../components/advertising/Ad";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
 import { MediaTypeOptions, launchImageLibraryAsync } from "expo-image-picker";
+import { env } from "../../env.pubilc";
+import { getBannerId, getRewardedId } from "../../LocalNotification";
+import * as Device from "expo-device";
+
+/* @ts-ignore */
+import { BANNER, REWARDED } from "@env";
+import { TestIds } from "react-native-google-mobile-ads";
 
 /* Interfaces */
 export interface Props {
@@ -184,7 +191,7 @@ class Preferences extends React.Component<Props, State> {
                             {/* Goto composer scene */}
                             <View style={[Styles.row, Styles.padded]}>
                                 <View style={Styles.tile}>
-                                    <Button flex color="green" active onPress={this.composerScene} text="Create →" />
+                                    <Button flex active onPress={this.composerScene} text="Create →" />
                                 </View>
                                 <View style={Styles.tile}>
                                     <Text style={Styles.header2}>🎨 Composer</Text>
@@ -352,6 +359,24 @@ class Preferences extends React.Component<Props, State> {
                                     loading={this.state.deletingImages}
                                     text="Delete all selfies"
                                 />
+                            </View>
+
+                            <View style={{ position: "absolute", bottom: 0, transform: [{ translateY: 400 }], paddingHorizontal: 30 }}>
+                                <Text style={Styles.paragraph}>p_ads: {env.PRODUCTION_ADS === true ? "true" : "false"}</Text>
+                                <Text style={Styles.paragraph}>g_bid: {getBannerId().slice(getBannerId().length - 3, getBannerId().length - 1)}</Text>
+                                <Text style={Styles.paragraph}>g_rid: {getRewardedId().slice(getRewardedId().length - 3, getRewardedId().length - 1)}</Text>
+                                <Text style={Styles.paragraph}>production</Text>
+                                <Text style={Styles.paragraph}>p_bid: {BANNER.slice(BANNER.length - 3, BANNER.length - 1)}</Text>
+                                <Text style={Styles.paragraph}>p_rid: {REWARDED.slice(REWARDED.length - 3, REWARDED.length - 1)}</Text>
+                                <Text style={Styles.paragraph}>dev</Text>
+                                <Text style={Styles.paragraph}>t_bid: {TestIds.BANNER.slice(TestIds.BANNER.length - 3, TestIds.BANNER.length - 1)}</Text>
+                                <Text style={Styles.paragraph}>t_rid: {TestIds.REWARDED.slice(TestIds.REWARDED.length - 3, TestIds.REWARDED.length - 1)}</Text>
+                                <Text style={Styles.paragraph}>{Device.brand}</Text>
+                                <Text style={Styles.paragraph}>{Device.osBuildId}</Text>
+                                <Text style={Styles.paragraph}>{Device.supportedCpuArchitectures?.join("...")}</Text>
+                                <Text style={Styles.paragraph}>{Device.osBuildId}</Text>
+                                <Text style={Styles.paragraph}>{Device.totalMemory}</Text>
+                                <Text style={Styles.paragraph}>{Device.platformApiLevel}</Text>
                             </View>
                         </ScrollView>
                     </View>

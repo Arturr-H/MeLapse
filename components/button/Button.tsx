@@ -3,6 +3,8 @@ import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, Touchabl
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Constants */
 const SCALE_ANIM_CONFIG = {
@@ -16,7 +18,7 @@ interface Props {
     onPress: () => void,
     active?: boolean,
 
-    color?: "red" | "blue" | "green",
+    color?: "red" | "blue",
     flex?: boolean,
     small?: true,
 
@@ -47,7 +49,6 @@ export class Button extends React.PureComponent<Props, State> {
     colors: {
         "blue": string[],
         "red": string[],
-        "green": string[]
     };
 
 	constructor(props: Props) {
@@ -61,9 +62,8 @@ export class Button extends React.PureComponent<Props, State> {
 
         /* Static */
         this.colors = {
-            "blue": ["rgb(90, 200, 245)", "rgb(80, 190, 245)"],
-            "red": ["rgb(255, 45, 85)", "rgb(235, 25, 75)"],
-            "green": ["rrgb(90, 200, 245)", "rgb(80, 190, 245)"]
+            "blue": [Colors.blue.default, Colors.blue.darkened],
+            "red": [Colors.red.default, Colors.red.darkened],
         }
 
         /* Bindings */
@@ -91,6 +91,7 @@ export class Button extends React.PureComponent<Props, State> {
 
 	render() {
         const scale = this.state.scale;
+        const color = this.colors[this.props.color ?? "blue"];
 
 		return (
             <Animated.View
@@ -100,13 +101,13 @@ export class Button extends React.PureComponent<Props, State> {
                 ]}
             >
                 <TouchableHighlight
-                    underlayColor={this.colors[this.props.color ?? "blue"][1]}
+                    underlayColor={color[2]}
                     style={[
                         this.props.style,
                         Styles.button,
                         {
-                            backgroundColor: this.colors[this.props.color ?? "blue"][0],
-                            borderColor: this.colors[this.props.color ?? "blue"][1],
+                            backgroundColor: color[0],
+                            borderColor: color[1],
                         },
                         this.props.flex && { flex: 1 },
                         this.props.small && {

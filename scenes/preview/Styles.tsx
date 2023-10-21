@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
@@ -55,8 +56,8 @@ export default StyleSheet.create({
         height: 70,
         borderRadius: 20,
 
-        backgroundColor: "rgb(90, 200, 245)",
-        borderColor: "rgb(80, 190, 245)",
+        backgroundColor: Colors.blue.default,
+        borderColor: Colors.blue.darkened,
         borderWidth: 2,
 
         shadowColor: "#000",
@@ -82,8 +83,8 @@ export default StyleSheet.create({
         height: 70,
         borderRadius: 40,
 
-        backgroundColor: "rgb(90, 200, 245)",
-        borderColor: "rgb(80, 190, 245)",
+        backgroundColor: Colors.blue.default,
+        borderColor: Colors.blue.darkened,
         borderWidth: 2,
 
         shadowColor: "#000",

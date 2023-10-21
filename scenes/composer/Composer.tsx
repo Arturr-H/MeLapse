@@ -233,7 +233,6 @@ class Composer extends React.Component<Props, State> {
                                     onPress={this.loadingScreen}
                                     active={true}
                                     flex
-                                    color="green"
                                     height={120}
                                 >
                                     <Text style={Styles.framerateSelectionText}>📀</Text>

@@ -9,15 +9,13 @@ export default StyleSheet.create({
         height: 50,
         minHeight: 50,
 
-        borderColor: "rgb(80, 190, 245)",
         borderWidth: 2,
         borderRadius: 15,
-
-        backgroundColor: "rgb(90, 200, 245)",
+        overflow: "hidden",
 
         display: "flex",
         justifyContent: "center",
-            alignItems: "center"
+            alignItems: "center",
     },
     buttonText: {
         color: "#fff",

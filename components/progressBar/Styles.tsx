@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
@@ -17,7 +18,7 @@ export default StyleSheet.create({
         overflow: "hidden"
     },
     progressBarInner: {
-        backgroundColor: "rgb(90, 200, 245)",
+        backgroundColor: Colors.blue.default,
         width: "100%",
         height: "100%"
     }

@@ -2,6 +2,7 @@ import React from "react";
 import { Text, TouchableHighlight } from "react-native";
 import Styles from "./Styles";
 import { ImpactFeedbackStyle, impactAsync } from "expo-haptics";
+import { Colors } from "../../styleBundles/Colors";
 
 type Callback = () => void;
 
@@ -29,7 +30,7 @@ export default class TimewarpButton extends React.PureComponent<Props> {
                     this.props.onTouchStart(this.props.callback);
                 }}
                 onPressOut={() => this.props.onTouchEnd()}
-                underlayColor={"rgb(80, 190, 245)"}
+                underlayColor={Colors.blue.darkened}
                 style={Styles.timewarpButton}
                 children={<Text style={Styles.timewarpButtonText}>{this.props.direction === "forwards" ? "▶︎" : "◀︎"}</Text>}
             />

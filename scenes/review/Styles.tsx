@@ -1,5 +1,6 @@
 import { Dimensions, StyleSheet } from "react-native";
 import MenuBundle from "../../styleBundles/MenuBundle";
+import { Colors } from "../../styleBundles/Colors";
 
 export default StyleSheet.create({
     ...MenuBundle,
@@ -89,8 +90,8 @@ export default StyleSheet.create({
         height: 80,
 
         borderRadius: 15,
-        backgroundColor: "rgb(90, 200, 245)",
-        borderColor: "rgb(80, 190, 245)",
+        backgroundColor: Colors.blue.default,
+        borderColor: Colors.blue.darkened,
         borderWidth: 2,
 
         display: "flex",

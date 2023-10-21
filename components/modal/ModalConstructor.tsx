@@ -2,6 +2,7 @@ import React, { RefObject } from "react";
 import { TextInput as RNTextInput, Animated, Dimensions, Easing, Image, TouchableOpacity, View, Text, TouchableHighlight, TouchableWithoutFeedback } from "react-native";
 import Styles from "./Styles";
 import { Animator } from "../animator/Animator";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Interfaces */
 interface ModalProps {
@@ -19,7 +20,7 @@ interface ModalProps {
 }
 interface ModalButton {
     /** Color of the button */
-    color: "red" | "blue" | "green",
+    color: "red" | "blue",
 
     /** Text */
     text: string,
@@ -39,10 +40,9 @@ interface State {
 export class ModalConstructor extends React.PureComponent<Props, State> {
 
     /* Static */
-    colors: { "blue": string[], "red": string[], "green": string[] } = {
-        "blue": ["rgb(90, 200, 245)", "rgb(80, 190, 245)"],
-        "red": ["rgb(255, 45, 85)", "rgb(235, 25, 75)"],
-        "green": ["rrgb(90, 200, 245)", "rgb(80, 190, 245)"]
+    colors: { "blue": string[], "red": string[] } = {
+        "blue": [Colors.blue.default, Colors.blue.darkened],
+        "red": [Colors.red.default, Colors.red.darkened],
     }
     
 	constructor(props: Props) {

@@ -5,6 +5,7 @@ import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Types */
 type SelectButtonContent = string | DoubleText;
@@ -83,7 +84,7 @@ function SelectButton(props: {
             flex: 1,
         }}>
             <TouchableHighlight
-                underlayColor={"rgb(80, 190, 245)"}
+                underlayColor={Colors.blue.darkened}
                 style={[
                     Styles.selectButton,
                     props.active && Styles.selectButtonActive,
