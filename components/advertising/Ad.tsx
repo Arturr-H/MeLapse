@@ -6,6 +6,7 @@ import AppConfig from "../../scenes/preferences/Config";
 /* @ts-ignore */
 import { BANNER } from "@env";
 import { env } from "../../env.pubilc";
+import { getBannerId } from "../../LocalNotification";
 
 /* Interfaces */
 interface AdProps {
@@ -27,25 +28,17 @@ interface AdProps {
  */
 export function Banner(props: AdProps): JSX.Element | null {
 	const [personalized, setPersonalized] = React.useState<null | boolean>(null);
-	const [bannerID, setBannerID] = React.useState<null | string>(null);
 
 	React.useEffect(() => {
 		(async () => {
-			let isProduction = env.PRODUCTION_ADS;
-
-			let bannerID: string;
-			if (isProduction === true) { bannerID = BANNER; }
-			else { bannerID = TestIds.BANNER; }
-
 			/* If it's not set - default to false */
 			setPersonalized(await AppConfig.getPersonalizedAds() ?? false)
-			setBannerID(bannerID);
 		})();
 	}, []);
 
 
 	return (
-		(personalized !== null && bannerID !== null) ? <View style={{
+		(personalized !== null) ? <View style={{
 			width: "100%",
 			display: "flex",
 			justifyContent: "center",
@@ -53,7 +46,7 @@ export function Banner(props: AdProps): JSX.Element | null {
 			height: props.allocatedHeight,
 		}}>
 			<BannerAd
-				unitId={bannerID}
+				unitId={getBannerId()}
 				size={BannerAdSize.LARGE_BANNER}
 				onAdLoaded={props.onAdLoaded}
 				onAdClosed={props.onAdClosed}
