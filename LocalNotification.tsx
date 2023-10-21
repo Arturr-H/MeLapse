@@ -3,6 +3,11 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { env } from "./env.pubilc";
+
+/* @ts-ignore */
+import { BANNER, REWARDED } from "@env";
+import { TestIds } from "react-native-google-mobile-ads";
 
 interface ILocalNotificationHook {
     expoPushToken: string | undefined;
@@ -89,4 +94,25 @@ export async function allowsNotificationsAsync(): Promise<boolean> {
 export async function clearAllScheduled(): Promise<void> {
     for (const not of await Notifications.getAllScheduledNotificationsAsync())
         await Notifications.cancelScheduledNotificationAsync(not.identifier);
+}
+
+/** Gets the banner ID */
+export function getBannerId(): string {
+    const isProduction = env.PRODUCTION_ADS;
+
+    if (isProduction === true) {
+        return BANNER;
+    }else {
+        return TestIds.BANNER
+    };
+}
+/** Gets the Rewarded ad ID */
+export function getRewardedId(): string {
+    const isProduction = env.PRODUCTION_ADS;
+
+    if (isProduction === true) {
+        return REWARDED;
+    }else {
+        return TestIds.REWARDED
+    };
 }
