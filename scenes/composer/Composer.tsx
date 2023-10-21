@@ -21,6 +21,7 @@ import AppConfig from "../preferences/Config";
 /* @ts-ignore */
 import { REWARDED } from "@env"
 import { env } from "../../env.pubilc";
+import { getRewardedId } from "../../LocalNotification";
 
 /* Interfaces */
 interface Props {
@@ -121,18 +122,12 @@ class Composer extends React.Component<Props, State> {
 
     /** Loads the rewarded ads for `LoadingScreen` */
     async loadRewarded(): Promise<RewardedAd> {
-        let isProduction = env.PRODUCTION_ADS;
-        let bannerID: string;
-        
-        if (isProduction === true) { bannerID = REWARDED; }
-        else { bannerID = TestIds.REWARDED; }
-
         const personalized = await AppConfig.getPersonalizedAds() ?? false;
 
         /* Try load */
         return new Promise<RewardedAd>((resolve, _) => {
             console.log("[Dbg] Loading rewarded ad");
-            const rew = RewardedAd.createForAdRequest(bannerID, {
+            const rew = RewardedAd.createForAdRequest(getRewardedId(), {
                 requestNonPersonalizedAdsOnly: personalized,
             });
 
