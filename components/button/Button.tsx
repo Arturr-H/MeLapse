@@ -101,7 +101,7 @@ export class Button extends React.PureComponent<Props, State> {
                 ]}
             >
                 <TouchableHighlight
-                    underlayColor={color[2]}
+                    underlayColor={color[1]}
                     style={[
                         this.props.style,
                         Styles.button,
