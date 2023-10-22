@@ -22,7 +22,6 @@ import Review from "./scenes/review/Review";
 import AdvancedComposer from "./scenes/composer/AdvancedComposer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Tutorial from "./scenes/tutorial/Tutorial";
-import PrivacyPolicy from "./scenes/privacyPolicy/PrivacyPolicy";
 import Statistics from "./scenes/statistics/Statistics";
 import Welcome from "./scenes/setup/Welcome";
 enableScreens();
@@ -103,7 +102,6 @@ const App = () => {
 				<Stack.Screen options={commonConfig} name="Tutorial" component={Tutorial} />
 
 				{/* Privacy policy */}
-				<Stack.Screen options={commonConfig} name="PrivacyPolicy" component={PrivacyPolicy} initialParams={{ confirmLocation: "Welcome" }} />
 				<Stack.Screen options={commonConfig} name="ThankYou" component={ThankYou} />
 			</Stack.Navigator>
 		</NavigationContainer>
