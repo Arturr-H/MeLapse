@@ -298,12 +298,12 @@ class Preferences extends React.Component<Props, State> {
                                     onPress={this.tutorialScene}
                                     text="Tutorial →"
                                 />
-                                <Button
+                                {/* <Button
                                     color="blue"
                                     active
                                     onPress={this.statisticsScene}
                                     text="Statistics →"
-                                />
+                                /> */}
                                 <Button
                                     color="blue"
                                     active
