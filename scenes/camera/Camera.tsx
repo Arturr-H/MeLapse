@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
-import { Animated, Linking, SafeAreaView, View } from "react-native";
+import { Animated, Image, Linking, SafeAreaView, View } from "react-native";
 import Styles from "./Styles";
 import { CameraType, Camera as ExpoCamera, FaceDetectionResult, FlashMode, PermissionStatus } from "expo-camera"
 import * as Haptic from "expo-haptics";
@@ -18,7 +18,6 @@ import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
-import { TiltOverlay } from "./TiltOverlay";
 import { OnionSkin } from "./onionSkin/OnionSkin";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
 
@@ -158,7 +157,8 @@ class Camera extends React.PureComponent<Props, State> {
 			anyFaceVisible: true,
 			animating: false,
 			showActivityIndicator: false,
-			cameraActive: true
+			cameraActive: true,
+			loadingImage: false,
 		});
 
 		/* Simulator throws error bc no camera */
@@ -210,7 +210,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 		const resetLoading = () => {
 			this.setState({
-				loadingImage: false,
 				showActivityIndicator: false,
 			});
 		}
@@ -307,7 +306,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 		}else {
 			/* No face visible */
-			this.setState({ anyFaceVisible: false });
+			this.setState({ anyFaceVisible: false, transform: [] });
 		}
 	}
 
@@ -354,7 +353,7 @@ class Camera extends React.PureComponent<Props, State> {
 					type={CameraType.front}
 					flashMode={this.state.flashlightOn ? FlashMode.on : FlashMode.off}
 					faceDetectorSettings={{
-						mode: FaceDetector.FaceDetectorMode.accurate,
+						mode: FaceDetector.FaceDetectorMode.fast,
 						detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
 						runClassifications: FaceDetector.FaceDetectorClassifications.all,
 						minDetectionInterval: 5,
