@@ -298,10 +298,10 @@ class Camera extends React.PureComponent<Props, State> {
 				let ffeatures = getFaceFeatures(e.faces[0]);
 				let transform = getTransforms(ffeatures, this.calibration);
 	
-				this.setState({
+				requestAnimationFrame(() => this.setState({
 					transform,
 					facialFeatures: ffeatures,
-				});
+				}));
 			}
 
 		}else {
