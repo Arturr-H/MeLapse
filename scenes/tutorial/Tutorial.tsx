@@ -1,6 +1,6 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { Animated, FlatList, NativeScrollEvent, NativeSyntheticEvent, SafeAreaView, ScrollView, View } from "react-native";
+import { Dimensions, NativeScrollEvent, NativeSyntheticEvent, SafeAreaView, ScrollView, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -9,8 +9,10 @@ import Page2 from "./page2/Page";
 import Page3 from "./page3/Page";
 import Page4 from "./page4/Page";
 import Page5 from "./page5/Page";
-import { WIDTH } from "../result/Result";
 import { StatusBar } from "expo-status-bar";
+
+/* Constants */
+const WIDTH = Dimensions.get("window").width;
 
 /* Interfaces */
 interface Props {

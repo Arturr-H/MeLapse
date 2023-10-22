@@ -1,9 +1,11 @@
-import React, { RefObject } from "react";
-import { Animated, Dimensions, Easing, Image, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Animated, Dimensions, Easing, TouchableOpacity } from "react-native";
 import Styles from "./Styles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Haptics from "expo-haptics";
-import { WIDTH } from "../result/Result";
+
+/* Constants */
+const WIDTH = Dimensions.get("window").width;
 
 /* Interfaces */
 interface Props {
