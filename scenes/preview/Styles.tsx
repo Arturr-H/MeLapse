@@ -22,6 +22,7 @@ export default StyleSheet.create({
 
         position: "absolute",
         zIndex: 3,
+        width: WIDTH
     },
     posterContainer: {
         position: "absolute",
@@ -211,5 +212,61 @@ export default StyleSheet.create({
         width: "70%",
         objectFit: "contain",
         position: "absolute",
+    },
+
+    numberContainer: {
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+        position: "absolute",
+        height: 220,
+    },
+
+    photoTextContainer: {
+        width: "100%",
+        height: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+        position: "absolute",
+    },
+    photoText: {
+        fontFamily: "inter-extrabold",
+        fontSize: 60,
+        width: "100%",
+        textAlign: "center",
+        position: "absolute"
+        // transform: [{ skewX: "10deg" }]
+    },
+
+    numberTextContainer: {
+        width: 500,
+        height: 250,
+
+        position: "absolute",
+        overflow: "hidden",
+    },
+    textTransitioner: {
+        width: "100%",
+        height: "200%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-around",
+    },
+    numberText: {
+        fontFamily: "inter-black",
+        fontSize: 250,
+
+        color: "#000",
+        opacity: 0.12,
+        // position: "absolute",
+        transform: [{ skewX: "-10deg" }],
+        // backgroundColor: "blue"
+    },
+    skewed: {
+        transform: [{ skewX: "-10deg" }, { translateX: -50 }],
     },
 })

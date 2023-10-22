@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Background from "./Background";
 import DenyStamp from "./DenyStamp";
 import GarbageFolder from "./GarbageFolder";
+import { BigText } from "./BigText";
 
 /* Interfaces */
 interface Props {
@@ -30,7 +31,8 @@ interface State {
     scrapButtonScale: Animated.Value,
 
     deactivateButtons: boolean,
-    lsimage?: LSImageProp
+    lsimage?: LSImageProp,
+    nrOfImages: number
 }
 
 /* Constants */
@@ -42,6 +44,7 @@ class Preview extends React.PureComponent<Props, State> {
     denyStamper: RefObject<DenyStamp> = React.createRef();
     background: RefObject<Background> = React.createRef();
     posterAnimator: RefObject<Animator> = React.createRef();
+    bigText: RefObject<BigText> = React.createRef();
 
     garbageFolderFront: RefObject<GarbageFolder> = React.createRef();
     garbageFolderBack: RefObject<GarbageFolder> = React.createRef();
@@ -57,6 +60,7 @@ class Preview extends React.PureComponent<Props, State> {
             scrapButtonScale: new Animated.Value(0.2),
 
             deactivateButtons: false,
+            nrOfImages: 0
         };
 
         /* Bindings */
@@ -76,9 +80,12 @@ class Preview extends React.PureComponent<Props, State> {
     componentWillUnmount(): void {
         this.props.navigation.removeListener("focus", this.onFocus);
     }
-    onFocus(): void {
+    async onFocus(): Promise<void> {
         this.introButtons();
         this.setState({ lsimage: this.props.lsimage });
+        await LSImage.getImagePointers().then(e => {
+            this.setState({ nrOfImages: e?.length ?? 1 });
+        })
     }
 
     /* Delete / save image */
@@ -135,10 +142,13 @@ class Preview extends React.PureComponent<Props, State> {
             Haptic.impactAsync(Haptic.ImpactFeedbackStyle.Medium);
             this.background.current?.fadeOut();
             this.outroButtons();
+            this.bigText.current?.animate();
 
             if (this.poster.current) {
                 this.poster.current?.save(() => {
-                    this.props.navigation.navigate("Camera", { comesFrom: "other" });
+                    setTimeout(() => {
+                        this.props.navigation.navigate("Camera", { comesFrom: "other" });
+                    }, 1100);
                 });
             }
         }else {
@@ -180,6 +190,12 @@ class Preview extends React.PureComponent<Props, State> {
                     <View style={Styles.absolute}>
                         {/* Poster (image preview) */}
                         {this.state.lsimage && <Poster lsimage={this.state.lsimage} ref={this.poster} />}
+
+                        <BigText
+                            ref={this.bigText}
+                            prev={this.state.nrOfImages - 1}
+                            curr={this.state.nrOfImages}
+                        />
                     </View>
                 </Animator>
 
