@@ -47,6 +47,7 @@ export interface State {
     onionSkinVisible: boolean,
     deletingImages: boolean,
     personalizedAds: boolean,
+    transformCamera: boolean
 }
 
 class Preferences extends React.Component<Props, State> {
@@ -62,6 +63,7 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: false,
             deletingImages: false,
             personalizedAds: false,
+            transformCamera: true
         };
 
         /* Bindings */
@@ -76,6 +78,7 @@ class Preferences extends React.Component<Props, State> {
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
             onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
             personalizedAds: await AppConfig.getPersonalizedAds(),
+            transformCamera: await AppConfig.getTransformCamera(),
         });
     }
 
@@ -90,17 +93,18 @@ class Preferences extends React.Component<Props, State> {
     thankYouScene      = () => this.props.navigation.navigate("ThankYou");
     privacyPolicyScene = () => {
         Linking.openURL("https://arturr-h.github.io/MeLapse-Pages/index.html");
-        // this.props.navigation.navigate("PrivacyPolicy", { confirmLocation: "Preferences" });
     }
 
     /** Reset all settings to default */
     async resetSettings(): Promise<void> {
         await AppConfig.setSaveSelfiesToCameraRoll(false);
         await OnionSkin.setOnionSkinVisibility(false);
+        await AppConfig.setTransformCamera(true);
 
         this.setState({
             onionSkinVisible: false,
             saveSelfiesToCameraRoll: false,
+            transformCamera: true,
         });
     }
 
@@ -283,6 +287,27 @@ class Preferences extends React.Component<Props, State> {
                                         this.warnAboutRestartingApp(personalized);
                                         this.setState({ personalizedAds: personalized });
                                         AppConfig.setPersonalizedAds(personalized);
+                                    }}
+                                />
+                            </View>
+
+                            <View style={[Styles.hr, Styles.hrPadded]} />
+
+                            {/* Personalized ads */}
+                            <View style={Styles.padded}>
+                                <Text style={Styles.header2}>📽️ Transform camera</Text>
+                                <View><Text style={Styles.paragraph}>
+                                    Transform the camera to the center in camera view. Only visual - transformations
+                                    will be applied nonetheless
+                                </Text></View>
+
+                                <SelectInput
+                                    buttons={["ON", "OFF"]}
+                                    initial={this.state.transformCamera ? 0 : 1}
+                                    onChange={(idx) => {
+                                        const condition = idx == 0 ? true : false;
+                                        this.setState({ transformCamera: condition });
+                                        AppConfig.setTransformCamera(condition);
                                     }}
                                 />
                             </View>
