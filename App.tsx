@@ -9,7 +9,6 @@ import * as ExpoSplashScreen from "expo-splash-screen";
 /* Scene imports */
 import Camera from "./scenes/camera/Camera";
 import Preview from "./scenes/preview/Preview";
-import Result from "./scenes/result/Result";
 
 import { enableScreens } from "react-native-screens";
 import HowOften from "./scenes/setup/HowOften";
@@ -80,10 +79,9 @@ const App = () => {
 	/* Render */
 	return (
 		<NavigationContainer>
-			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={initialRoute} >
+			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={"Preferences"} >
 				<Stack.Screen options={commonConfig} name="Camera" component={Camera} initialParams={{ comesFrom: "other" }} />
 				<Stack.Screen options={commonConfig} name="Preview" component={Preview} />
-				<Stack.Screen options={commonConfig} name="Result" component={Result} />
 
 				{/* Preferences */}
 				<Stack.Screen options={commonConfig} name="Preferences" component={Preferences} />
