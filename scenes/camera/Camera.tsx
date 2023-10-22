@@ -148,14 +148,13 @@ class Camera extends React.PureComponent<Props, State> {
 				]
 			})
 		}
-		this.setState({ cameraAllowed: status === PermissionStatus.GRANTED });
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
-
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		this.animateIntro();
 		this.setState({
+			cameraAllowed: status === PermissionStatus.GRANTED,
 			anyFaceVisible: true,
 			animating: false,
 			showActivityIndicator: false,
@@ -351,7 +350,7 @@ class Camera extends React.PureComponent<Props, State> {
 				{/* Camera */}
 				{(this.state.cameraAllowed && this.state.cameraActive) && <ExpoCamera
 					ref={this.camera}
-					style={Styles.container}
+					style={[Styles.container, this.state.transformCamera ? { transform: this.state.transform } : { transform: [] }]}
 					type={CameraType.front}
 					flashMode={this.state.flashlightOn ? FlashMode.on : FlashMode.off}
 					faceDetectorSettings={{

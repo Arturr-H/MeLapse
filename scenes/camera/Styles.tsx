@@ -192,6 +192,16 @@ export default StyleSheet.create({
         borderRadius: OVERLAY_FEATURE_HEIGHT / 2,
         opacity: 0.4,
     },
+    calibratedNose: {
+        position: "absolute",
+        backgroundColor: "#fff",
+
+        borderRadius: OVERLAY_FEATURE_HEIGHT / 2,
+        opacity: 0.4,
+
+        width: OVERLAY_FEATURE_HEIGHT,
+        height: OVERLAY_FEATURE_HEIGHT,
+    },
     
     faceRotationViewContainer: {
         width: "100%",
