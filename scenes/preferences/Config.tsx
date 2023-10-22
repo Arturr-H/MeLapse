@@ -27,7 +27,7 @@ export default class AppConfig {
     static async setTargetTimesPerDay(value: number) { await AsyncStorage.setItem("targetTimesPerDay", JSON.stringify(value)) }
     
     /** Transform camera in camera scene */
-    static async getTransformCamera(): Promise<boolean> { return this.tryGet("transformCamera", false) }
+    static async getTransformCamera(): Promise<boolean> { return this.tryGet("transformCamera", true) }
     static async setTransformCamera(value: boolean) { await AsyncStorage.setItem("transformCamera", JSON.stringify(value)) }
 
     /** Also save selfie to camera roll */
