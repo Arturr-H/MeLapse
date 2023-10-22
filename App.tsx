@@ -79,7 +79,7 @@ const App = () => {
 	/* Render */
 	return (
 		<NavigationContainer>
-			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={"Preferences"} >
+			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={initialRoute} >
 				<Stack.Screen options={commonConfig} name="Camera" component={Camera} initialParams={{ comesFrom: "other" }} />
 				<Stack.Screen options={commonConfig} name="Preview" component={Preview} />
 
