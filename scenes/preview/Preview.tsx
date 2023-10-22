@@ -18,7 +18,7 @@ import GarbageFolder from "./GarbageFolder";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Result: { lsimage: LSImageProp }, Camera: { comesFrom: "other" } }, "Camera", "Result">,
+    navigation: StackNavigationProp<{ Camera: { comesFrom: "other" } }, "Camera", "Result">,
 
     /* Navigation props */
     lsimage: LSImageProp
@@ -138,7 +138,7 @@ class Preview extends React.PureComponent<Props, State> {
 
             if (this.poster.current) {
                 this.poster.current?.save(() => {
-                    this.props.navigation.navigate("Result", { lsimage: this.props.lsimage });
+                    this.props.navigation.navigate("Camera", { comesFrom: "other" });
                 });
             }
         }else {
