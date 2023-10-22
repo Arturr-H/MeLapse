@@ -27,6 +27,7 @@ interface State {
 	overlay?: {
 		eyes: FeatureData,
 		mouth: FeatureData,
+		nose: Coordinate,
 	}
 }
 
@@ -58,10 +59,12 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 
 	/** Updates the calibrated positions */
 	updateCalib(calib: FaceData): void {
+		console.log(calib);
 		this.setState({
 			overlay: {
 				eyes: this.getOverlayFeatureData(calib.leftEyePosition, calib.rightEyePosition, true),
 				mouth: this.getOverlayFeatureData(calib.leftMouthPosition, calib.rightMouthPosition, false),
+				nose: calib.noseBasePosition
 			}
 		})
 	}
@@ -95,6 +98,7 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 
 		return (
 			<View style={Styles.calibratedOverlayContainer}>
+				{/* Eyes */}
 				<View
 					style={[Styles.calibratedFeature, {
 						width: this.state.overlay.eyes.width + OVERLAY_FEATURE_HEIGHT,
@@ -105,6 +109,8 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 						],
 					}, this.props.color ? { backgroundColor: this.props.color } : {}]}
 				/>
+
+				{/* Mouth */}
 				<View
 					style={[Styles.calibratedFeature, {
 						width: this.state.overlay.mouth.width,
@@ -115,6 +121,16 @@ export class CalibratedOverlay extends React.PureComponent<Props, State> {
 						],
 					}, this.props.color ? { backgroundColor: this.props.color } : {}]}
 				/>
+
+				{/* Nose */}
+				{this.state.overlay.nose && <View
+					style={[Styles.calibratedNose, {
+						transform: [
+							{ translateX: this.state.overlay.nose.x - OVERLAY_FEATURE_HEIGHT/2 },
+							{ translateY: this.state.overlay.nose.y - OVERLAY_FEATURE_HEIGHT/2 },
+						],
+					}, this.props.color ? { backgroundColor: this.props.color } : {}]}
+				/>}
 			</View>
 		);
 	}
