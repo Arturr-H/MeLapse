@@ -71,6 +71,12 @@ interface State {
      * the calibration and return to camera scene.
      * But not if there's no face calibration already */
     canGoBack: boolean,
+
+    nosePosition: {x:number, y:number},
+    lmp: {x:number, y:number},
+    rep: {x:number, y:number},
+    rmp: {x:number, y:number},
+    lep: {x:number, y:number},
 }
 
 class Calibration extends React.PureComponent<Props, State> {
@@ -107,6 +113,11 @@ class Calibration extends React.PureComponent<Props, State> {
             bottomVisible: "save",
 
             canGoBack: false,
+            nosePosition: {x:0,y:0},
+            lmp: {x:0, y:0},
+            rep: {x:0, y:0},
+            rmp: {x:0, y:0},
+            lep: {x:0, y:0},
         };
 
         /* Bindings */
@@ -195,12 +206,18 @@ class Calibration extends React.PureComponent<Props, State> {
             rep.x += dx;
             lmp.x -= dx;
             rmp.x += dx;
+            nose.x += dx;
 
             lep.y -= dy;
             rep.y -= dy;
             lmp.y += dy;
             rmp.y += dy;
             nose.y += dy;
+
+            // console.log(nose);
+
+            this.setState({ nosePosition: nose });
+            this.setState({ lmp, rep, rmp, lep });
 
             this.updateRollIndicators(face.rollAngle, true);
 
