@@ -99,8 +99,13 @@
 - [x] Fix calibration scene being able to be skipped (warn in camera scene)
 
 ## Before build
-* Set `EXPO_PUBLIC_PRODUCTION_ADS` to true
+* Set `PRODUCTION_ADS` to true (ONLY CHANGE BACK AFTER BUILD FOR DEV)
 * Set `initialRoute` in `App.tsx`
+* `expo prebuild`
+* `./updatePlist.sh`
+* Bump version
+* Increment `buildNumber` in `app.json` -> `expo.ios.buildNumber`
+* `eas build -p ios`
 
 # Future things to implement
 - [ ] Fix quality steps. From 1, to 6, to 64 is dumb
@@ -116,3 +121,18 @@
 - [x] Notifications
 - [ ] Android?
 
+### Todo for v1.0.77
+- [x] Fix ads not working
+- [x] Remove `result` scene
+
+### Todo for v1.0.78
+- [ ] Streak system?
+- [ ] Fix `BigText` counter being -1
+- [ ] Fix bug where users are sent back to welcome scene (IMPORTANT)
+- [ ] Fix so you can view your photo after its been taken (better way)
+- [ ] Onionskin opacity slider?
+- [ ] Add aaron in credits scene
+- [ ] Fix `BigText` color to no opacity
+- [ ] Improved calibration scene 
+- [ ] What is this app scene in tutorial bc many seem to download the app without reading description
+- [ ] Maybe some ad after taking picture in preview scene
