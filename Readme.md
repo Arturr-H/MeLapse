@@ -1,4 +1,4 @@
-# MeLapse 📸
+# MeLapse | On [ Apple AppStore](https://apps.apple.com/se/app/melapse/id6467423081?l=en-GB)
 This repo is a react-native app ([expo](https://expo.dev)), which I've spent the last couple months building. It started in April 2023 and have not been able to work on this project every week.
 
 I restarted the project (which is now this repo) because the I wasn't really proud of my first version. It contained small annoying bugs, and didn't really look all that good. I've now learned from my mistakes since my first try making this app.
@@ -15,9 +15,6 @@ I also wanted a better way of testing my app - so I did it via apples `TestFligh
 
 ### Why did I make this app?
 Firstly I just wanted to see how my acne changes over time when trying out diffrent medicines, and after building my first prototype in april 2023 I realised that it could potentially be used outside of "acne-tracking". I've previously seen videos on YouTube where people take photos of their face and (I'm pretty sure) manually overlay them ontop of eachother. This app just removes all that annoying stuff.
-
-### What are my plans?
-I've really not decided yet wether I'd want to publish this app or not, but this could probably be a good addition to my project portfolio.
 
 ## Screenshots 🌄
 
