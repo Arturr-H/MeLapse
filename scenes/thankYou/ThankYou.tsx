@@ -37,7 +37,13 @@ class ThankYou extends React.PureComponent<Props, State> {
             <Text style={Styles.header2}>Arman</Text>
             <Text style={Styles.paragraph}>Testing</Text>
             <Text style={Styles.paragraph}>Feedback</Text>
-        </React.Fragment>
+        </React.Fragment>,
+
+        <React.Fragment>
+            <Text style={Styles.header2}>Aaron</Text>
+            <Text style={Styles.paragraph}>Testing</Text>
+            <Text style={Styles.paragraph}>Feedback & ideas</Text>
+        </React.Fragment>,
     ];
 
     constructor(props: Props) {
