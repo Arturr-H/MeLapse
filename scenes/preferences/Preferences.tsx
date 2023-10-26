@@ -66,7 +66,7 @@ class Preferences extends React.Component<Props, State> {
             deletingImages: false,
             personalizedAds: false,
             transformCamera: true,
-            onionSkinOpacity: 0.1
+            onionSkinOpacity: 0.45
         };
 
         /* Bindings */
@@ -112,7 +112,7 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: false,
             saveSelfiesToCameraRoll: false,
             transformCamera: true,
-            onionSkinOpacity: 0.1
+            onionSkinOpacity: 0.45
         });
     }
 
