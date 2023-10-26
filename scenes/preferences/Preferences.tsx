@@ -18,6 +18,7 @@ import { MediaTypeOptions, launchImageLibraryAsync } from "expo-image-picker";
 import { env } from "../../env.pubilc";
 import { getBannerId, getRewardedId } from "../../LocalNotification";
 import * as Device from "expo-device";
+import SliderInput from "../../components/sliderInput/SliderInput";
 
 /* @ts-ignore */
 import { BANNER, REWARDED } from "@env";
@@ -47,7 +48,8 @@ export interface State {
     onionSkinVisible: boolean,
     deletingImages: boolean,
     personalizedAds: boolean,
-    transformCamera: boolean
+    transformCamera: boolean,
+    onionSkinOpacity: number
 }
 
 class Preferences extends React.Component<Props, State> {
@@ -63,7 +65,8 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: false,
             deletingImages: false,
             personalizedAds: false,
-            transformCamera: true
+            transformCamera: true,
+            onionSkinOpacity: 0.1
         };
 
         /* Bindings */
@@ -76,10 +79,14 @@ class Preferences extends React.Component<Props, State> {
     async componentDidMount(): Promise<void> {
         this.setState({
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
-            onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
             personalizedAds: await AppConfig.getPersonalizedAds(),
             transformCamera: await AppConfig.getTransformCamera(),
+            
+            onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
+            onionSkinOpacity: await OnionSkin.getOnionSkinOpacity()
         });
+
+        console.log(await OnionSkin.getOnionSkinOpacity());
     }
 
     /* Scene switches */
@@ -105,6 +112,7 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: false,
             saveSelfiesToCameraRoll: false,
             transformCamera: true,
+            onionSkinOpacity: 0.1
         });
     }
 
@@ -251,6 +259,15 @@ class Preferences extends React.Component<Props, State> {
                                         this.setState({ onionSkinVisible: idx == 0 ? true : false });
                                         OnionSkin.setOnionSkinVisibility(idx == 0 ? true : false);
                                     }}
+                                />
+
+                                <View><Text style={Styles.paragraph}>Onion skin opacity</Text></View>
+                                <SliderInput
+                                    onChange={(nr) => {
+                                        this.setState({ onionSkinOpacity: nr });
+                                        OnionSkin.setOnionSkinOpacity(nr);
+                                    }}
+                                    initial={this.state.onionSkinOpacity}
                                 />
                             </View>
 
