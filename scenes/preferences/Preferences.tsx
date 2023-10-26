@@ -261,7 +261,7 @@ class Preferences extends React.Component<Props, State> {
                                     }}
                                 />
 
-                                <View><Text style={Styles.paragraph}>Onion skin opacity</Text></View>
+                                <Text style={[Styles.paragraph, { marginTop: 10 }]}>Onion skin opacity</Text>
                                 <SliderInput
                                     onChange={(nr) => {
                                         this.setState({ onionSkinOpacity: nr });
