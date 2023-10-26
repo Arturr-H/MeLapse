@@ -4,7 +4,9 @@ import { LSImage, LSImageProp } from "../../../functional/Image";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* Interfaces */
-interface Props {}
+interface Props {
+    opacity: number
+}
 interface State {
     onionSkinOverlay: string | null,
     visible: boolean
@@ -50,6 +52,11 @@ export class OnionSkin extends React.PureComponent<Props, State> {
         await AsyncStorage.setItem("onionSkinImage", JSON.stringify(img));
     }
 
+    /** Sets the onion skin opacity (external call) */
+    static async setOnionSkinOpacity(opacity: number): Promise<void> {
+        await AsyncStorage.setItem("onionSkinOpacity", JSON.stringify(opacity));
+    }
+
     /* Getters */
     static async getOnionSkinImage(): Promise<LSImageProp | null> {
         try {
@@ -69,6 +76,15 @@ export class OnionSkin extends React.PureComponent<Props, State> {
             return false
         }
     }
+    static async getOnionSkinOpacity(): Promise<number> {
+        try {
+            return await JSON.parse(
+                await AsyncStorage.getItem("onionSkinOpacity") ?? "!"
+            )
+        }catch {
+            return 0.45
+        }
+    }
 
 	render() {
 		return (
@@ -78,7 +94,7 @@ export class OnionSkin extends React.PureComponent<Props, State> {
                     width: "100%",
                     height: "100%",
                     zIndex: 40,
-                    opacity: 0.45
+                    opacity: this.props.opacity
                 }}
                 source={{ uri: this.state.onionSkinOverlay ?? undefined }}
             />

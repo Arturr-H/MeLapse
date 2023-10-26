@@ -20,6 +20,7 @@ import CalibrationData from "../calibration/CalibrationData";
 import { CalibratedOverlay } from "./CalibratedOverlay";
 import { OnionSkin } from "./onionSkin/OnionSkin";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
+import { env } from "../../env.pubilc";
 
 /* Interfaces */
 interface Props {
@@ -62,6 +63,7 @@ interface State {
 
 	/** Onion skin image (URI) */
 	onionSkinOverlay: string | null,
+	onionSkinOpacity: number
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -104,6 +106,7 @@ class Camera extends React.PureComponent<Props, State> {
 			transformCamera: false,
 			anyFaceVisible: false,
 			onionSkinOverlay: null,
+			onionSkinOpacity: 0.45,
 			cameraActive: true,
 		};
 
@@ -118,7 +121,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 	/* Lifetime */
 	async componentDidMount(): Promise<void> {
-		if (await CalibrationData.getCalibration() === null) {
+		if (await CalibrationData.getCalibration() === null && !env.DEV_ENV) {
 			alert("Face calibration was not found.");
 			this.props.navigation.navigate("Calibration");
 		};
@@ -151,6 +154,7 @@ class Camera extends React.PureComponent<Props, State> {
 		/* Try get face calibration */
 		await this.setFaceMetadata();
 		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
+		OnionSkin.getOnionSkinOpacity().then(e => this.setState({ onionSkinOpacity: e }));
 		this.animateIntro();
 		this.setState({
 			cameraAllowed: status === PermissionStatus.GRANTED,
@@ -162,7 +166,7 @@ class Camera extends React.PureComponent<Props, State> {
 		});
 
 		/* Simulator throws error bc no camera */
-		try { this.camera.current?.resumePreview(); }
+		try { if (!env.DEV_ENV) this.camera.current?.resumePreview(); }
 		catch {}
 	}
 
@@ -215,7 +219,7 @@ class Camera extends React.PureComponent<Props, State> {
 		}
 
 		/* Freeze camera */
-		try { this.camera.current?.pausePreview(); }
+		try { if (!env.DEV_ENV) this.camera.current?.pausePreview(); }
 		catch {}
 
 		/* Haptic */
@@ -344,7 +348,7 @@ class Camera extends React.PureComponent<Props, State> {
 				<PictureManipulator ref={this.pictureManipulator} />
 
 				{/* Onion skin image */}
-				<OnionSkin ref={this.onionSkin} />
+				<OnionSkin opacity={this.state.onionSkinOpacity} ref={this.onionSkin} />
 
 				{/* Camera */}
 				{(this.state.cameraAllowed && this.state.cameraActive) && <ExpoCamera
