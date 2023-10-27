@@ -28,14 +28,27 @@ export class OnionSkin extends React.PureComponent<Props, State> {
         await this.updateOnionskin();
 	}
     async updateOnionskin(): Promise<void> {
+        console.log("UPDATEIGN ONIONSKIN");
         try {
-            const image = await OnionSkin.getOnionSkinImage();
-            if (!image) throw new Error();
             const visible = await OnionSkin.getOnionSkinVisibility();
-            const path = LSImage.fromLSImageProp(image).getPath();
+            let onionSkinOverlay: string;
+            const lsImgs = await LSImage.getImagePointers();
+            
+            if (await OnionSkin.getAlwaysUseLatestSelfie() === true && lsImgs) {
+                if (lsImgs)
+                    OnionSkin.setOnionSkinImage(lsImgs[lsImgs.length - 1]);
 
+                const path = LSImage.fromLSImageProp(lsImgs[lsImgs.length-1]).getPath();
+                onionSkinOverlay = path;
+            }else {
+
+                const image = await OnionSkin.getOnionSkinImage();
+                if (!image) throw new Error();
+                const path = LSImage.fromLSImageProp(image).getPath();
+                onionSkinOverlay = path;
+            }
             this.setState({ 
-                onionSkinOverlay: path,
+                onionSkinOverlay,
                 visible
             });
         }catch (e) {
@@ -50,6 +63,12 @@ export class OnionSkin extends React.PureComponent<Props, State> {
     /** Sets the onion skin image from the image pointers array (external call) */
     static async setOnionSkinImage(img: LSImageProp): Promise<void> {
         await AsyncStorage.setItem("onionSkinImage", JSON.stringify(img));
+    }
+    /** Set if should use latest selfie as onionskin image */
+    static async setAlwaysUseLatestSelfie(cond: boolean): Promise<void> {
+        const imgPtrs = await LSImage.getImagePointers();
+        if (imgPtrs) await this.setOnionSkinImage(imgPtrs[imgPtrs?.length]);
+        await AsyncStorage.setItem("onionSkinUseLatestSelfie", JSON.stringify(cond));
     }
 
     /** Sets the onion skin opacity (external call) */
@@ -83,6 +102,15 @@ export class OnionSkin extends React.PureComponent<Props, State> {
             )
         }catch {
             return 0.45
+        }
+    }
+    static async getAlwaysUseLatestSelfie(): Promise<boolean> {
+        try {
+            return await JSON.parse(
+                await AsyncStorage.getItem("onionSkinUseLatestSelfie") ?? "false"
+            )
+        }catch {
+            return false
         }
     }
 
