@@ -3,15 +3,14 @@ import { StatusBar } from "expo-status-bar";
 import React, { RefObject } from "react";
 import { ActivityIndicator, Dimensions, Easing, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
-import { useFocusEffect, useIsFocused, useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Animated } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { LSImageProp } from "../../functional/Image";
+import { LSImage, LSImageProp } from "../../functional/Image";
 import DenyStamp from "./DenyStamp";
 import { StreakOverlay } from "./StreakOverlay";
 import StreakHandler from "../../functional/Streak";
-
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
@@ -81,7 +80,6 @@ class Preview extends React.PureComponent<Props, State> {
 
     /* Lifetime */
     componentDidMount(): void {
-
         this.props.navigation.addListener("focus", this.focus);
         this.focus();
     }
@@ -99,6 +97,7 @@ class Preview extends React.PureComponent<Props, State> {
         this.deleteImage();
     }
     async onSave(): Promise<void> {
+        await LSImage.fromLSImageProp(this.props.lsimage).saveAsync();
         const sValue = await StreakHandler.tryIncrement();
         if (sValue) {
             this.setState({
