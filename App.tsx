@@ -23,6 +23,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Tutorial from "./scenes/tutorial/Tutorial";
 import Statistics from "./scenes/statistics/Statistics";
 import Welcome from "./scenes/setup/Welcome";
+import OnionSkin from "./scenes/preferences/onionSkin/OnionSkin";
 enableScreens();
 
 /* Notifications */
@@ -44,7 +45,7 @@ const Stack = createStackNavigator();
 
 const App = () => {
 	useLocalNotification();
-	const [initialRoute, setInitialRoute] = React.useState<"Camera" | "Welcome">("Welcome");
+	const [initialRoute, setInitialRoute] = React.useState<"Camera" | "Welcome" | null>(null);
 	
 	/* Config for scenes (avoiding repetition) */
 	let commonConfig = {
@@ -52,6 +53,14 @@ const App = () => {
 		animationEnabled: true,
 		cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter
 	};
+
+	/* Fonts */
+	const [fontsLoaded] = useFonts({
+		"inter-extrabold": require("./assets/fonts/Inter-ExtraBold.ttf"),
+		"inter-black": require("./assets/fonts/Inter-Black.ttf"),
+		"manrope-black": require("./assets/fonts/Manrope-ExtraBold.ttf"),
+		"manrope-light": require("./assets/fonts/Manrope-Light.ttf"),
+	});
 	
 	/* Component did mount hehe */
 	React.useEffect(() => {
@@ -66,15 +75,7 @@ const App = () => {
 		});
 	}, []);
 
-	/* Fonts */
-	const [fontsLoaded] = useFonts({
-		"inter-extrabold": require("./assets/fonts/Inter-ExtraBold.ttf"),
-		"inter-black": require("./assets/fonts/Inter-Black.ttf"),
-		"manrope-black": require("./assets/fonts/Manrope-ExtraBold.ttf"),
-		"manrope-light": require("./assets/fonts/Manrope-Light.ttf"),
-	});
-
-	if (!fontsLoaded) return <SplashScene />;
+	if (!fontsLoaded || initialRoute === null) return <SplashScene />;
 
 	/* Render */
 	return (
@@ -85,6 +86,7 @@ const App = () => {
 
 				{/* Preferences */}
 				<Stack.Screen options={commonConfig} name="Preferences" component={Preferences} />
+				<Stack.Screen options={commonConfig} name="OnionSkinPreferences" component={OnionSkin} />
 				<Stack.Screen options={commonConfig} name="Statistics" component={Statistics} />
 				<Stack.Screen options={commonConfig} name="Review" component={Review} />
 
