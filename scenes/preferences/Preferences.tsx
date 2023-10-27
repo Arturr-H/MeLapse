@@ -28,18 +28,18 @@ import { TestIds } from "react-native-google-mobile-ads";
 export interface Props {
     navigation: StackNavigationProp<{
         Camera: { comesFrom: "preferences" },
-        Debug: undefined,
         Composer: undefined,
         Review: undefined,
         Calibration: undefined,
         Tutorial: undefined,
         Statistics: undefined,
         ThankYou: undefined,
+        OnionSkinPreferences: undefined,
         PrivacyPolicy: { confirmLocation: "Preferences" },
         HowOften: { confirmLocation: "Preferences" | "Calibration" }
-    }, "Camera" | "Debug" | "Composer" | "Review"
+    }, "Camera" | "Composer" | "Review"
     | "Calibration" | "Tutorial" | "PrivacyPolicy"
-    | "Statistics" | "HowOften" | "ThankYou">,
+    | "Statistics" | "HowOften" | "ThankYou" | "OnionSkinPreferences">,
 }
 export interface State {
     switching: boolean,
@@ -85,8 +85,6 @@ class Preferences extends React.Component<Props, State> {
             onionSkinVisible: await OnionSkin.getOnionSkinVisibility(),
             onionSkinOpacity: await OnionSkin.getOnionSkinOpacity()
         });
-
-        console.log(await OnionSkin.getOnionSkinOpacity());
     }
 
     /* Scene switches */
@@ -98,6 +96,7 @@ class Preferences extends React.Component<Props, State> {
     statisticsScene    = () => this.props.navigation.navigate("Statistics");
     howOftenScene      = () => this.props.navigation.navigate("HowOften", { confirmLocation: "Preferences" });
     thankYouScene      = () => this.props.navigation.navigate("ThankYou");
+    onionSkinScene     = () => this.props.navigation.navigate("OnionSkinPreferences");
     privacyPolicyScene = () => {
         Linking.openURL("https://arturr-h.github.io/MeLapse-Pages/index.html");
     }
@@ -247,27 +246,14 @@ class Preferences extends React.Component<Props, State> {
                             {/* Onionskin */}
                             <View style={Styles.padded}>
                                 <Text style={Styles.header2}>🧅 Onion skin</Text>
-                                <View><Text style={Styles.paragraph}>
-                                    Display a thin layer above the camera view of a previous selfie, to help you align your face better.
-                                    To select onionskin selfie, go to review images {">"} ⚙️ {">"} Onionskin
-                                </Text></View>
-
-                                <SelectInput
-                                    buttons={["YES", "NO"]}
-                                    initial={this.state.onionSkinVisible ? 0 : 1}
-                                    onChange={(idx) => {
-                                        this.setState({ onionSkinVisible: idx == 0 ? true : false });
-                                        OnionSkin.setOnionSkinVisibility(idx == 0 ? true : false);
-                                    }}
-                                />
-
-                                <Text style={[Styles.paragraph, { marginTop: 10 }]}>Onion skin opacity</Text>
-                                <SliderInput
-                                    onChange={(nr) => {
-                                        this.setState({ onionSkinOpacity: nr });
-                                        OnionSkin.setOnionSkinOpacity(nr);
-                                    }}
-                                    initial={this.state.onionSkinOpacity}
+                                <Text style={Styles.paragraph}>
+                                    Display a thin layer of a past selfie ontop of
+                                    the camera scene to help you align your face better
+                                </Text>
+                                <Button
+                                    active
+                                    onPress={this.onionSkinScene}
+                                    text="Configure →"
                                 />
                             </View>
 
