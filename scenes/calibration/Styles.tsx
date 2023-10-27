@@ -1,5 +1,6 @@
 import { Dimensions, StyleSheet } from "react-native";
 import MenuBundle from "../../styleBundles/MenuBundle";
+import { Colors } from "../../styleBundles/Colors";
 
 /* Constants */
 const WIDTH = Dimensions.get("window").width;
@@ -97,7 +98,7 @@ export default StyleSheet.create({
         width: "100%",
         fontFamily: "manrope-light",
 
-        color: "#d0d0d0",
+        color: Colors.text.light,
         textAlign: "center",
 
         position: "absolute",

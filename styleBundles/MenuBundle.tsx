@@ -1,4 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
+import { Colors } from "./Colors";
 const WIDTH = Dimensions.get("window").width;
 
 export default StyleSheet.create({
@@ -40,7 +41,7 @@ export default StyleSheet.create({
     },
     paragraph: {
         fontSize: 16,
-        color: "#d0d0d0",
+        color: Colors.text.light, //"#d0d0d0",
         marginBottom: 5,
         fontFamily: "manrope-light",
 
@@ -57,7 +58,7 @@ export default StyleSheet.create({
     },
     italic: {
         fontStyle: "italic",
-        color: "#5c5c5c",
+        color: Colors.text.light,
     },
 
     row: {
