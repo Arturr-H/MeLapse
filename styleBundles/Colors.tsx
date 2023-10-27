@@ -7,5 +7,10 @@ export const Colors = {
     red: {
         default: "#ff2d55",
         darkened: "#eb194b",
+    },
+
+    text: {
+        dark: "#000",
+        light: "#aaa"
     }
 }
