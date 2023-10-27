@@ -29,7 +29,6 @@ export default class StreakHandler {
 
     /** Set streak (try to), returns `StreakValue` or null if nothing changed */
     static async tryIncrement(): Promise<StreakValue | null> {
-        this.clearPrevDate();
         const date = new Date();
         const prevDate: DateValue | null = await this.getPrevDate();
         const currentDate: DateValue = {
