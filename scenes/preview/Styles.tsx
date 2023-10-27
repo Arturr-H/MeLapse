@@ -50,7 +50,23 @@ export default StyleSheet.create({
 
         display: "flex",
         justifyContent: "center",
-        paddingHorizontal: "12%"
+        paddingHorizontal: "12%",
+    },
+    imageRow: {
+        width: "100%",
+        flex: 1,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+            paddingVertical: 40
+    },
+    image: {
+        width: "100%",
+        height: "100%",
+
+        objectFit: "contain",
     },
     acceptButton: {
         width: "100%",
@@ -231,13 +247,16 @@ export default StyleSheet.create({
         justifyContent: "center",
             alignItems: "center",
         position: "absolute",
+        zIndex: 2,
     },
     photoText: {
         fontFamily: "inter-extrabold",
-        fontSize: 60,
+        fontSize: 50,
         width: "100%",
         textAlign: "center",
-        position: "absolute"
+        position: "absolute",
+
+        backgroundColor: "#fff",
         // transform: [{ skewX: "10deg" }]
     },
 
@@ -261,10 +280,30 @@ export default StyleSheet.create({
         fontSize: 250,
 
         color: "#000",
-        opacity: 0.12,
+        // opacity: 0.42,
         // position: "absolute",
         transform: [{ skewX: "-10deg" }],
         // backgroundColor: "blue"
+    },
+    fireTextContainer: {
+        position: "absolute"
+    },
+    fireText: {
+        fontFamily: "inter-black",
+        fontSize: 240,
+    },
+    newStreakText: {
+        position: "absolute",
+        bottom: 50,
+
+        fontFamily: "manrope-black",
+        fontSize: 32,
+        color: "#ddd"
+    },
+    blurView: {
+        position: "absolute",
+        width: "100%",
+        height: "100%",
     },
     skewed: {
         transform: [{ skewX: "-10deg" }, { translateX: -50 }],
