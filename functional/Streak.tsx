@@ -29,6 +29,7 @@ export default class StreakHandler {
 
     /** Set streak (try to), returns `StreakValue` or null if nothing changed */
     static async tryIncrement(): Promise<StreakValue | null> {
+        this.clearPrevDate();
         const date = new Date();
         const prevDate: DateValue | null = await this.getPrevDate();
         const currentDate: DateValue = {
@@ -58,7 +59,7 @@ export default class StreakHandler {
         /* If its not been set */
         if (prevDate === null) {
             console.log("[DBG~Streak] Initializing streak");
-            return increase();
+            return reset();
         }
 
         /* If it has been set but it's the same day */
