@@ -5,35 +5,71 @@ import { Button } from "../../components/button/Button";
 import SelectInput from "../../components/selectInput/SelectInput";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
-import AppConfig from "../preferences/Config";
+import AppConfig from "../menu/Config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { allowsNotificationsAsync, clearAllScheduled } from "../../LocalNotification";
 import * as Notifications from "expo-notifications";
+import { TitleH3 } from "../../components/text/Title";
 
 /* Interfaces */
-export interface Props {
+interface Props {
     navigation: StackNavigationProp<{ Calibration: undefined, Preferences: undefined }, "Calibration" | "Preferences">,
-    confirmLocation: "Calibration" | "Preferences"
 }
-export interface State {
-    notisEnabled: boolean,
-    selectInputInitial: number
-}
+interface State {}
 
 export class HowOften extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
+    };
 
-        /* State */
+    async onConfirm(): Promise<void> {
+        await AsyncStorage.setItem("setupComplete", "true");
+        this.props.navigation.navigate("Calibration");
+    }
+
+    render() {
+        return (
+            <SafeAreaView style={Styles.container}>
+                <View style={Styles.column}>
+                    <View style={Styles.body}>
+                        <Text style={Styles.header}>Goal per day 🎯</Text>
+                        <Text style={Styles.paragraph}>
+                            How many notifications would you like to receive throughout the day? (For reminding you about taking selfies)
+                        </Text>
+
+                        <NotificationOptions />
+                    </View>
+
+                    {/* Confirm */}
+                    <View style={Styles.footer}>
+                        <Button active onPress={this.onConfirm} text="Confirm" />
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+}
+
+/** Notification Option Props */
+interface NOProps {}
+
+/** Notification Option State */
+interface NOState {
+    notisEnabled: boolean,
+    selectInputInitial: number
+}
+export class NotificationOptions extends React.PureComponent<NOProps, NOState> {
+    constructor(props: NOProps) {
+        super(props);
+
         this.state = {
             notisEnabled: true,
-            selectInputInitial: 1,
+            selectInputInitial: 1
         };
 
-        /* Bindings */
         this.tryEnableNotifications = this.tryEnableNotifications.bind(this);
-        this.onConfirm = this.onConfirm.bind(this);
-    };
+        this.onChange = this.onChange.bind(this);
+    }
 
     /* Lifetime */
     async componentDidMount(): Promise<void> {
@@ -45,17 +81,7 @@ export class HowOften extends React.PureComponent<Props, State> {
         });
     };
 
-    async onConfirm(): Promise<void> {
-        await AsyncStorage.setItem("setupComplete", "true");
-        const location = this.props.confirmLocation;
-
-        if (location === "Calibration" || location === "Preferences") {
-            this.props.navigation.navigate(location);
-        }else {
-            this.props.navigation.navigate("Calibration");
-        }
-    }
-
+    /** Yeah */
     async tryEnableNotifications(): Promise<void> {
         const result = await Notifications.requestPermissionsAsync();
         if (!result.granted) {
@@ -66,6 +92,7 @@ export class HowOften extends React.PureComponent<Props, State> {
         }
     }
 
+    /** Schedule new notifications */
     async onChange(nr: number): Promise<void> {
         clearAllScheduled().then(async () => {
             await AppConfig.setTargetTimesPerDay(nr);
@@ -116,44 +143,24 @@ export class HowOften extends React.PureComponent<Props, State> {
         })
     }
 
-    render() {
-        return (
-            <SafeAreaView style={Styles.container}>
-                <View style={Styles.column}>
-                    <View style={Styles.body}>
-                        <Text style={Styles.header}>Goal per day 🎯</Text>
-                        <Text style={Styles.paragraph}>
-                            How many notifications would you like to receive throughout the day? (For reminding you about taking selfies)
-                        </Text>
+    render(): React.ReactNode {
+        return <View style={Styles.gap}>
+            {/* Name */}
+            <SelectInput
+                initial={this.state.selectInputInitial}
+                buttons={["0", "1", "2", "3"]}
+                onChange={this.onChange}
+            />
 
-                        <View style={Styles.gap}>
-
-                            {/* Name */}
-                            <SelectInput
-                                initial={this.state.selectInputInitial}
-                                buttons={["0", "1", "2", "3"]}
-                                onChange={this.onChange}
-                            />
-
-                            {!this.state.notisEnabled && <View>
-                                <Text style={Styles.paragraph}>Recommended but not obligatory</Text>
-                                <Button
-                                    onPress={this.tryEnableNotifications}
-                                    text="Enable notifications"
-                                    active
-                                />
-                            </View>
-                            }
-                        </View>
-                    </View>
-
-                    {/* Confirm */}
-                    <View style={Styles.footer}>
-                        <Button active onPress={this.onConfirm} text="Confirm" />
-                    </View>
-                </View>
-            </SafeAreaView>
-        );
+            {!this.state.notisEnabled && <View>
+                <TitleH3 title="Enable notifications" info="Recommended but not obligatory - give MeLapse permission to send out notifications to you throughout the day. Can be turned off at any time." />
+                <Button
+                    onPress={this.tryEnableNotifications}
+                    text="Enable"
+                    active
+                />
+            </View>}
+        </View>
     }
 }
 
