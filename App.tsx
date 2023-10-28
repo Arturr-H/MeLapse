@@ -12,7 +12,6 @@ import Preview from "./scenes/preview/Preview";
 
 import { enableScreens } from "react-native-screens";
 import HowOften from "./scenes/setup/HowOften";
-import Preferences from "./scenes/preferences/Preferences";
 import Calibration from "./scenes/calibration/Calibration";
 import Composer from "./scenes/composer/Composer";
 import LoadingScreen from "./scenes/compileFootage/LoadingScreen";
@@ -23,13 +22,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Tutorial from "./scenes/tutorial/Tutorial";
 import Statistics from "./scenes/statistics/Statistics";
 import Welcome from "./scenes/setup/Welcome";
-import OnionSkin from "./scenes/preferences/onionSkin/OnionSkin";
+import ThankYou from "./scenes/thankYou/ThankYou";
+import Menu from "./scenes/menu/Menu";
+import CameraPreferences from "./scenes/menu/preferences/camera/CameraPreferences";
+import GeneralPreferences from "./scenes/menu/preferences/general/GeneralPreferences";
+import Help from "./scenes/menu/help/Help";
 enableScreens();
 
 /* Notifications */
 import * as Notifications from "expo-notifications";
 import { useLocalNotification } from "./LocalNotification";
-import ThankYou from "./scenes/thankYou/ThankYou";
 Notifications.setNotificationHandler({
 	handleNotification: async () => ({
 		shouldShowAlert: true,
@@ -85,8 +87,10 @@ const App = () => {
 				<Stack.Screen options={commonConfig} name="Preview" component={Preview} />
 
 				{/* Preferences */}
-				<Stack.Screen options={commonConfig} name="Preferences" component={Preferences} />
-				<Stack.Screen options={commonConfig} name="OnionSkinPreferences" component={OnionSkin} />
+				<Stack.Screen options={commonConfig} name="Menu" component={Menu} />
+				<Stack.Screen options={commonConfig} name="Help" component={Help} />
+				<Stack.Screen options={commonConfig} name="CameraPreferences" component={CameraPreferences} />
+				<Stack.Screen options={commonConfig} name="GeneralPreferences" component={GeneralPreferences} />
 				<Stack.Screen options={commonConfig} name="Statistics" component={Statistics} />
 				<Stack.Screen options={commonConfig} name="Review" component={Review} />
 
