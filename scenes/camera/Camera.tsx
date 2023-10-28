@@ -63,7 +63,10 @@ interface State {
 
 	/** Onion skin image (URI) */
 	onionSkinOverlay: string | null,
-	onionSkinOpacity: number
+	onionSkinOpacity: number,
+
+	/** Which camera direction to use */
+	cameraDirection: CameraType
 }
 
 class Camera extends React.PureComponent<Props, State> {
@@ -108,6 +111,8 @@ class Camera extends React.PureComponent<Props, State> {
 			onionSkinOverlay: null,
 			onionSkinOpacity: 0.45,
 			cameraActive: true,
+
+			cameraDirection: CameraType.front
 		};
 
 		/* Bindings */
@@ -153,8 +158,14 @@ class Camera extends React.PureComponent<Props, State> {
 
 		/* Try get face calibration */
 		await this.setFaceMetadata();
-		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
 		OnionSkin.getOnionSkinOpacity().then(e => this.setState({ onionSkinOpacity: e }));
+		AppConfig.getTransformCamera().then(e => this.setState({ transformCamera: e }));
+		AppConfig.getCameraDirectionFront().then(isFront =>
+			this.setState({ cameraDirection: isFront
+				? CameraType.front
+				: CameraType.back
+			})
+		);
 		this.animateIntro();
 		this.setState({
 			cameraAllowed: status === PermissionStatus.GRANTED,
@@ -354,7 +365,7 @@ class Camera extends React.PureComponent<Props, State> {
 				{(this.state.cameraAllowed && this.state.cameraActive) && <ExpoCamera
 					ref={this.camera}
 					style={[Styles.container, this.state.transformCamera ? { transform: this.state.transform } : { transform: [] }]}
-					type={CameraType.front}
+					type={this.state.cameraDirection}
 					flashMode={this.state.flashlightOn ? FlashMode.on : FlashMode.off}
 					faceDetectorSettings={{
 						mode: FaceDetector.FaceDetectorMode.fast,
@@ -379,7 +390,6 @@ class Camera extends React.PureComponent<Props, State> {
 
 				{/* UI components */}
 				<SafeAreaView style={Styles.uiLayer}>
-					{/* Button to open preferences */}
 					<MenuButton
 						active={!(this.state.loadingImage || this.state.animating)}
 						ref={this.menuButton}
@@ -390,16 +400,7 @@ class Camera extends React.PureComponent<Props, State> {
 
 					{/* Bottom UI components */}
 					<View style={Styles.bottomBar}>
-						<View style={Styles.bottomBarTile}>
-							{/* Helps user know how to rotate face */}
-							{/* <TiltOverlay
-								calibration={this.calibration}
-								sensitivity={10}
-								facialFeatures={this.state.facialFeatures}
-								anyFaceVisible={this.state.anyFaceVisible}
-							/> */}
-
-						</View>
+						<View style={Styles.bottomBarTile}></View>
 
 						{/* Middle - Shutter Button */}
 						<View style={[Styles.bottomBarTile, { zIndex: 4 }]}>

@@ -67,7 +67,7 @@ export class OnionSkin extends React.PureComponent<Props, State> {
     /** Set if should use latest selfie as onionskin image */
     static async setAlwaysUseLatestSelfie(cond: boolean): Promise<void> {
         const imgPtrs = await LSImage.getImagePointers();
-        if (imgPtrs) await this.setOnionSkinImage(imgPtrs[imgPtrs?.length]);
+        if (imgPtrs) await this.setOnionSkinImage(imgPtrs[imgPtrs.length - 1]);
         await AsyncStorage.setItem("onionSkinUseLatestSelfie", JSON.stringify(cond));
     }
 
