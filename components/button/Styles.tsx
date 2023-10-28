@@ -23,5 +23,14 @@ export default StyleSheet.create({
         fontFamily: "manrope-black",
 
         textTransform: "uppercase",
+    },
+
+    emoji: {
+        position: "absolute",
+        left: 0,
+        fontSize: 30,
+
+        transform: [{ translateX: 6 }],
+        opacity: 0.4
     }
 })

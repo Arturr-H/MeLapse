@@ -38,7 +38,11 @@ interface Props {
     height?: number,
 
     /** Add styles */
-    style?: StyleProp<ViewStyle>
+    style?: StyleProp<ViewStyle>,
+
+    /** Emoji at the left side of the button */
+    emoji?: string,
+    emojiSize?: number,
 }
 interface State {
     loading?: boolean,
@@ -134,21 +138,34 @@ export class Button extends React.PureComponent<Props, State> {
                         }
                     }}
                 >
-                    {
-                        this.state.loading === true
+                    <React.Fragment>
+                        {
+                            this.state.loading === true
 
-                        /* Loading */
-                        ? <ActivityIndicator color={"white"} />
+                            /* Loading */
+                            ? <ActivityIndicator color={"white"} />
 
-                        /* Children */
-                        : this.props.children ? <>{this.props.children}</>
+                            /* Children */
+                            : this.props.children ? <>{this.props.children}</>
 
-                        /* Text */
-                        : <Text style={[
-                            Styles.buttonText,
-                            this.props.small && { fontSize: 16 }
-                        ]}>{this.props.text}</Text>
-                    }
+                            /* Text */
+                            : <Text style={[
+                                Styles.buttonText,
+                                this.props.small && { fontSize: 16 }
+                            ]}>{this.props.text}</Text>
+                        }
+
+                        {this.props.emoji && <Text
+                            style={[
+                                Styles.emoji,
+                                this.props.emojiSize ? {
+                                    fontSize: this.props.emojiSize,
+                                    transform: [{ translateX: -this.props.emojiSize / 3 }]
+                                } : {}
+                            ]}
+                            children={this.props.emoji}
+                        />}
+                    </React.Fragment>
                 </TouchableHighlight>
             </Animated.View>
         );
