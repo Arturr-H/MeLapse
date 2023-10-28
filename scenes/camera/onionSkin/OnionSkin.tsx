@@ -107,10 +107,10 @@ export class OnionSkin extends React.PureComponent<Props, State> {
     static async getAlwaysUseLatestSelfie(): Promise<boolean> {
         try {
             return await JSON.parse(
-                await AsyncStorage.getItem("onionSkinUseLatestSelfie") ?? "false"
+                await AsyncStorage.getItem("onionSkinUseLatestSelfie") ?? "true"
             )
         }catch {
-            return false
+            return true
         }
     }
 
