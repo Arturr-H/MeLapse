@@ -9,11 +9,7 @@ const WIDTH = Dimensions.get("window").width;
 
 /* Interfaces */
 interface Props {
-	navigation: StackNavigationProp<{
-		Preview: { lsimage: any },
-		Preferences: undefined,
-		Calibration: undefined
-	}, "Preview" | "Preferences" | "Calibration">,
+	navigation: any,
 	active: boolean,
 
 	onAnimating: (is: boolean) => void,
@@ -46,10 +42,8 @@ export class MenuButton extends React.PureComponent<Props, State> {
 			rotate: new Animated.Value(0),
 		};
 
-		/* Refs */
-
 		/* Bindings */
-		this.openPreferencesScene = this.openPreferencesScene.bind(this);
+		this.openMenuScene = this.openMenuScene.bind(this);
 		this.instanSetBack = this.instanSetBack.bind(this);
 		this.fadeInButton = this.fadeInButton.bind(this);
 		this.animateBack = this.animateBack.bind(this);
@@ -131,7 +125,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 				
 			]).start(() => {
 				this.props.beforeNavigate && this.props.beforeNavigate();
-				this.openPreferencesScene();
+				this.openMenuScene();
 			});
 		}
 	}
@@ -142,8 +136,8 @@ export class MenuButton extends React.PureComponent<Props, State> {
 	}
 
 	/* Switch scene after anim */
-	openPreferencesScene(): void {
-		this.props.navigation.navigate("Preferences");
+	openMenuScene(): void {
+		this.props.navigation.navigate("Menu");
 	}
 
 	render() {
