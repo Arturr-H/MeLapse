@@ -24,7 +24,7 @@ const SWITCH_SPEED = 60;
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<{ Preferences: undefined }, "Preferences">,
+    navigation: any,
 }
 export interface State {
     /** If loading lsimage pointers */
@@ -150,7 +150,7 @@ class Review extends React.PureComponent<Props, State> {
 
     /** Probably to preferences */
     goBack(): void {
-        this.props.navigation.navigate("Preferences");
+        this.props.navigation.navigate("Menu");
     }
 
     /** Try delete image */
@@ -230,7 +230,7 @@ class Review extends React.PureComponent<Props, State> {
                     <TimewarpButton direction="forwards" callback={this.nextImage} onTouchEnd={this.onTouchEnd} onTouchStart={this.onTouchStart} />
                 </View>
                 <View style={{ width: "100%", flex: 1, paddingHorizontal: 20 }}>
-                    <Button text="← Back" active flex onPress={this.goBack} />
+                    <Button text="Back" active flex onPress={this.goBack} />
                 </View>
                 {/* Loading for delete image */}
                 {this.state.deleting && <ProgressView />}

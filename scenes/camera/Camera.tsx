@@ -13,7 +13,7 @@ import { FaceData, getFaceFeatures, getTransforms } from "../../functional/FaceD
 import { PictureManipulator } from "./PictureManipulator";
 import { ProgressView } from "../../components/progressView/ProgressView";
 import { MenuButton } from "./MenuButton";
-import AppConfig from "../preferences/Config";
+import AppConfig from "../menu/Config";
 import { ShutterButton } from "./ShutterButton";
 import FlashLightButton from "./FlashLightButton";
 import CalibrationData from "../calibration/CalibrationData";
