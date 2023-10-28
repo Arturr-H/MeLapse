@@ -86,13 +86,15 @@ export default class FlashLightButton extends React.PureComponent<Props, State> 
 
 				const val = clampedDy / -160;
 
-				if (val !== 0) 
+				if (val !== 0) {
 					this.setState({ active: true });
-				else 
+					if (this.brightnessPermission) await Brightness.setBrightnessAsync(0);
+				}else {
 					this.setState({ active: false });
+					if (this.brightnessPermission) await Brightness.setBrightnessAsync(1);
+				}
 
 				this.props.onChange(val);
-				if (this.brightnessPermission) await Brightness.setBrightnessAsync(1);
 				this.changeState("static");
             },
         });
