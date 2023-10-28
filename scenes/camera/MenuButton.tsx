@@ -1,5 +1,5 @@
 import React from "react";
-import { Animated, Dimensions, Easing, TouchableOpacity } from "react-native";
+import { Animated, Dimensions, Easing, TouchableOpacity, View } from "react-native";
 import Styles from "./Styles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Haptics from "expo-haptics";
@@ -16,6 +16,7 @@ interface Props {
 	beforeNavigate?: () => void
 }
 interface State {
+	menuButtonIconScale: Animated.Value,
 	size: Animated.Value,
 	opacity: Animated.Value,
 	rotate: Animated.Value,
@@ -28,6 +29,7 @@ const HEIGHT = Dimensions.get("window").height;
 const DURATION = 800;
 const DEFAULT_ = { easing: Easing.inOut(Easing.exp), useNativeDriver: true };
 const BTN_FINAL_HEIGHT = (HEIGHT/Styles.menuButton.height) * 2.5;
+const MENU_BUTTON_OPACITY = 0.5;
 
 export class MenuButton extends React.PureComponent<Props, State> {
 	constructor(props: Props) {
@@ -35,6 +37,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 		/* State */
 		this.state = {
+			menuButtonIconScale: new Animated.Value(1),
 			size: new Animated.Value(BTN_FINAL_HEIGHT),
 			opacity: new Animated.Value(0),
 			x: new Animated.Value(0),
@@ -53,7 +56,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 
 	async componentDidMount(): Promise<void> {
 		this.isAnimating(false);
-		Animated.timing(this.state.opacity, { duration: 750, toValue: 1, useNativeDriver: false }).start();
+		Animated.timing(this.state.opacity, { duration: 750, toValue: MENU_BUTTON_OPACITY, useNativeDriver: false }).start();
 	}
 
 	/** Scale down if going back from preferences scene */
@@ -64,8 +67,9 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		};
 		Animated.parallel([
 			Animated.timing(this.state.size, { ...OPT, toValue: 1 }),
-			Animated.timing(this.state.opacity, { ...OPT, toValue: 1 }),
-			Animated.timing(this.state.rotate, { ...OPT, toValue: 0 })
+			Animated.timing(this.state.opacity, { ...OPT, toValue: MENU_BUTTON_OPACITY }),
+			Animated.timing(this.state.rotate, { ...OPT, toValue: 0 }),
+			Animated.timing(this.state.menuButtonIconScale, { ...OPT, toValue: 1 })
 		]).start(() => 
 			this.isAnimating(false)
 		);
@@ -78,6 +82,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 			size: new Animated.Value(1),
 			rotate: new Animated.Value(0),
 			x: new Animated.Value(0),
+			menuButtonIconScale: new Animated.Value(1)
 		});
 	}
 
@@ -86,7 +91,7 @@ export class MenuButton extends React.PureComponent<Props, State> {
 		Animated.timing(this.state.opacity, {
 			...DEFAULT_,
 			duration: DURATION,
-			toValue: 1
+			toValue: MENU_BUTTON_OPACITY
 		}).start();
 	}
 
@@ -119,6 +124,11 @@ export class MenuButton extends React.PureComponent<Props, State> {
 				}),
 				Animated.timing(this.state.rotate, {
 					toValue: 180,
+					duration: DURATION,
+					...DEFAULT_
+				}),
+				Animated.timing(this.state.menuButtonIconScale, {
+					toValue: 0,
 					duration: DURATION,
 					...DEFAULT_
 				}),
@@ -159,10 +169,16 @@ export class MenuButton extends React.PureComponent<Props, State> {
 					style={[transform, Styles.innerMenuButton]}
 					onPress={this.onPress}
 				/>
-				<Animated.Text
-					children={"⚙️"}
-					style={[Styles.menuButtonIcon, { opacity, transform: [{ rotate }] }]}
-				/>
+				<View pointerEvents="none" style={Styles.menuButtonIconWrapper}><Animated.Image
+					source={require("../../assets/images/icons/menu.png")}
+					style={[
+						Styles.menuButtonIcon,
+						{
+							opacity,
+							transform: [{ rotate }, { scale: this.state.menuButtonIconScale }]
+						}
+					]}
+				/></View>
 			</Animated.View>
 		);
 	}

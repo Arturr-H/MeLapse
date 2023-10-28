@@ -106,11 +106,18 @@ export default StyleSheet.create({
         position: "absolute",
         borderRadius: 40
     },
+    menuButtonIconWrapper: {
+        width: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+    },
     menuButtonIcon: {
-        pointerEvents: "none",
-        color: "#fff",
-        fontSize: 30,
-        fontFamily: "inter-black",
+        width: "70%",
+        objectFit: "contain",
+        opacity: 0.3
+        // pointerEvents: "none",
     },
 
     flashRingLightContainer: {
