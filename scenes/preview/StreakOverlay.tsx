@@ -44,8 +44,8 @@ export class StreakOverlay extends React.PureComponent<Props, State> {
         Animated.timing(this.state.pos, {
             useNativeDriver: true,
             toValue: { x: 50, y: -250 },
-            duration: 500,
-            delay: 800,
+            duration: 600,
+            delay: 1000,
             easing: Easing.inOut(Easing.exp),
         }).start(() => {
             setTimeout(() => {
@@ -71,7 +71,7 @@ export class StreakOverlay extends React.PureComponent<Props, State> {
                 {/* Fire emoji background */}
                 <View style={Styles.fireTextContainer}>
                     <Text style={[Styles.fireText, fontSize]}>🔥</Text>
-                    <BlurView style={Styles.blurView} intensity={10} />
+                    <BlurView style={Styles.blurView} intensity={2} />
                 </View>
 
                 {/* Number increase */}
