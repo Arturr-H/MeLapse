@@ -3,7 +3,7 @@ import * as MediaLibrary from "expo-media-library";
 import RNFS from "react-native-fs";
 import { formatDate } from "./Date";
 import * as fs from "react-native-fs";
-import AppConfig from "../scenes/preferences/Config";
+import AppConfig from "../scenes/menu/Config";
 
 /// We use .jpg because when we flip the image
 /// using `expo-image-manipulator` we save it
