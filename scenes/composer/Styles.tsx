@@ -7,7 +7,7 @@ export default StyleSheet.create({
     
     durationViewer: {
         width: "100%",
-        height: 200,
+        height: 140,
         backgroundColor: "#eee",
         borderRadius: 10,
 

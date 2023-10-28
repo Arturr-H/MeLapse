@@ -16,12 +16,14 @@ import { QUALITY_OPTION_BITRATE } from "../../functional/VideoCreator";
 import * as Ads from "../../components/advertising/Ad";
 import { ModalConstructor } from "../../components/modal/ModalConstructor";
 import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
-import AppConfig from "../preferences/Config";
+import AppConfig from "../menu/Config";
 
 /* @ts-ignore */
 import { REWARDED } from "@env"
 import { env } from "../../env.pubilc";
 import { getRewardedId } from "../../LocalNotification";
+import MenuTemplate from "../../styleBundles/template/MenuTemplate";
+import { TitleH3 } from "../../components/text/Title";
 
 /* Interfaces */
 interface Props {
@@ -214,125 +216,98 @@ class Composer extends React.Component<Props, State> {
 	render() {
 		return (
             <React.Fragment>
-            <ModalConstructor ref={this.modalConstructor} />
-			<SafeAreaView style={[Styles.container]}>
+                <ModalConstructor ref={this.modalConstructor} />
+                <MenuTemplate title="Composer 🎨" backButtonPress={"Menu"}>
 
-                <KeyboardAvoidingView behavior="padding" style={Styles.keyboardAvoidingView}>
-                <View style={{ width: "100%", flex: 1 }}>
-                    <ScrollGradient />
-                    <ScrollView showsVerticalScrollIndicator={false}>
-
-                    <View style={Styles.containerInner}>
-                        <Text style={[Styles.header, Styles.padded]}>Composer 🎨</Text>
-
-                        {/* Generate video */}
-                        <View style={[Styles.row, Styles.padded]}>
-                            <View style={Styles.tile}>
-                            
-                                <Button
-                                    onPress={this.loadingScreen}
-                                    active={true}
-                                    flex
-                                    height={120}
-                                >
-                                    <Text style={Styles.framerateSelectionText}>📀</Text>
-                                    <Text style={Styles.paragraphWhite}>Render →</Text>
-                                </Button>
-                            </View>
+                    {/* Generate video */}
+                    <View style={[Styles.row, Styles.padded]}>
+                        <View style={Styles.tile}>
+                        
+                            <Button
+                                onPress={this.loadingScreen}
+                                active={true}
+                                flex
+                                height={120}
+                            >
+                                <Text style={Styles.framerateSelectionText}>📀</Text>
+                                <Text style={Styles.paragraphWhite}>Render →</Text>
+                            </Button>
                         </View>
+                    </View>
 
-                        <Ads.Banner allocatedHeight={140} />
+                    <Ads.Banner allocatedHeight={140} />
 
-                        <View style={[Styles.hr, Styles.hrPadded]} />
+                    <View style={[Styles.hr, Styles.hrPadded]} />
 
-                        {/* Framerate viewer */}
-                        <View style={[Styles.row, Styles.padded]}>
-                            <View style={Styles.tile}>
-                                <Text style={Styles.header2}>🎞️ Framerate</Text>
-                                <Text style={Styles.paragraph}>Footage frame rate (frames per second)</Text>
+                    {/* Framerate viewer */}
+                    <Text style={[Styles.header2, Styles.padded]}>🔧 Output settings</Text>
+                    <View style={[Styles.row, Styles.padded]}>
+                        <View style={Styles.tile}>
+                            <TitleH3 title="Framerate" info="Footage frame rate (frames per second). Can be overwritten to a more specific value in the advanced composer section." />
+                            <FramerateScroller 
+                                framerates={this.framerates}
+                                initial={this.state.config.framerate}
+                                onSelect={this.onChangeFramerate}
+                                overwritten={this.state.framerateIsOverwritten[0]}
+                            />
+                        </View>
+                        <View style={Styles.tile}>
+                            <View style={Styles.durationViewer}>
+                                <View style={[Styles.durationViewerInner, Styles.durationViewerInnerCentered]}>
 
-                                <FramerateScroller 
-                                    framerates={this.framerates}
-                                    initial={this.state.config.framerate}
-                                    onSelect={this.onChangeFramerate}
-                                    overwritten={this.state.framerateIsOverwritten[0]}
-                                />
-                            </View>
-                            <View style={Styles.tile}>
-                                <View style={Styles.durationViewer}>
-                                    <View style={[Styles.durationViewerInner, Styles.durationViewerInnerCentered]}>
-
-                                        {/* If framerate is overwritten */}
-                                        {this.state.framerateIsOverwritten[0]
-                                            ? <>
-                                                <Text style={Styles.durationText}>{this.state.framerateIsOverwritten[1]}</Text>
-                                                <Text style={Styles.paragraphWhite}>FPS</Text>
-                                            </>
-                                            : <>
-                                                <Text style={Styles.durationText}>{this.state.duration}s</Text>
-                                                <Text style={Styles.paragraphWhite}>Your footage will be {this.state.duration}s long with {this.framerates[this.state.config.framerate]} fps.</Text>
-                                            </>
-                                        }
-                                    </View>
+                                    {/* If framerate is overwritten */}
+                                    {this.state.framerateIsOverwritten[0]
+                                        ? <>
+                                            <Text style={Styles.durationText}>{this.state.framerateIsOverwritten[1]}</Text>
+                                            <Text style={Styles.paragraphWhite}>FPS</Text>
+                                        </>
+                                        : <>
+                                            <Text style={Styles.durationText}>{this.state.duration}s</Text>
+                                            <Text style={Styles.paragraphWhite}>Duration of your footage</Text>
+                                        </>
+                                    }
                                 </View>
                             </View>
                         </View>
-
-                        <View style={[Styles.hr, Styles.hrPadded]} />
-
-                        {/* Output type (?) */}
-                        <View style={Styles.padded}>
-                            <Text style={Styles.header2}>🔧 Output settings</Text>
-                            <Text style={Styles.paragraph}>Change the output format of your rendered footage (Default is MP4)</Text>
-                            <SelectInput
-                                initial={this.state.config.format}
-                                onChange={ComposerConfig.setFormat}
-                                buttons={["GIF", "MP4"]}
-                            />
-                        </View>
-
-                        {/* Quality */}
-                        <View style={Styles.padded}>
-                            <Text style={Styles.paragraph}>Change the quality of the rendered footage. Higher quality footage requires more storage but looks better</Text>
-                            <SelectInput
-                                initial={this.state.config.quality}
-                                buttons={[
-                                    { main: "LOW", lower: `${QUALITY_OPTION_BITRATE["LOW"]} MB/s` },
-                                    { main: "MID", lower: `${QUALITY_OPTION_BITRATE["MID"]} MB/s` },
-                                    { main: "HIGH", lower: `${QUALITY_OPTION_BITRATE["HIGH"]} MB/s` },
-                                ]}
-                                onChange={ComposerConfig.setQuality}
-                            />
-                        </View>
-
-                        <View style={[Styles.hr, Styles.hrPadded]} />
-
-                        {/* Open advanced configuration */}
-                        <View style={Styles.padded}>
-                            <Text style={Styles.header2}>🚧 Advanced</Text>
-                            <Text style={Styles.paragraph}>Open advanced configuration for tweaking the rendering process. Not recommended as it can break the rendering process if you're not careful.</Text>
-                            <Button
-                                color={"blue"}
-                                active
-                                onPress={this.openAdvancedSettings}
-                                text="Advanced settings →"
-                            />
-                        </View>
                     </View>
-                    </ScrollView>
-                </View>
+                    <View style={[Styles.hr, Styles.hrPadded]} />
 
-                {/* Confirm */}
-                <View style={[Styles.padded, { transform: [{ translateY: -12 }] }]}>
-                    <Button
-                        onPress={this.goBack}
-                        active={true}
-                        color="blue"
-                        text="← Back"
-                    />
-                </View>
-                </KeyboardAvoidingView>
-			</SafeAreaView>
+                    {/* Output type (?) */}
+                    <View style={Styles.padded}>
+                        <TitleH3 title="Format" info="Change the output format of your rendered footage (Default and recommended is MP4)." />
+                        <SelectInput
+                            initial={this.state.config.format}
+                            onChange={ComposerConfig.setFormat}
+                            buttons={["GIF", "MP4"]}
+                        />
+                    </View>
+
+                    {/* Quality */}
+                    <View style={Styles.padded}>
+                        <TitleH3 title="Quality" info="Change the quality of the rendered footage. Higher quality footage requires more storage but looks better." />
+                        <SelectInput
+                            initial={this.state.config.quality}
+                            buttons={[
+                                { main: "LOW", lower: `${QUALITY_OPTION_BITRATE["LOW"]} MB/s` },
+                                { main: "MID", lower: `${QUALITY_OPTION_BITRATE["MID"]} MB/s` },
+                                { main: "HIGH", lower: `${QUALITY_OPTION_BITRATE["HIGH"]} MB/s` },
+                            ]}
+                            onChange={ComposerConfig.setQuality}
+                        />
+                    </View>
+
+
+                    {/* Open advanced configuration */}
+                    <View style={Styles.padded}>
+                        <TitleH3 title="Advanced" info="Open the advanced composer preferences page. Not recommended unless you really know what your'e doing - some incorrect values might break your footage." />
+                        <Button
+                            color={"blue"}
+                            active
+                            onPress={this.openAdvancedSettings}
+                            text="Advanced settings →"
+                        />
+                    </View>
+                </MenuTemplate>
             </React.Fragment>
 		);
 	}

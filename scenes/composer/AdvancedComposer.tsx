@@ -1,13 +1,14 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { KeyboardAvoidingView, SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
 import Config from "./Config";
-import ScrollGradient from "../../components/scrollGradient/ScrollGradient";
+import MenuTemplate from "../../styleBundles/template/MenuTemplate";
+import { TitleH2, TitleH3 } from "../../components/text/Title";
 
 /* Interfaces */
 export interface Props {
@@ -112,80 +113,56 @@ class AdvancesComposer extends React.Component<Props, State> {
 
 	render() {
 		return (
-			<SafeAreaView style={Styles.container}>
-                <KeyboardAvoidingView style={Styles.keyboardAvoidingView} behavior="padding">
-                    <View style={{ width: "100%", flex: 1 }}>
-                        <ScrollGradient />
-                        <ScrollView contentContainerStyle={Styles.containerInner} showsVerticalScrollIndicator={false}>
-                            <View style={Styles.padded}><Text style={Styles.header}>🚧 Advanced</Text></View>
+            <MenuTemplate backButtonPress={"Composer"} title="🚧 Advanced">
 
-                            {/* Override bitrate */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.header2}>🎛️ Override bitrate</Text>
-                                <View><Text style={Styles.paragraph}>How many (maximum) bits per second to override default bitrate (which is controlled via quality in preferences)</Text></View>
+                {/* Override bitrate */}
+                <View style={Styles.padded}>
+                    <TitleH2 title="Overwrites" />
+                    <TitleH3 title="Bitrate" info="How many (maximum) bits per second to override default bitrate (which is controlled via quality in composer)" />
 
-                                <TextInput
-                                    placeholder="Bitrate (M)"
-                                    active
-                                    keyboardType="decimal-pad"
-                                    maxChars={32}
-                                    ref={this.overrideBitrateInput}
-                                    initial={this.state.bitrate?.toString()}
-                                    onChangeText={this.onChangeBitrate}
-                                />
-                            </View>
+                    <TextInput
+                        placeholder="Bitrate (M)"
+                        active
+                        keyboardType="decimal-pad"
+                        maxChars={32}
+                        ref={this.overrideBitrateInput}
+                        initial={this.state.bitrate?.toString()}
+                        onChangeText={this.onChangeBitrate}
+                    />
+                </View>
 
-                            {/* Override bitrate */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.header2}>📐 Override output size</Text>
-                                <View><Text style={Styles.paragraph}>Change width of image (height will scale proportionally keeping aspect ratio)</Text></View>
+                {/* Override bitrate */}
+                <View style={Styles.padded}>
+                    <TitleH3 title="Output size" info="Change width of image (height will scale proportionally keeping aspect ratio)" />
 
-                                <TextInput
-                                    placeholder="Width (px)"
-                                    active
-                                    flex
-                                    keyboardType="number-pad"
-                                    maxChars={4}
-                                    ref={this.widthOverride}
-                                    initial={this.state.widthOverride?.toString()}
-                                    onChangeText={(e) => this.onChangeWidthOverride(e)}
-                                />
-                            </View>
+                    <TextInput
+                        placeholder="Width (px)"
+                        active
+                        flex
+                        keyboardType="number-pad"
+                        maxChars={4}
+                        ref={this.widthOverride}
+                        initial={this.state.widthOverride?.toString()}
+                        onChangeText={(e) => this.onChangeWidthOverride(e)}
+                    />
+                </View>
 
-                            {/* Override FPS */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.header2}>⏲️ Override framerate</Text>
-                                <View><Text style={Styles.paragraph}>Set frames per second from anywhere between 1 - 120</Text></View>
+                {/* Override FPS */}
+                <View style={Styles.padded}>
+                    <TitleH3 title="Framerate" info="Set frames per second from anywhere between 1 - 120" />
 
-                                <TextInput
-                                    placeholder="Framerate"
-                                    active
-                                    flex
-                                    keyboardType="number-pad"
-                                    maxChars={3}
-                                    ref={this.framerateOverride}
-                                    initial={this.state.framerateOverride?.toString()}
-                                    onChangeText={(e) => this.onChangeFramerateOverride(e)}
-                                />
-                            </View>
-
-                            <View style={[Styles.hr, Styles.hrPadded]} />
-
-                            {/* Reset config */}
-                            <View style={Styles.padded}>
-                                <Text style={Styles.header2}>🚨 Danger zone</Text>
-                                <Text style={Styles.paragraph}>Reset only all ADVANCED settings to default</Text>
-                                <Button loading={this.state.loadingReset} color="red" active={!this.state.switching} onPress={this.resetAdvancedConfig} text="Reset advanced 🗑️" />
-                            </View>
-                        </ScrollView>
-                    </View>
-                    
-                    {/* Confirm */}
-                    <View style={[Styles.padded, { transform: [{ translateY: -12 }] }]}>
-                        <Button color="blue" active={!this.state.switching} onPress={this.goBack} text="← Save" />
-                    </View>
-                </KeyboardAvoidingView>
-			</SafeAreaView>
+                    <TextInput
+                        placeholder="Framerate"
+                        active
+                        flex
+                        keyboardType="number-pad"
+                        maxChars={3}
+                        ref={this.framerateOverride}
+                        initial={this.state.framerateOverride?.toString()}
+                        onChangeText={(e) => this.onChangeFramerateOverride(e)}
+                    />
+                </View>
+            </MenuTemplate>
 		);
 	}
 }
