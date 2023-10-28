@@ -1,11 +1,9 @@
 import React from "react";
 import { View } from "react-native";
-import { BannerAd, BannerAdSize, TestIds } from "react-native-google-mobile-ads";
-import AppConfig from "../../scenes/preferences/Config";
+import { BannerAd, BannerAdSize } from "react-native-google-mobile-ads";
+import AppConfig from "../../scenes/menu/Config";
 
 /* @ts-ignore */
-import { BANNER } from "@env";
-import { env } from "../../env.pubilc";
 import { getBannerId } from "../../LocalNotification";
 
 /* Interfaces */

@@ -1,16 +1,13 @@
 /* Imports */
 import React, { RefObject } from "react";
-import { KeyboardAvoidingView, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Styles from "./Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TextInput } from "../../components/textInput/TextInput";
 import { Button } from "../../components/button/Button";
-import AppConfig from "../preferences/Config";
 import MultiAnimator from "../../components/animator/MultiAnimator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LSImage, LSImageProp } from "../../functional/Image";
-import Poster from "../../components/poster/Poster";
 import QuickCounter from "./QuickCounter";
 import { formatDate } from "../../functional/Date";
 

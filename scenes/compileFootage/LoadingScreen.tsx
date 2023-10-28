@@ -11,12 +11,7 @@ import { Button } from "../../components/button/Button";
 import { StatusBar } from "expo-status-bar";
 import { ProgressBar } from "../../components/progressBar/ProgressBar";
 import ButtonStyles from "../../components/button/Styles";
-import { RewardedAd, RewardedAdEventType, TestIds } from "react-native-google-mobile-ads";
-import AppConfig from "../preferences/Config";
-
-/* @ts-ignore */
-import { REWARDED } from "@env"
-import { env } from "../../env.pubilc";
+import { RewardedAd } from "react-native-google-mobile-ads";
 
 /* Interfaces */
 interface Props {
