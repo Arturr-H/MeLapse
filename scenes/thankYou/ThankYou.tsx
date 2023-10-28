@@ -9,9 +9,7 @@ import { StatusBar } from "expo-status-bar";
 
 /* Interfaces */
 export interface Props {
-    navigation: StackNavigationProp<
-        { Preferences: undefined }
-    , "Preferences">,
+    navigation: any,
 }
 export interface State {
     contents: JSX.Element[]
@@ -19,30 +17,36 @@ export interface State {
 
 class ThankYou extends React.PureComponent<Props, State> {
     contents: JSX.Element[] = [
-        <React.Fragment>
+        <React.Fragment key={"cr-hugo"}>
             <Text style={Styles.header2}>Hugo</Text>
             <Text style={Styles.paragraph}>Testing</Text>
             <Text style={Styles.paragraph}>Feedback & ideas</Text>
             <Text style={Styles.paragraph}>Bug reports</Text>
         </React.Fragment>,
 
-        <React.Fragment>
+        <React.Fragment key={"cr-marco"}>
             <Text style={Styles.header2}>Marco</Text>
             <Text style={Styles.paragraph}>Testing</Text>
             <Text style={Styles.paragraph}>Feedback & ideas</Text>
             <Text style={Styles.paragraph}>Scrapping animations</Text>
         </React.Fragment>,
 
-        <React.Fragment>
+        <React.Fragment key={"cr-arman"}>
             <Text style={Styles.header2}>Arman</Text>
             <Text style={Styles.paragraph}>Testing</Text>
             <Text style={Styles.paragraph}>Feedback</Text>
         </React.Fragment>,
 
-        <React.Fragment>
+        <React.Fragment key={"cr-aaron"}>
             <Text style={Styles.header2}>Aaron</Text>
             <Text style={Styles.paragraph}>Testing</Text>
-            <Text style={Styles.paragraph}>Feedback & ideas</Text>
+            <Text style={Styles.paragraph}>Feedback</Text>
+        </React.Fragment>,
+
+        <React.Fragment key={"cr-mom"}>
+            <Text style={Styles.header2}>Mom</Text>
+            <Text style={Styles.paragraph}>UI & UX Tips</Text>
+            <Text style={Styles.paragraph}>Feedback</Text>
         </React.Fragment>,
     ];
 
@@ -73,7 +77,7 @@ class ThankYou extends React.PureComponent<Props, State> {
             this.setState({ contents: this.shuffle(this.contents) });
         });
     };
-    goBack = () => this.props.navigation.navigate("Preferences");
+    goBack = () => this.props.navigation.navigate("Menu");
 
 	render() {
 		return (
@@ -81,7 +85,9 @@ class ThankYou extends React.PureComponent<Props, State> {
                 <View style={Styles.body}>
                     <Text style={Styles.header}>Thank you</Text>
 
-                    {this.state.contents}
+                    <ScrollView contentContainerStyle={Styles.body}>
+                        {this.state.contents}
+                    </ScrollView>
                 </View>
 
                 <View style={Styles.footer}>
