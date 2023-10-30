@@ -189,7 +189,7 @@ export default StyleSheet.create({
         height: "100%",
 
         zIndex: 1,
-        pointerEvents: "none",
+        // pointerEvents: "none",
     },
     calibratedFeature: {
         position: "absolute",

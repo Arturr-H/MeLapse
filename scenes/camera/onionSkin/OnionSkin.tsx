@@ -9,7 +9,10 @@ interface Props {
 }
 interface State {
     onionSkinOverlay: string | null,
-    visible: boolean
+    visible: boolean,
+
+    /** Can be hidden if clicked on */
+    hideOnionskin: boolean
 }
 
 export class OnionSkin extends React.PureComponent<Props, State> {
@@ -17,10 +20,16 @@ export class OnionSkin extends React.PureComponent<Props, State> {
 		super(props);
 
 		/* State */
-		this.state = { onionSkinOverlay: null, visible: false };
+		this.state = {
+            onionSkinOverlay: null,
+            visible: false,
+            hideOnionskin: false
+        };
 
 		/* Bindings */
         this.updateOnionskin = this.updateOnionskin.bind(this);
+        this.show = this.show.bind(this);
+        this.hide = this.hide.bind(this);
 	}
 
 	/* Lifetimme */
@@ -114,9 +123,13 @@ export class OnionSkin extends React.PureComponent<Props, State> {
         }
     }
 
+    /* Visibility triggers (external calls) */
+    show(): void { this.setState({ hideOnionskin: false }); }
+    hide(): void { this.setState({ hideOnionskin: true }) }
+
 	render() {
 		return (
-            this.state.visible && <Image
+            (this.state.visible && !this.state.hideOnionskin) && <Image
                 style={{
                     position: "absolute",
                     width: "100%",

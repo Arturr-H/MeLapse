@@ -346,7 +346,7 @@ class Camera extends React.PureComponent<Props, State> {
 			console.log("No face calibration found")
 		}
 	}
-	
+
 	/* Render */
 	render() {
 		return (
@@ -396,6 +396,13 @@ class Camera extends React.PureComponent<Props, State> {
 						navigation={this.props.navigation}
 						beforeNavigate={() => this.setCameraActive(false)}
 						onAnimating={(animating) => this.setState({ animating })}
+					/>
+
+					{/* Show / hide onionskin touch area */}
+					<View
+						style={{ width: "100%", flex: 1 }}
+						onTouchStart={this.onionSkin.current?.hide}
+						onTouchEnd={this.onionSkin.current?.show}
 					/>
 
 					{/* Bottom UI components */}
