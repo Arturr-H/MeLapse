@@ -66,13 +66,18 @@ const App = () => {
 	
 	/* Component did mount hehe */
 	React.useEffect(() => {
+		// KEEP THIS FOR DEBUG PURPOSES: Reset all keys in AsyncStorage
+		// AsyncStorage.getAllKeys().then(async e => e.forEach(a => AsyncStorage.removeItem(a)));
 
 		/* First screen */
 		AsyncStorage.getItem("setupComplete").then((value) => {
+			console.log(value);
 			ExpoSplashScreen.hideAsync();
 
 			if (value === "true") {
 			  	setInitialRoute("Camera");
+			}else {
+				setInitialRoute("Welcome");
 			}
 		});
 	}, []);
@@ -82,7 +87,7 @@ const App = () => {
 	/* Render */
 	return (
 		<NavigationContainer>
-			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={initialRoute} >
+			<Stack.Navigator screenOptions={{cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter}} initialRouteName={initialRoute ?? "Camera"} >
 				<Stack.Screen options={commonConfig} name="Camera" component={Camera} initialParams={{ comesFrom: "other" }} />
 				<Stack.Screen options={commonConfig} name="Preview" component={Preview} />
 
