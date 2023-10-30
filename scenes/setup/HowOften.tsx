@@ -1,9 +1,8 @@
-import React, { RefObject } from "react";
+import React from "react";
 import { Linking, SafeAreaView, Text, View } from "react-native";
 import Styles from "./Styles";
 import { Button } from "../../components/button/Button";
 import SelectInput from "../../components/selectInput/SelectInput";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import AppConfig from "../menu/Config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,18 +12,22 @@ import { TitleH3 } from "../../components/text/Title";
 
 /* Interfaces */
 interface Props {
-    navigation: StackNavigationProp<{ Calibration: undefined, Preferences: undefined }, "Calibration" | "Preferences">,
+    navigation: any,
 }
 interface State {}
 
 export class HowOften extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
+
+        /* Bindings */
+        this.onConfirm = this.onConfirm.bind(this);
     };
 
     async onConfirm(): Promise<void> {
-        await AsyncStorage.setItem("setupComplete", "true");
-        this.props.navigation.navigate("Calibration");
+        await AsyncStorage.setItem("setupComplete", "true").then(() => {
+            this.props.navigation.navigate("Calibration");
+        });
     }
 
     render() {
@@ -167,5 +170,5 @@ export class NotificationOptions extends React.PureComponent<NOProps, NOState> {
 export default function (props: any) {
     const navigation = useNavigation();
 
-    return <HowOften {...props} confirmLocation={props.route.params.confirmLocation} navigation={navigation} />;
+    return <HowOften {...props} navigation={navigation} />;
 }
