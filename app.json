@@ -2,7 +2,7 @@
   "expo": {
     "name": "MeLapse",
     "slug": "MeLapse",
-    "version": "1.0.78",
+    "version": "1.0.79",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.arre.unnamed",
-      "buildNumber": "7"
+      "buildNumber": "8"
     },
     "android": {
       "adaptiveIcon": {
