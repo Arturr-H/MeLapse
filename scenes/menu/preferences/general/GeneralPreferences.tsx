@@ -58,13 +58,21 @@ class GeneralPreferences extends React.Component<Props, State> {
             if (!result.canceled) {
                 result.assets.forEach((asset, idx) => {
                     setTimeout(() => {
-                        saveImage(new LSImage().withPath(asset.uri));
+                        saveImage(new LSImage().withPath(asset.uri)).then(() => {
+                            if (idx === result.assets.length - 1) {
+                                alert("Selfies imported!");
+                                this.setState({ importingSelfies: false });
+                            }
+                        });
                     }, 40*idx);
-                })
+                });
+            }else {
+                this.setState({ importingSelfies: false });
+                return;
             }
-        }).finally(() => {
+        }).catch(() => {
             this.setState({ importingSelfies: false });
-            alert("Selfies imported!")
+            alert("No selfies were imported");
         })
     }
 
