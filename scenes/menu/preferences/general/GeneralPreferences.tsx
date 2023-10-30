@@ -88,7 +88,7 @@ class GeneralPreferences extends React.Component<Props, State> {
 
                     {/* Cameraroll saving */}
                     <View>
-                        <TitleH3 title="Cameraroll saving" info="Automatically save each selfie to your camera roll, may be useful for when you want to e.g export all of your images to other editing software (won't apply to previous selfies)" />
+                        <TitleH3 title="Cameraroll saving" info="Automatically save each selfie to your camera roll, may be useful for when you want to e.g export all of your images to other editing software (won't apply to previous selfies - can be saved in the 'Review images' section)" />
                         <SelectInput
                             buttons={["YES", "NO"]}
                             initial={this.state.saveSelfiesToCameraRoll ? 0 : 1}
@@ -101,7 +101,7 @@ class GeneralPreferences extends React.Component<Props, State> {
 
                     {/* Import selfies */}
                     <View>
-                        <TitleH3 title="Import selfies" info="Import past selfies from your camera roll. Face alignments won't be applied ⚠️, )" />
+                        <TitleH3 title="Import selfies" info="Import past selfies from your camera roll. Face alignments won't be applied - might need to implement that in the future" />
                         <Button
                             color="blue"
                             active
@@ -120,7 +120,7 @@ class GeneralPreferences extends React.Component<Props, State> {
 
                     {/* Cameraroll saving */}
                     <View>
-                        <TitleH3 title="Notifications per day" info="How many notifications would you like to recieve per day?" />
+                        <TitleH3 title="Notifications per day" info="How many notifications which are sent to you throughout the day" />
                         <NotificationOptions />
                     </View>
                 </View>
