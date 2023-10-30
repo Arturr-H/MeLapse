@@ -8,6 +8,7 @@ export const TitleH3 = (props: { title: string, info?: string }) => {
 
         {props.info && <TouchableOpacity
             activeOpacity={0.5}
+            style={Styles.questionMarkButtonTouchable}
             onPress={() => Alert.alert(
                 "Info 🤔",
                 props.info,

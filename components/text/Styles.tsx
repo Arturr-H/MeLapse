@@ -12,6 +12,14 @@ export default StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center"
     },
+    questionMarkButtonTouchable: {
+        width: 28,
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center",
+
+        transform: [{ translateX: 6 }]
+    },
     questionMarkButton: {
         fontSize: 20,
         fontFamily: "manrope-black",
