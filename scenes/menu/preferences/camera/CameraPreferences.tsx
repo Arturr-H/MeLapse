@@ -64,7 +64,7 @@ class CameraPreferences extends React.Component<Props, State> {
                     {/* LIVE TRANSFORM */}
                     <View>
                     <TitleH2 title="General" />
-                    <TitleH3 title="Live-transform camera" info="Transform the camera to the center in camera view. Only visual - transformations will be applied nonetheless." />
+                    <TitleH3 title="Live-transform camera" info="Transform the camera to the center in camera view. Only visual - post processing transformations will be applied nonetheless (can be disabled by setting menu>general preferences>align selfies to off)." />
                     <SelectInput
                         buttons={["TRANSFORM", "STATIC"]}
                         initial={this.state.transformCamera ? 0 : 1}
