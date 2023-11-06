@@ -299,7 +299,7 @@ class Composer extends React.Component<Props, State> {
 
                     {/* Open advanced configuration */}
                     <View style={Styles.padded}>
-                        <TitleH3 title="Advanced" info="Open the advanced composer preferences page. Not recommended unless you really know what your'e doing - some incorrect values might break your footage." />
+                        <TitleH3 title="Advanced" info="Open the advanced composer preferences page. Not recommended unless you really know what you're doing - some incorrect values might break your footage." />
                         <Button
                             color={"blue"}
                             active
