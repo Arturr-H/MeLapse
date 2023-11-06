@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 type StorageKey =
     "targetTimesPerDay" | "transformCamera"
     | "postProcessingTransform" | "saveSelfiesToCameraRoll"
-    | "personalizedAds" | "cameraDirectionFront";
+    | "personalizedAds" | "cameraDirectionFront" | "postProcessingAlign";
 
 /* Enums */
 export enum TargetTimesPerDay { None = 0, Once = 1, Twice = 2, Thrice = 3 }
@@ -40,6 +40,10 @@ export default class AppConfig {
     /** If the camera direction is front (selfie-camera) */
     static async getCameraDirectionFront(): Promise<boolean> { return this.tryGet("cameraDirectionFront", true) }
     static async setCameraDirectionFront(value: boolean) { await AsyncStorage.setItem("cameraDirectionFront", JSON.stringify(value)) }
+
+    /** Align selfies in post processing step */
+    static async getPostProcessingAlign(): Promise<boolean> { return this.tryGet("postProcessingAlign", true) }
+    static async setPostProcessingAlign(value: boolean) { await AsyncStorage.setItem("postProcessingAlign", JSON.stringify(value)) }
 
     private static async tryGet(key: StorageKey, default_: any): Promise<any> {
         try {

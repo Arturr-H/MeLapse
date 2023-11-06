@@ -24,6 +24,7 @@ export interface Props {
 export interface State {
     saveSelfiesToCameraRoll: boolean,
     importingSelfies: boolean,
+    postProcessingAlign: boolean
 }
 
 class GeneralPreferences extends React.Component<Props, State> {
@@ -34,6 +35,7 @@ class GeneralPreferences extends React.Component<Props, State> {
         this.state = {
             saveSelfiesToCameraRoll: false,
             importingSelfies: false,
+            postProcessingAlign: true
         };
 
         /* Bindings */
@@ -45,6 +47,7 @@ class GeneralPreferences extends React.Component<Props, State> {
         this.setState({
             importingSelfies: false,
             saveSelfiesToCameraRoll: await AppConfig.getSaveSelfiesToCameraRoll(),
+            postProcessingAlign: await AppConfig.getPostProcessingAlign()
         });
     }
 
@@ -122,6 +125,26 @@ class GeneralPreferences extends React.Component<Props, State> {
                     <View>
                         <TitleH3 title="Notifications per day" info="How many notifications which are sent to you throughout the day" />
                         <NotificationOptions />
+                    </View>
+                </View>
+
+                <View style={[Styles.hr, Styles.hrPadded]} />
+
+                {/* Post Processing */}
+                <View style={[Styles.padded, { gap: 15 }]}>
+                    <TitleH2 title="Post Processing" />
+
+                    {/* Transform image */}
+                    <View>
+                        <TitleH3 title="Align selfies" info="Align the selfie to match the position of your calibrated face - happens after capturing picture. Not recommended to turn off because it will most likely make your face alignings worse." />
+                        <SelectInput
+                            buttons={["YES", "NO"]}
+                            initial={this.state.postProcessingAlign ? 0 : 1}
+                            onChange={(idx) => {
+                                this.setState({ postProcessingAlign: idx == 0 ? true : false });
+                                AppConfig.setPostProcessingAlign(idx == 0 ? true : false);
+                            }}
+                        />
                     </View>
                 </View>
             </MenuTemplate>
