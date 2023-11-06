@@ -258,8 +258,8 @@ class Camera extends React.PureComponent<Props, State> {
 				/* Use pic manipulator to (try) take transformed pic */
 				let path: string;
 
-				/* Try flip */
-				if (anyFaceVisible) {
+				/* Try align to center */
+				if (anyFaceVisible && await AppConfig.getPostProcessingAlign()) {
 					try {
 						path = await this.pictureManipulator.current?.takePictureAsync(
 							flipped.uri,
