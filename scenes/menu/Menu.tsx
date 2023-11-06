@@ -12,6 +12,8 @@ import AppConfig from "./Config";
 import { OnionSkin } from "../camera/onionSkin/OnionSkin";
 import { LSImage } from "../../functional/Image";
 import ComposerConfig from "../composer/Config";
+import { TitleH1, TitleH2, TitleH3 } from "../../components/text/Title";
+import StreakHandler from "../../functional/Streak";
 
 /* Interfaces */
 export interface Props {
@@ -24,6 +26,7 @@ export interface State {
     alwaysUseLatestSelfie: boolean,
     onionSkinVisible: boolean,
     onionSkinOpacity: number,
+    streak: number,
     
     deletingImages: boolean
 }
@@ -37,6 +40,7 @@ class Menu extends React.Component<Props, State> {
             onionSkinVisible: false,
             alwaysUseLatestSelfie: false,
             onionSkinOpacity: 0.45,
+            streak: 0.45,
 
             deletingImages: false
         };
@@ -47,6 +51,7 @@ class Menu extends React.Component<Props, State> {
 
     async componentDidMount(): Promise<void> {
         this.setState({
+            streak: await StreakHandler.getCurrent()
         });
     }
 
@@ -115,7 +120,11 @@ class Menu extends React.Component<Props, State> {
 
 	render() {
 		return (
-            <MenuTemplate title="Menu" backButtonPress="Camera">
+            <MenuTemplate backButtonPress="Camera">
+                <View style={[Styles.padded, { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }]}>
+                    <TitleH1 title="Menu" />
+                    {this.state.streak && this.state.streak > 0 && <Text style={Styles.header2}>{this.state.streak} 🔥</Text>}
+                </View>
                 {/* Goto composer scene */}
                 <View style={[Styles.row, Styles.padded]}>
                     <View style={Styles.tile}>
