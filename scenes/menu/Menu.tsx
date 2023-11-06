@@ -61,6 +61,7 @@ class Menu extends React.Component<Props, State> {
         await AppConfig.setPersonalizedAds(true);
         await AppConfig.setSaveSelfiesToCameraRoll(false);
         await AppConfig.setTargetTimesPerDay(2);
+        await AppConfig.setPostProcessingAlign(true);
 
         await ComposerConfig.setBitrate(null); // no overwrite
         await ComposerConfig.setFormat(1); // 1 = mp4
