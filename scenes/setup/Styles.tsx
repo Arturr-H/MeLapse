@@ -55,5 +55,53 @@ export default StyleSheet.create({
         display: "flex",
         justifyContent: "center",
         gap: 10
+    },
+
+
+
+    timestampSelectorWrapper: {
+        display: "flex",
+        flexDirection: "row",
+        gap: 10
+    },
+    timestampSelector: {
+        flex: 3,
+        height: 50,
+        
+        backgroundColor: "#eee",
+        borderColor: "#eee",
+        borderWidth: 2,
+        borderRadius: 15,
+
+        padding: 2,
+
+        display: "flex",
+        flexDirection: "row"
+    },
+    changeButton: {
+        width: 24,
+        height: "100%",
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    changeButtonText: {
+        fontSize: 24,
+        fontFamily: "manrope-black",
+        color: "#aaa"
+    },
+
+    timeSign: {
+        height: "100%",
+        flex: 1,
+
+        display: "flex",
+        justifyContent: "center",
+            alignItems: "center"
+    },
+    timeSignText: {
+        fontSize: 18,
+        fontFamily: "manrope-black",
     }
 })
